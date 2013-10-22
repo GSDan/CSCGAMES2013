@@ -1,10 +1,31 @@
 #include "Transaction.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <queue>
 #include <ctime>
 #include <vector>
 #include <stdlib.h>  
+#include <math.h>  
+#include <iomanip>   
+
+int validResponse(int lhs, int rhs){
+	int usrIn = 100;
+	bool valid = 0;
+	while(!valid){
+		std::cin >> usrIn;
+		for(int i = 0; i < rhs; i++){
+			if(lhs <= usrIn && rhs >= usrIn){
+				valid = 1;
+				return usrIn;
+			}
+		}
+		std::cout << "\nInvalid response\n";
+		std::cin.ignore();
+		std::cin.clear();					//clears cin after error
+		std::cin.sync();					//clears cin after error
+	}
+}
 
 //populate a given queue with a given number of random ints
 void populateQueue(std::queue<int> &q, int num){
@@ -229,32 +250,100 @@ bool assessRow(std::vector<Transaction> transactions, bool shouldPrint){
 	return true;
 }
 
+void insertCoin(int &credit, int &spent){
+	int response;
+	std::cout << "You've run out of credit! Insert some money.\n\n1. 10p\n2. 20p\n3. 50p\n4. "<<(char)156 << "1.00\n";
+	response = validResponse(1,4);
+	switch(response){
+		case 1:
+			credit = 10;
+			spent += 10;
+		case 2:
+			credit = 20;
+			spent += 20;
+		case 3:
+			credit = 30;
+			spent += 30;
+		case 4:
+			credit = 100;
+			spent += 100;
+	}
+	system("cls");	
+}
 
 int main(){
 	srand((unsigned int)time( NULL ) ); //reseed rand
 	int numRows;
+	bool finished = false;
+	int response;
+	double odds = 0.17;
+	int credit = 0;
+	int spent = 0;
 
-	std::cout << "How many rows would you like to generate?\n";
-	std::cin >> numRows;
+	while(!finished){
 
-	double hit = 0;
+		if(credit==0)
+			insertCoin(credit, spent);
 
-	for(int i = 0; i < numRows; i++){
-		std::vector<Transaction> row = createRow();
-		for(int j =0; j < row.size(); j++){
-			std::cout << row[j].toString();
-			if(j != row.size()-1)
-				std::cout << ",";  
+		std::cout << "How many rows would you like to generate?\n";
+		std::cin >> numRows;
+		credit -= 10;
+		system("cls");
+
+		//toFile string will eventually be printed to file
+		std::string toFile = "";
+
+		//number of successful rows
+		double hit = 0;
+
+		for(int i = 0; i < numRows; i++){
+			std::vector<Transaction> row = createRow();
+		
+			if( assessRow(row, false)){
+				hit++;
+				for(int j =0; j < row.size(); j++){
+					toFile += row[j].toString();
+					if(j != row.size()-1)
+						toFile += ",";  
+					else
+						toFile += "\n";
+				}			
+			}
 		}
-		if( assessRow(row, true)){
-			hit++;
-			std::cout << " <-- WINNER";
+
+		if(numRows == hit){
+			int winnings = pow(odds, numRows)*200;
+			std::ofstream outfile;
+			outfile.open("CWoutput.txt", std::ios_base::app);
+			outfile << "rows = " << numRows << "\nWINNER\n" << toFile << "\n\n";
+			std::cout << "\nYou are a winner!\n";
+			std::wcout << "You have been credited with " << winnings << "p\n";
+			credit += winnings;
 		}
-		std::cout << "\n\n";
+
+		std::cout << hit << " successful rows, with a success rate of " << hit/numRows*100 << "%";
+		std::cout << "\nThe odds of winning were " << pow(odds, numRows)*100<<"%\n";
+		std::cout << "\n\nPlay again?\n1. Yes\n2. No\n";
+		response = validResponse(1,2);
+		if(response == 1)
+			system("cls");		
+		else
+			finished = true;
+
 	}
 
-	std::cout << hit << " successful rows, with a success rate of " << hit/numRows*100 << "%";
+	double earnings = credit - spent;
+	system("cls");	
+	if(earnings < -100)
+		std::cout << "\nYou lost "<<(char)156 << std::setprecision(2) << abs(earnings)/100 << ", sucker!";
+	else if(earnings < 0)
+		std::cout << "\nYou lost " << abs((int)earnings) << "p, sucker.";
+	else if(earnings < 100)
+		std::cout << "\nYou won "<<(char)156 <<std::setprecision(2) << earnings/100 << ", wow!";
+	else
+		std::cout << "\nYou won " << (int)earnings << "p, well done!";
 
-	int x;
-	std::cin >> x;
+	std::cout << "\n\n1.Quit\n";
+	response = validResponse(1,1);
+	
 }
