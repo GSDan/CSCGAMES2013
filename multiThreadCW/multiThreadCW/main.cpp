@@ -2,14 +2,24 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <queue>
 #include <ctime>
 #include <vector>
 #include <stdlib.h>  
 #include <math.h>  
 #include <iomanip>   
+#include <thread> 
+#include <chrono>
+#include <mutex>  
+
+std::mutex mtx;
+std::queue<int> times;
+
 
 int validResponse(int lhs, int rhs){
+
+	//will only allow the user to continue if they enter a number between lhs and rhs (inclusive)
 	int usrIn = 100;
 	bool valid = 0;
 	while(!valid){
@@ -22,14 +32,13 @@ int validResponse(int lhs, int rhs){
 		}
 		std::cout << "\nInvalid response\n";
 		std::cin.ignore();
-		std::cin.clear();					//clears cin after error
-		std::cin.sync();					//clears cin after error
+		std::cin.clear();	//clears cin after error
+		std::cin.sync();	//clears cin after error
 	}
 }
 
-//populate a given queue with a given number of random ints
 void populateQueue(std::queue<int> &q, int num){
-		
+	//populate a given queue with a given number of random ints
 	for(int i = 0; i< num; i++){
 		int temp = rand() % 25;
 		q.push(temp);
@@ -86,7 +95,6 @@ std::vector<Transaction> createRow(){
 		
 		//randomly choose a thread to access
 		int thread = rand() % 5;
-		std::string result;
 		switch (thread)
 		{
 		case 0:
@@ -107,6 +115,38 @@ std::vector<Transaction> createRow(){
 		}
 	}
 	return transactions;
+}
+
+void createRowThreaded(char thread, std::vector<Transaction> &transactions, std::queue<int> &threadQueue, int money){
+
+	while(!threadQueue.empty()){
+
+		mtx.lock();
+			std::chrono::microseconds dura(times.front());
+			times.pop();
+		mtx.unlock();
+
+		std::this_thread::sleep_for( dura );
+		
+		//ascertain if the action should be to withdraw or deposit
+		//as the action alternates in the queue, we can use modulus to check
+		bool withdrawal = false;
+		if(threadQueue.size() % 2  == 0){
+			withdrawal = true;
+			money++;
+		}
+
+		//retrieve the bank account num from the queue and remove it
+		int account = threadQueue.front();
+		threadQueue.pop();
+
+		//create a transaction object and add it to the vector
+		Transaction trans(withdrawal, account, money, thread);
+
+		mtx.lock();
+			transactions.push_back(trans);
+		mtx.unlock();
+	}
 }
 
 std::vector<Transaction> convertRow(std::string row){
@@ -256,94 +296,215 @@ void insertCoin(int &credit, int &spent){
 	response = validResponse(1,4);
 	switch(response){
 		case 1:
-			credit = 10;
+			credit += 10;
 			spent += 10;
+			break;
 		case 2:
-			credit = 20;
+			credit += 20;
 			spent += 20;
+			break;
 		case 3:
-			credit = 30;
-			spent += 30;
+			credit += 50;
+			spent += 50;
+			break;
 		case 4:
-			credit = 100;
+			credit += 100;
 			spent += 100;
+			break;
 	}
 	system("cls");	
 }
 
+bool validateFile(std::string filename){
+	//read in file at given address
+	std::ifstream infile;
+	infile.open(filename);
+
+	if(!infile.is_open()){
+		std::cout << "\nThe file " << filename << " was not found, aborting.\n";
+		return false;
+	}
+	
+	std::string line;
+	std::cout << "\n\nAssessing file " << filename << "\n";
+	int incorrect = 0;
+	while(std::getline(infile, line)){
+		std::size_t found = line.find("rows");
+		if (found!=std::string::npos){
+			//if the line contains the word "rows" pull the int from it and store
+			std::stringstream ss(line);
+			std::string temp;
+			char eq;
+			int numRows;
+			ss >> temp >> eq >> numRows;
+
+			//read in junk "WINNER" line
+			std::getline(infile, line);
+
+			for(int i = 0; i < numRows; i++){
+				std::getline(infile, line);
+				std::cout << "\nASSESSING:\n" << line;
+				//line is now a row. Convert into transaction objects and assess
+				std::vector<Transaction> transactions = convertRow(line);
+				if(!assessRow(transactions, true)){
+					incorrect ++;
+					std::cout << "  FAILED\n";
+				}
+				else{
+					std::cout << "  PASSED\n";
+				}
+			}
+		}
+	}
+	
+	if(incorrect == 0){
+		std::cout << "\nFile scrubbed with no errors found.\n";
+		return true;
+	}else{
+		std::cout << "\n" << incorrect << " errors found while assessing " << filename << "\n";
+		return false;
+	}
+	
+}
+
 int main(){
-	srand((unsigned int)time( NULL ) ); //reseed rand
+	srand((unsigned int)time( NULL ) );
 	int numRows;
-	bool finished = false;
+	bool finishedGame = false;
+	bool finishedProgram = false;
 	int response;
 	double odds = 0.17;
 	int credit = 0;
 	int spent = 0;
 
-	while(!finished){
-
-		if(credit==0)
-			insertCoin(credit, spent);
-
-		std::cout << "How many rows would you like to generate?\n";
-		std::cin >> numRows;
-		credit -= 10;
+	while(!finishedProgram){
 		system("cls");
+		std::cout << "*********\nMAIN MENU\n*********\n\nWould you like to play the game, assess an existing file or quit?\n\n1. Play game!\n2. Assess a file\n3. Quit\n";
+		response = validResponse(1,3);
+		if(response == 1){
+			//play the game
+			finishedGame = false;
+			credit = 0;
+			spent = 0;
 
-		//toFile string will eventually be printed to file
-		std::string toFile = "";
+			while(!finishedGame){
 
-		//number of successful rows
-		double hit = 0;
+			system("cls");
+			if(credit < 10)
+				insertCoin(credit, spent);
 
-		for(int i = 0; i < numRows; i++){
-			std::vector<Transaction> row = createRow();
-		
-			if( assessRow(row, false)){
-				hit++;
-				for(int j =0; j < row.size(); j++){
-					toFile += row[j].toString();
-					if(j != row.size()-1)
-						toFile += ",";  
-					else
-						toFile += "\n";
-				}			
+			std::cout << "How many rows would you like to generate?  CREDIT: "<< credit << "\n";
+			std::cin >> numRows;
+			credit -= 10;
+			system("cls");
+
+			//toFile string will eventually be printed to file
+			std::string toFile = "";
+
+			//number of successful rows
+			double hit = 0;
+
+			for(int i = 0; i < numRows; i++){
+				
+				
+				for(int j = 0; j < 20; j++){
+					times.push(rand() % 5000);	
+				}
+
+				std::queue<int> threadA;
+				int Amoney = rand() % 9;
+				std::queue<int> threadB;
+				int Bmoney = rand() % 9;
+				std::queue<int> threadC;
+				int Cmoney = rand() % 9;
+				std::queue<int> threadD;
+				int Dmoney = rand() % 9;
+				std::queue<int> threadE;
+				int Emoney = rand() % 9;
+				
+				populateQueue(threadA, 4);
+				populateQueue(threadB, 4);
+				populateQueue(threadC, 4);
+				populateQueue(threadD, 4);
+				populateQueue(threadE, 4);
+
+				
+				//create threads and set them off
+				std::vector<Transaction> row;
+				
+				std::thread tA(createRowThreaded,'a',std::ref(row), threadA, Amoney);				
+				std::thread tB(createRowThreaded,'b',std::ref(row), threadB, Bmoney);				
+				std::thread tC(createRowThreaded,'c',std::ref(row), threadC, Cmoney);				
+				std::thread tD(createRowThreaded,'d',std::ref(row), threadD, Dmoney);	
+				std::thread tE(createRowThreaded,'e',std::ref(row), threadE, Emoney);
+
+				//wait for all to finish
+				tA.join();tB.join();tC.join();tD.join();tE.join();
+				
+				//std::vector<Transaction> row = createRow();
+				std::string rowString;
+				for(int j = 0; j < row.size(); j++){
+					rowString += row[j].toString() += ",";
+				}
+				std::cout << "\n\n" << rowString;
+				if( assessRow(row, true)){
+					hit++;
+					for(int j =0; j < row.size(); j++){
+						toFile += row[j].toString();
+						if(j != row.size()-1)
+							toFile += ",";  
+						else
+							toFile += "\n";
+					}			
+				}
+			
+			}
+
+			if(numRows == hit){
+				int winnings = 100 / (pow(odds, numRows)*100)*9;
+				std::ofstream outfile;
+				outfile.open("CWoutput.txt", std::ios_base::app);
+				outfile << "rows = " << numRows << "\nWINNER\n" << toFile << "\n\n";
+				std::cout << "\n\nYou are a winner!\n";
+				std::wcout << "You have been credited with " << winnings << "p\n";
+				credit += winnings;
+			}
+
+			std::cout << "\n\n" << hit << " successful rows, with a success rate of " << (int)(hit/numRows*100) << "%";
+			std::cout << "\nThe odds of winning were " << pow(odds, numRows)*100<<"%\n";
+			std::cout << "\n\nPlay again?\n1. Yes\n2. No\n";
+			response = validResponse(1,2);
+			if(response != 1){
+				
+				double earnings = credit - spent;
+			
+				system("cls");	
+				if(earnings < 0)
+					std::cout << "\nYou lost "<<(char)156 << std::setprecision(2) << abs(earnings)/100 << ", sucker!";
+				else
+					std::cout << "\nYou won "<<(char)156 <<std::setprecision(2) << earnings/100 << ", wow!";
+				std::cout << "\n\n1. Continue\n";
+				response = validResponse(1,1);
+				finishedGame = true;
+
+			}
+
 			}
 		}
-
-		if(numRows == hit){
-			int winnings = pow(odds, numRows)*200;
-			std::ofstream outfile;
-			outfile.open("CWoutput.txt", std::ios_base::app);
-			outfile << "rows = " << numRows << "\nWINNER\n" << toFile << "\n\n";
-			std::cout << "\nYou are a winner!\n";
-			std::wcout << "You have been credited with " << winnings << "p\n";
-			credit += winnings;
+		
+		else if(response == 2){
+			system("cls");
+			std::cout << "Enter the name of the file to assess:";
+			std::string filename;
+			std::cin >> filename;
+			validateFile(filename);
+			std::cout << "\n\n1. Continue\n";
+			response = validResponse(1,1);
+		}else{
+			finishedProgram = true;
 		}
 
-		std::cout << hit << " successful rows, with a success rate of " << hit/numRows*100 << "%";
-		std::cout << "\nThe odds of winning were " << pow(odds, numRows)*100<<"%\n";
-		std::cout << "\n\nPlay again?\n1. Yes\n2. No\n";
-		response = validResponse(1,2);
-		if(response == 1)
-			system("cls");		
-		else
-			finished = true;
 
 	}
-
-	double earnings = credit - spent;
-	system("cls");	
-	if(earnings < -100)
-		std::cout << "\nYou lost "<<(char)156 << std::setprecision(2) << abs(earnings)/100 << ", sucker!";
-	else if(earnings < 0)
-		std::cout << "\nYou lost " << abs((int)earnings) << "p, sucker.";
-	else if(earnings < 100)
-		std::cout << "\nYou won "<<(char)156 <<std::setprecision(2) << earnings/100 << ", wow!";
-	else
-		std::cout << "\nYou won " << (int)earnings << "p, well done!";
-
-	std::cout << "\n\n1.Quit\n";
-	response = validResponse(1,1);
-	
+		
 }
