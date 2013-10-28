@@ -71,17 +71,18 @@ public:
 			std::cout << "Deposit to account      " << accountNum << " of $" << money << " by thread " << threadID << "\n"; 
 		}
 	}
-	bool isPartner(Transaction rhs){
-		//check if this transaction is a partner of the given one
-		if(rhs.getThreadID() == this->threadID &&
-			rhs.getMoney() == this->money &&
-			rhs.isWithdrawal() != this->withdrawal){
+	friend bool operator==( const Transaction lhs, const Transaction rhs);
+};
+
+bool operator==( const Transaction lhs, const Transaction rhs){
+	//check if this transaction is a partner of the given one
+		if(rhs.threadID == lhs.threadID &&
+			rhs.money == lhs.money &&
+			rhs.withdrawal != lhs.withdrawal){
 			//thread ID and money are the same, transaction types are opposite 
 			return true;
 		}
 		else
 			return false;
-		
-	}
-};
+}
 #endif
