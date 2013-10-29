@@ -1,0 +1,74 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Main Tutorials", "Main Tutorials", "{26FF1E94-61DD-4E24-A071-50FA11CAC038}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial1 - Your First Triangle", "1) Your First Triangle\Tutorial1.vcxproj", "{061C02AD-EAAA-4BB1-9D23-1B1E55D0E924}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial2 - Matrix transformations", "2) Matrix Transformations\Tutorial2.vcxproj", "{C5675B01-9FCD-47D7-BBCB-AC54444DFAF9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial3 - Texturing", "3) Texturing\Tutorial3.vcxproj", "{67A58E4E-A392-4FFF-9D65-F24BEEB0EC77}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial4 - Depth and Transparency", "4) Depth & Transparency\Tutorial4.vcxproj", "{45EBBBBF-1252-40BA-8C99-68085713A623}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial5 - Scissors and Stencils", "5) Stencils & Scissors\Tutorial5.vcxproj", "{E32F8803-372F-4674-A0E7-11E0FECF4B87}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nclgl", "..\nclgl\nclgl.vcxproj", "{98D6B51B-CB0A-4389-ADC6-24082B967C3F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{061C02AD-EAAA-4BB1-9D23-1B1E55D0E924}.Debug|Win32.ActiveCfg = Debug|Win32
+		{061C02AD-EAAA-4BB1-9D23-1B1E55D0E924}.Debug|Win32.Build.0 = Debug|Win32
+		{061C02AD-EAAA-4BB1-9D23-1B1E55D0E924}.Release|Win32.ActiveCfg = Release|Win32
+		{061C02AD-EAAA-4BB1-9D23-1B1E55D0E924}.Release|Win32.Build.0 = Release|Win32
+		{C5675B01-9FCD-47D7-BBCB-AC54444DFAF9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C5675B01-9FCD-47D7-BBCB-AC54444DFAF9}.Debug|Win32.Build.0 = Debug|Win32
+		{C5675B01-9FCD-47D7-BBCB-AC54444DFAF9}.Release|Win32.ActiveCfg = Release|Win32
+		{C5675B01-9FCD-47D7-BBCB-AC54444DFAF9}.Release|Win32.Build.0 = Release|Win32
+		{67A58E4E-A392-4FFF-9D65-F24BEEB0EC77}.Debug|Win32.ActiveCfg = Debug|Win32
+		{67A58E4E-A392-4FFF-9D65-F24BEEB0EC77}.Debug|Win32.Build.0 = Debug|Win32
+		{67A58E4E-A392-4FFF-9D65-F24BEEB0EC77}.Release|Win32.ActiveCfg = Release|Win32
+		{67A58E4E-A392-4FFF-9D65-F24BEEB0EC77}.Release|Win32.Build.0 = Release|Win32
+		{45EBBBBF-1252-40BA-8C99-68085713A623}.Debug|Win32.ActiveCfg = Debug|Win32
+		{45EBBBBF-1252-40BA-8C99-68085713A623}.Debug|Win32.Build.0 = Debug|Win32
+		{45EBBBBF-1252-40BA-8C99-68085713A623}.Release|Win32.ActiveCfg = Release|Win32
+		{45EBBBBF-1252-40BA-8C99-68085713A623}.Release|Win32.Build.0 = Release|Win32
+		{E32F8803-372F-4674-A0E7-11E0FECF4B87}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E32F8803-372F-4674-A0E7-11E0FECF4B87}.Debug|Win32.Build.0 = Debug|Win32
+		{E32F8803-372F-4674-A0E7-11E0FECF4B87}.Release|Win32.ActiveCfg = Release|Win32
+		{E32F8803-372F-4674-A0E7-11E0FECF4B87}.Release|Win32.Build.0 = Release|Win32
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F}.Debug|Win32.Build.0 = Debug|Win32
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F}.Release|Win32.ActiveCfg = Release|Win32
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{061C02AD-EAAA-4BB1-9D23-1B1E55D0E924} = {26FF1E94-61DD-4E24-A071-50FA11CAC038}
+		{C5675B01-9FCD-47D7-BBCB-AC54444DFAF9} = {26FF1E94-61DD-4E24-A071-50FA11CAC038}
+		{67A58E4E-A392-4FFF-9D65-F24BEEB0EC77} = {26FF1E94-61DD-4E24-A071-50FA11CAC038}
+		{45EBBBBF-1252-40BA-8C99-68085713A623} = {26FF1E94-61DD-4E24-A071-50FA11CAC038}
+		{E32F8803-372F-4674-A0E7-11E0FECF4B87} = {26FF1E94-61DD-4E24-A071-50FA11CAC038}
+	EndGlobalSection
+EndGlobal
