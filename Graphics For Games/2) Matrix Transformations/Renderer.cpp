@@ -3,7 +3,7 @@
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	triangle = Mesh :: GenerateTriangle ();
-
+	camera = new Camera();
 	currentShader = new Shader ("vertex.glsl",SHADERDIR"colourFragment.glsl");
 
 	if (! currentShader->LinkProgram()) {
@@ -21,9 +21,13 @@ Renderer ::~ Renderer ( void ) {
 
 void Renderer :: SwitchToPerspective () {
 	projMatrix = Matrix4 :: Perspective (1.0f ,10000.0f,( float ) width / ( float ) height, 45.0f);
-}void Renderer :: SwitchToOrthographic () {
+}
+
+void Renderer :: SwitchToOrthographic () {
 	projMatrix = Matrix4 :: Orthographic ( -1.0f,10000.0f,width / 2.0f , - width/2.0f , height / 2.0f , - height / 2.0f );
-}void Renderer :: RenderScene () {
+}
+
+void Renderer :: RenderScene () {
 	glClear ( GL_COLOR_BUFFER_BIT );
 
 	glUseProgram ( currentShader -> GetProgram ());
@@ -47,4 +51,9 @@ void Renderer :: SwitchToPerspective () {
 	glUseProgram (0);
 
 	SwapBuffers ();
-}
+}
+
+void Renderer::UpdateScene(float msec) {
+	camera->UpdateCamera(msec);
+	viewMatrix = camera->BuildViewMatrix();
+}
