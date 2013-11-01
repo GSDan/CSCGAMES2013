@@ -57,7 +57,9 @@ void Renderer :: ToggleRepeating () {
 	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , //y axis
 	repeating ? GL_REPEAT : GL_CLAMP );
 	glBindTexture ( GL_TEXTURE_2D , 0);
-}void Renderer :: ToggleFiltering () {
+}
+
+void Renderer :: ToggleFiltering () {
 	filtering = ! filtering ;
 	glBindTexture ( GL_TEXTURE_2D , triangle -> GetTexture ());
 	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER ,
