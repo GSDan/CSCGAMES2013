@@ -1,4 +1,4 @@
-# version 150 core
+#version 150 core
 uniform sampler2D diffuseTex ;
 uniform int useTexture;
 in Vertex {

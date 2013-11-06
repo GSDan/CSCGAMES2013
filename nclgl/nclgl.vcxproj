@@ -18,6 +18,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="OBJMesh.cpp" />
+    <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="OGLRenderer.cpp" />
     <ClCompile Include="Quaternion.cpp" />
@@ -34,6 +35,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="OBJMesh.h" />
+    <ClInclude Include="SceneNode.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="OGLRenderer.h" />
     <ClInclude Include="Quaternion.h" />
