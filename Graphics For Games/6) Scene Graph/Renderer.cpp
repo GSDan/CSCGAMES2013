@@ -6,7 +6,7 @@ Renderer::Renderer(Window& parent): OGLRenderer(parent)
 
 	camera = new Camera();
 
-	currentShader = new Shader(SHADERDIR"SceneVertex.glsl",SHADERDIR"SceneFragment.glsl");
+	currentShader = new Shader("../../Shaders/SceneVertex.glsl","../../Shaders/SceneFragment.glsl");
 
 	if(!currentShader->LinkProgram())
 	{
