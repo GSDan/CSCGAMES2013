@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E32F8803-372F-4674-A0E7-11E0FECF4B87}</ProjectGuid>
+    <ProjectGuid>{95F93172-8DC5-4E52-80B6-0D56624BD569}</ProjectGuid>
     <RootNamespace>Tutorial1</RootNamespace>
-    <ProjectName>Tutorial5 - Scissors and Stencils</ProjectName>
+    <ProjectName>Tutorial11 - Real-time Lighting A</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -69,10 +69,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="tutorial5.cpp" />
+    <ClCompile Include="Tutorial11.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PerPixelFragment.glsl" />
+    <None Include="PerPixelVertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

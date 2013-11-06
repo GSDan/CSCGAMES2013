@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E32F8803-372F-4674-A0E7-11E0FECF4B87}</ProjectGuid>
-    <RootNamespace>Tutorial1</RootNamespace>
-    <ProjectName>Tutorial5 - Scissors and Stencils</ProjectName>
+    <ProjectGuid>{52CBA66E-8806-488E-9C6C-E0BBDEECFC2E}</ProjectGuid>
+    <RootNamespace>SceneManagement</RootNamespace>
+    <ProjectName>Tutorial6 - Scene Graph</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -38,12 +38,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\..\GLEW\include;..\..\SOIL;..\..\;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\GLEW\lib;..\..\SOIL\$(Configuration);..\$(Configuration)\;..\..\nclgl\$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\GLEW\include;..\..\SOIL\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>..\..\SOIL\$(Configuration);..\..\GLEW\lib\;..\Debug\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\..\GLEW\include;..\..\SOIL;..\..\</IncludePath>
-    <LibraryPath>..\..\GLEW\lib;..\..\SOIL\$(Configuration);..\$(Configuration)\;..\..\nclgl\$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\GLEW\include;..\..\SOIL\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>..\..\SOIL\$(Configuration);..\..\GLEW\lib\;..\Release\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -68,10 +72,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CubeRobot.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="tutorial5.cpp" />
+    <ClCompile Include="Tutorial6.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CubeRobot.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
