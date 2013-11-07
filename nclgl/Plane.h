@@ -18,4 +18,4 @@ bool SphereInPlane ( const Vector3 & position , float radius ) const ;
 protected :
 Vector3 normal ;
 float distance ;
-};
+};

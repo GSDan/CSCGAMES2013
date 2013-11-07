@@ -38,6 +38,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial7 - Scene Managemen
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial8 - Index Buffers", "8) Index Buffers\Tutorial8.vcxproj", "{5844D912-7DC1-4A49-9F98-F7FE1C053563}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 9 - Skeletal Animation", "9) Skeletal Animation\Tutorial9.vcxproj", "{9FB8682D-BD52-4B33-B37D-D6C2141B67DE}"
 EndProject
