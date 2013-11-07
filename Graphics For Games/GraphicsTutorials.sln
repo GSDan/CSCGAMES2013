@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Main Tutorials", "Main Tutorials", "{26FF1E94-61DD-4E24-A071-50FA11CAC038}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial1 - Your First Triangle", "1) Your First Triangle\Tutorial1.vcxproj", "{061C02AD-EAAA-4BB1-9D23-1B1E55D0E924}"
@@ -33,6 +33,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial6 - Scene Graph", "6) Scene Graph\Tutorial6.vcxproj", "{52CBA66E-8806-488E-9C6C-E0BBDEECFC2E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial7 - Scene Management", "7) Scene Management\Tutorial7.vcxproj", "{87B5801E-F373-4FD4-9CD4-A75E3B14039D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial8 - Index Buffers", "8) Index Buffers\Tutorial8.vcxproj", "{5844D912-7DC1-4A49-9F98-F7FE1C053563}"
 EndProject
