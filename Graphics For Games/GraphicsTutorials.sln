@@ -61,6 +61,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 9 - Skeletal Anima
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial10 - Post Processing", "10) Post Processing\Tutorial10.vcxproj", "{9D4EB641-9F16-458C-AA69-448DA2C2464E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial11 - Real-time Lighting A", "11) Per Fragment Lighting A\Tutorial11.vcxproj", "{95F93172-8DC5-4E52-80B6-0D56624BD569}"
 EndProject
