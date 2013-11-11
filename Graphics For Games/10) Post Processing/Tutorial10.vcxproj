@@ -44,7 +44,7 @@
     <LibraryPath>..\..\SOIL\$(Configuration);..\..\GLEW\lib\;..\Debug\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-     <IncludePath>..\..\GLEW\include;..\..\SOIL\;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\GLEW\include;..\..\SOIL\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>..\..\SOIL\$(Configuration);..\..\GLEW\lib\;..\Release\;$(LibraryPath)</LibraryPath>
@@ -72,7 +72,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Tutorial10.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

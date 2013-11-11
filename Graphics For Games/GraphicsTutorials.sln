@@ -45,6 +45,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 9 - Skeletal Animation", "9) Skeletal Animation\Tutorial9.vcxproj", "{9FB8682D-BD52-4B33-B37D-D6C2141B67DE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial10 - Post Processing", "10) Post Processing\Tutorial10.vcxproj", "{9D4EB641-9F16-458C-AA69-448DA2C2464E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
