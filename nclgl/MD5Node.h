@@ -29,7 +29,7 @@ _-_-_-_-_-_-_-""  ""
 
 
 #pragma once
-#include "scenenode.h"
+#include "SceneNode.h"
 #include "MD5FileData.h"
 #include "MD5Mesh.h"
 

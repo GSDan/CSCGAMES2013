@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Matrix4.cpp" />
@@ -22,10 +23,12 @@
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="OGLRenderer.cpp" />
     <ClCompile Include="Quaternion.cpp" />
+    <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="InputDevice.h" />
@@ -39,6 +42,7 @@
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="OGLRenderer.h" />
     <ClInclude Include="Quaternion.h" />
+    <ClInclude Include="SceneNode.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vector3.h" />

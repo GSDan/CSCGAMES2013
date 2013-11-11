@@ -155,6 +155,7 @@ void MD5Mesh::RebufferData()	{
 		glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*sizeof(Vector4), (void*)colours);
 	}
 
+	/*
 #ifdef MD5_USE_NORMALS
 	if(normals) {
 		glBindBuffer(GL_ARRAY_BUFFER, bufferObject[NORMAL_BUFFER]);
@@ -167,7 +168,7 @@ void MD5Mesh::RebufferData()	{
 		glBindBuffer(GL_ARRAY_BUFFER, bufferObject[TANGENT_BUFFER]);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*sizeof(Vector3), (void*)tangents);
 	}
-#endif
+#endif*/
 
 	if(indices) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferObject[INDEX_BUFFER]);

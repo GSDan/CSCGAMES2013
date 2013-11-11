@@ -498,7 +498,7 @@ void MD5FileData::CreateMeshes()	{
 		target->weights		  = new Vector2[subMesh.numverts];	//Make weight mem
 #endif
 
-#ifdef MD5_USE_NORMALS
+/*#ifdef MD5_USE_NORMALS
 		//Create space for normals!
 		target->normals		  = new Vector3[subMesh.numverts];
 #endif 
@@ -507,7 +507,7 @@ void MD5FileData::CreateMeshes()	{
 		//Create space for tangents, and assign the bump texture
 		target->bumpTexture	  = subMesh.bumpIndex;	
 		target->tangents	  = new Vector3[subMesh.numverts];
-#endif
+#endif */
 
 		target->numIndices    = subMesh.numtris*3; //Each tri has 3 points....
 		target->numVertices   = subMesh.numverts;

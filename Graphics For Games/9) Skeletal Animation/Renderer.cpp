@@ -6,16 +6,16 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent)	{
 	camera			= new Camera(0,90.0f,Vector3(-180,60,0));
 
 #ifdef MD5_USE_HARDWARE_SKINNING
-	currentShader   = new Shader(SHADERDIR"skeletonVertex.glsl", SHADERDIR"TexturedFragment.glsl");
+	currentShader   = new Shader("../../Shaders/skeletonVertex.glsl", "../../Shaders/TexturedFragment.glsl");
 #else
-	currentShader   = new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl");
+	currentShader   = new Shader("../../Shaders/TexturedVertex.glsl", "../../Shaders/TexturedFragment.glsl");
 #endif
 
-	hellData		= new MD5FileData(MESHDIR"hellknight.md5mesh");
+	hellData		= new MD5FileData("../../Meshes/hellknight.md5mesh");
 	hellNode		= new MD5Node(*hellData);
 
-	hellData->AddAnim(MESHDIR"idle2.md5anim");
-	hellNode->PlayAnim(MESHDIR"idle2.md5anim");
+	hellData->AddAnim("../../Meshes/idle2.md5anim");
+	hellNode->PlayAnim("../../Meshes/idle2.md5anim");
 
 	if(!currentShader->LinkProgram()) {
 		return;
