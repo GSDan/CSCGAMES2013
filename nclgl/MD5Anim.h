@@ -1,7 +1,7 @@
 /******************************************************************************
 Class:MD5Anim
 Implements:
-Author:Rich Davison
+Author:Rich Davison	<richard.davison4@newcastle.ac.uk>
 Description: Implementation of id Software's MD5 skeletal animation format.
 
 MD5Anims are slightly less complicated than MD5Meshes. They consist of a 
@@ -22,9 +22,11 @@ _-_-_-_-_-_-_-""  ""
 #include <fstream>
 #include <string>
 
-#include "../Framework/quaternion.h"
-#include "../Framework/Vector3.h"
+#include "quaternion.h"
+#include "Vector3.h"
+
 #include "MD5Mesh.h"
+#include "MD5FileData.h"
 
 
 /*

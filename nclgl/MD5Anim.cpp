@@ -395,7 +395,7 @@ void	MD5Anim::TransformSkeleton(MD5Skeleton &skel, unsigned int frameNum) {
 		//If the joint has no parent (determined by a negative parent variable) we need to 
 		//transform the joint's transform to the correct rotation, using the conversion matrix
 		if(skelJoint.parent < 0) {	//Base Joint, so we're done
-			skelJoint.transform = MD5Mesh::conversionMatrix * skelJoint.transform;
+			skelJoint.transform = MD5FileData::conversionMatrix * skelJoint.transform;
 		}
 		else{	
 			//If this joint /does/ have a parent, we transform the joint's transform by its

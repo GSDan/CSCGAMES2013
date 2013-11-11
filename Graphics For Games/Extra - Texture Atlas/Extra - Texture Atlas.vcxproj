@@ -11,9 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9FB8682D-BD52-4B33-B37D-D6C2141B67DE}</ProjectGuid>
-    <RootNamespace>Tutorial1</RootNamespace>
-    <ProjectName>Tutorial 9 - Skeletal Animation</ProjectName>
+    <ProjectGuid>{5E152084-769D-459E-B59A-C8F05E165612}</ProjectGuid>
+    <RootNamespace>Extra3Dto2DProjection</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -68,11 +67,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Tutorial9.cpp" />
+    <ClCompile Include="TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="TextureAtlas.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AtlasVertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
