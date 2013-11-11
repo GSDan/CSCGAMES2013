@@ -11,9 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9FB8682D-BD52-4B33-B37D-D6C2141B67DE}</ProjectGuid>
-    <RootNamespace>Tutorial1</RootNamespace>
-    <ProjectName>Tutorial 9 - Skeletal Animation</ProjectName>
+    <ProjectGuid>{93B8637F-1A19-40B0-BD8B-7843D17B1F1E}</ProjectGuid>
+    <RootNamespace>Extra2Dto3DProjection</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -68,8 +67,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Tutorial9.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h" />

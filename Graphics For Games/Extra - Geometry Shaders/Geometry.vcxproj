@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9FB8682D-BD52-4B33-B37D-D6C2141B67DE}</ProjectGuid>
-    <RootNamespace>Tutorial1</RootNamespace>
-    <ProjectName>Tutorial 9 - Skeletal Animation</ProjectName>
+    <ProjectGuid>{867248B2-6D91-45C4-B4CE-64AD14C4D373}</ProjectGuid>
+    <RootNamespace>Tutorial10</RootNamespace>
+    <ProjectName>Extra - Geometry Shaders</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -37,7 +37,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>..\..\GLEW\include;..\..\SOIL;..\..\;$(IncludePath)</IncludePath>
     <LibraryPath>..\..\GLEW\lib;..\..\SOIL\$(Configuration);..\$(Configuration)\;..\..\nclgl\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -68,10 +68,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Tutorial9.cpp" />
+    <None Include="fragment.glsl" />
+    <None Include="geometry.glsl" />
+    <None Include="vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ParticleEmitter.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="tutorial10.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

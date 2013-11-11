@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9FB8682D-BD52-4B33-B37D-D6C2141B67DE}</ProjectGuid>
+    <ProjectGuid>{D0AFE823-365D-49D6-B9AD-B417C23A4D1A}</ProjectGuid>
     <RootNamespace>Tutorial1</RootNamespace>
-    <ProjectName>Tutorial 9 - Skeletal Animation</ProjectName>
+    <ProjectName>Extra - Drawing Text</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -68,11 +68,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Drawing Text.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Tutorial9.cpp" />
+    <ClCompile Include="TextMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="TextMesh.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

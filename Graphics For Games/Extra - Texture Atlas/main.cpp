@@ -1,15 +1,16 @@
 #pragma comment(lib, "nclgl.lib")
+#pragma comment(lib, "glu32.lib")
 
-#include "../nclgl/window.h"
+#include "./NCLGL/window.h"
 #include "Renderer.h"
 
 int main() {
-	Window w("Skeletal Animation!", 800,600,false);
+	Window w("Texture Atlases!", 800,600,false);
 	if(!w.HasInitialised()) {
 		return -1;
 	}
-	
-	Renderer renderer(w);//This handles all the boring OGL 3.2 initialisation stuff, and sets up our tutorial!
+
+	Renderer renderer(w);
 	if(!renderer.HasInitialised()) {
 		return -1;
 	}
