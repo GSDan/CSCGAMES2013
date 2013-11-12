@@ -2,9 +2,8 @@
 #include "OGLRenderer.h"
 
 enum MeshBuffer {
-	//initialised according to order, 0,1,2 etc
-	VERTEX_BUFFER , COLOUR_BUFFER, TEXTURE_BUFFER, INDEX_BUFFER, MAX_BUFFER
-};
+VERTEX_BUFFER , COLOUR_BUFFER , TEXTURE_BUFFER , NORMAL_BUFFER , INDEX_BUFFER , MAX_BUFFER
+};
 class Mesh {
 public :
 	Mesh ( void );
@@ -34,5 +33,7 @@ protected :
 
 	GLuint numIndices ;
 	unsigned int * indices ;
+
+	void GenerateNormals ();	Vector3 * normals ;
 
 };
