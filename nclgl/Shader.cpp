@@ -93,8 +93,9 @@ bool Shader::LinkProgram()	{
 }
 
 void Shader :: SetDefaultAttributes () {
-	glBindAttribLocation ( program , VERTEX_BUFFER , "position");
-	glBindAttribLocation ( program , COLOUR_BUFFER , "colour");
-	glBindAttribLocation ( program , NORMAL_BUFFER , "normal"); // New !
-	glBindAttribLocation ( program , TEXTURE_BUFFER , "texCoord");
-}
+	glBindAttribLocation ( program , VERTEX_BUFFER , " position ");
+	glBindAttribLocation ( program , COLOUR_BUFFER , " colour ");
+	glBindAttribLocation ( program , NORMAL_BUFFER , " normal ");
+	glBindAttribLocation ( program , TANGENT_BUFFER , " tangent "); // New ;)
+	glBindAttribLocation ( program , TEXTURE_BUFFER , " texCoord ");
+}

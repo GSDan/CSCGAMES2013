@@ -46,6 +46,8 @@ HeightMap :: HeightMap ( std :: string name ) {
 		}
 	}
 
-	GenerateNormals ();
+	GenerateNormals ();
+	GenerateTangents ();
+	
 	BufferData ();
 }
