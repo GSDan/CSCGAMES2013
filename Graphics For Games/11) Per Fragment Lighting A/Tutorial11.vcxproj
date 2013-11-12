@@ -74,10 +74,6 @@
   <ItemGroup>
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="PerPixelFragment.glsl" />
-    <None Include="PerPixelVertex.glsl" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
