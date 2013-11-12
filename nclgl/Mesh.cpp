@@ -2,6 +2,9 @@
 
 Mesh :: Mesh ( void ) {
 
+	tangents = NULL ;
+	bumpTexture = 0;
+
 		//max buffer = 2 in header
 	for( int i = 0; i < MAX_BUFFER ; ++ i ) {
 		bufferObject [ i ] = 0;
@@ -29,7 +32,8 @@ Mesh ::~ Mesh ( void ) {
 	glDeleteTextures (1 ,& texture );
 	delete [] textureCoords ;
 	delete [] indices ;
-	delete [] normals ;
+	delete [] normals ;	delete [] tangents ;
+	glDeleteTextures (1 ,& bumpTexture );
 }
 
 Mesh * Mesh :: GenerateTriangle () {
@@ -118,25 +122,35 @@ void Mesh :: BufferData () {
 		glBufferData ( GL_ARRAY_BUFFER , numVertices * sizeof ( Vector3 ) ,	normals , GL_STATIC_DRAW );
 		glVertexAttribPointer ( NORMAL_BUFFER , 3 , GL_FLOAT , GL_FALSE ,0 ,0);
 		glEnableVertexAttribArray ( NORMAL_BUFFER );
-	}
+	}	if( tangents ) {
+		glGenBuffers (1 , & bufferObject [ TANGENT_BUFFER ]);
+		glBindBuffer ( GL_ARRAY_BUFFER , bufferObject [ TANGENT_BUFFER ]);
+		glBufferData ( GL_ARRAY_BUFFER , numVertices * sizeof ( Vector3 ) ,	tangents , GL_STATIC_DRAW );
+		glVertexAttribPointer ( TANGENT_BUFFER ,3 , GL_FLOAT , GL_FALSE ,0 ,0);
+		glEnableVertexAttribArray ( TANGENT_BUFFER );
+	}
 
 	glBindVertexArray (0);
 }
 
 void Mesh :: Draw () {
+	glActiveTexture ( GL_TEXTURE0 );
 	glBindTexture ( GL_TEXTURE_2D , texture );
+
+	glActiveTexture ( GL_TEXTURE1 ); // New !!!
+	glBindTexture ( GL_TEXTURE_2D , bumpTexture ); // New !!!
+
 	glBindVertexArray ( arrayObject );
-	glBindVertexArray ( arrayObject );
+
 	if( bufferObject [ INDEX_BUFFER ]) {
 		glDrawElements ( type , numIndices , GL_UNSIGNED_INT , 0);
 	}
 	else {
 		glDrawArrays ( type , 0 , numVertices );
 	}
+
 	glBindVertexArray (0);
-	glBindVertexArray (0);
-	glBindTexture ( GL_TEXTURE_2D , 0);
-}
+}
 
 void Mesh :: GenerateNormals () {
 	if (! normals ) {
@@ -176,4 +190,51 @@ void Mesh :: GenerateNormals () {
 	for ( GLuint i = 0; i < numVertices ; ++ i ){
 		normals [ i ]. Normalise ();
 	}
+}
+
+void Mesh :: GenerateTangents () {
+	if (! tangents ) {
+		tangents = new Vector3 [ numVertices ];
+	}
+	for ( GLuint i = 0; i < numVertices ; ++ i ){
+		tangents [ i ] = Vector3 ();
+	}
+
+	if( indices ) {
+		for ( GLuint i = 0; i < numIndices ; i +=3){
+			int a = indices [ i ];
+			int b = indices [ i +1];
+			int c = indices [ i +2];
+
+			Vector3 tangent = GenerateTangent ( vertices [ a ] , vertices [ b ] ,	vertices [ c ] , textureCoords [ a ] ,	textureCoords [ b ] , textureCoords [ c ]);
+
+			tangents [ a ] += tangent ;
+			tangents [ b ] += tangent ;
+			tangents [ c ] += tangent ;
+		}
+	}
+	else {
+		for ( GLuint i = 0; i < numVertices ; i +=3){
+			Vector3 tangent = GenerateTangent ( vertices [ i ], vertices [ i +1],vertices [ i +2] , textureCoords [ i ] ,textureCoords [ i +1] , textureCoords [ i +2]);
+
+			tangents [ i ] += tangent ;
+			tangents [ i +1] += tangent ;
+			tangents [ i +2] += tangent ;
+		}
+	}
+	for ( GLuint i = 0; i < numVertices ; ++ i ){
+		tangents [ i ]. Normalise ();
+	}
+}Vector3 Mesh :: GenerateTangent ( const Vector3 &a , const Vector3 &b ,const Vector3 &c , const Vector2 & ta , const Vector2 & tb , const Vector2 & tc ) {
+	Vector2 coord1 = tb - ta ;
+	Vector2 coord2 = tc - ta ;
+
+	Vector3 vertex1 = b - a ;
+	Vector3 vertex2 = c - a ;
+
+	Vector3 axis = Vector3 ( vertex1 * coord2 . y - vertex2 * coord1 . y );
+
+	float factor = 1.0f / ( coord1 . x * coord2 . y - coord2 . x * coord1 . y );
+
+	return axis * factor ;
 }
