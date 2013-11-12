@@ -125,8 +125,7 @@ void Mesh :: BufferData () {
 	}	if( tangents ) {
 		glGenBuffers (1 , & bufferObject [ TANGENT_BUFFER ]);
 		glBindBuffer ( GL_ARRAY_BUFFER , bufferObject [ TANGENT_BUFFER ]);
-		glBufferData ( GL_ARRAY_BUFFER , numVertices * sizeof ( Vector3 ) ,
-		tangents , GL_STATIC_DRAW );
+		glBufferData ( GL_ARRAY_BUFFER , numVertices * sizeof ( Vector3 ) ,	tangents , GL_STATIC_DRAW );
 		glVertexAttribPointer ( TANGENT_BUFFER ,3 , GL_FLOAT , GL_FALSE ,0 ,0);
 		glEnableVertexAttribArray ( TANGENT_BUFFER );
 	}
@@ -143,7 +142,7 @@ void Mesh :: Draw () {
 
 	glBindVertexArray ( arrayObject );
 
-	if( bufferObject [ INDEX_BUFFER ]) {// Added by the index buffers tut ...
+	if( bufferObject [ INDEX_BUFFER ]) {
 		glDrawElements ( type , numIndices , GL_UNSIGNED_INT , 0);
 	}
 	else {
@@ -207,9 +206,7 @@ void Mesh :: GenerateTangents () {
 			int b = indices [ i +1];
 			int c = indices [ i +2];
 
-			Vector3 tangent = GenerateTangent ( vertices [ a ] , vertices [ b ] ,
-			vertices [ c ] , textureCoords [ a ] ,
-			textureCoords [ b ] , textureCoords [ c ]);
+			Vector3 tangent = GenerateTangent ( vertices [ a ] , vertices [ b ] ,	vertices [ c ] , textureCoords [ a ] ,	textureCoords [ b ] , textureCoords [ c ]);
 
 			tangents [ a ] += tangent ;
 			tangents [ b ] += tangent ;
@@ -218,9 +215,7 @@ void Mesh :: GenerateTangents () {
 	}
 	else {
 		for ( GLuint i = 0; i < numVertices ; i +=3){
-			Vector3 tangent = GenerateTangent ( vertices [ i ] , vertices [ i +1] ,
-			vertices [ i +2] , textureCoords [ i ] ,
-			textureCoords [ i +1] , textureCoords [ i +2]);
+			Vector3 tangent = GenerateTangent ( vertices [ i ], vertices [ i +1],vertices [ i +2] , textureCoords [ i ] ,textureCoords [ i +1] , textureCoords [ i +2]);
 
 			tangents [ i ] += tangent ;
 			tangents [ i +1] += tangent ;
