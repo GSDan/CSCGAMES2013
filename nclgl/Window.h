@@ -46,6 +46,7 @@ public:
 	static Mouse*		GetMouse()		{return mouse;}
 
 	GameTimer*   GetTimer()		{return timer;}
+	float				elapsedMS;
 
 protected:
 	void	CheckMessages(MSG &msg);
@@ -70,7 +71,7 @@ protected:
 	Vector2				position;
 	Vector2				size;
 
-	float				elapsedMS;
+	
 
 	bool				mouseLeftWindow;
 };
