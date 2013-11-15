@@ -10,15 +10,15 @@ up are currently public.
 -_-_-_-_-_-_-_,------,   
 _-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
 -_-_-_-_-_-_-~|__( ^ .^) /
-_-_-_-_-_-_-_-""  ""   
+_-_-_-_-_-_-_-"" ""   
 
 *//////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <iostream>
-#include "common.h"
-#include "Vector3.h"
-#include "Vector4.h"
+#include"common.h"
+#include"Vector3.h"
+#include"Vector4.h"
 
 class Vector3;
 
@@ -115,11 +115,11 @@ public:
 
 	//Handy string output for the matrix. Can get a bit messy, but better than nothing!
 	inline friend std::ostream& operator<<(std::ostream& o, const Matrix4& m){
-		o << "Mat4(";
-		o << "\t"	<< m.values[0] << "," << m.values[1] << "," << m.values[2] << "," << m.values [3] << std::endl;
-		o << "\t\t" << m.values[4] << "," << m.values[5] << "," << m.values[6] << "," << m.values [7] << std::endl;
-		o << "\t\t" << m.values[8] << "," << m.values[9] << "," << m.values[10] << "," << m.values [11] << std::endl;
-		o << "\t\t" << m.values[12] << "," << m.values[13] << "," << m.values[14] << "," << m.values [15] << " )" <<std::endl;
+		o <<"Mat4(";
+		o <<"\t"	<< m.values[0] <<"," << m.values[1] <<"," << m.values[2] <<"," << m.values [3] << std::endl;
+		o <<"\t\t" << m.values[4] <<"," << m.values[5] <<"," << m.values[6] <<"," << m.values [7] << std::endl;
+		o <<"\t\t" << m.values[8] <<"," << m.values[9] <<"," << m.values[10] <<"," << m.values [11] << std::endl;
+		o <<"\t\t" << m.values[12] <<"," << m.values[13] <<"," << m.values[14] <<"," << m.values [15] <<" )" <<std::endl;
 		return o;
 	}
 };

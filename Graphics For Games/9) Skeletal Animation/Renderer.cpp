@@ -1,14 +1,14 @@
-#include "Renderer.h"
-#include "../../nclgl/MD5Node.h"
+#include"Renderer.h"
+#include"../../nclgl/MD5Node.h"
 
 
 Renderer::Renderer(Window &parent) : OGLRenderer(parent)	{	
 	camera			= new Camera(0,90.0f,Vector3(-180,60,0));
 
 #ifdef MD5_USE_HARDWARE_SKINNING
-	currentShader   = new Shader("../../Shaders/skeletonVertex.glsl", "../../Shaders/TexturedFragment.glsl");
+	currentShader   = new Shader("../../Shaders/skeletonVertex.glsl","../../Shaders/TexturedFragment.glsl");
 #else
-	currentShader   = new Shader("../../Shaders/TexturedVertex.glsl", "../../Shaders/TexturedFragment.glsl");
+	currentShader   = new Shader("../../Shaders/TexturedVertex.glsl","../../Shaders/TexturedFragment.glsl");
 #endif
 
 	hellData		= new MD5FileData("../../Meshes/hellknight.md5mesh");
@@ -45,11 +45,11 @@ void Renderer::RenderScene()	{
 
 	glUseProgram(currentShader->GetProgram());
 
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"diffuseTex"), 0);
 
 #ifdef MD5_USE_HARDWARE_SKINNING
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "weightTex"), MD5_WEIGHT_TEXNUM);
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "transformTex"), MD5_TRANSFORM_TEXNUM);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"weightTex"), MD5_WEIGHT_TEXNUM);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"transformTex"), MD5_TRANSFORM_TEXNUM);
 #endif
 
 	UpdateShaderMatrices();

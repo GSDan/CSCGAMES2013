@@ -1,8 +1,8 @@
 # pragma once
 
-#include "../../nclgl/OGLRenderer.h"
-#include "../../nclgl/HeightMap.h"
-#include "../../nclgl/Camera.h"
+#include"../../nclgl/OGLRenderer.h"
+#include"../../nclgl/HeightMap.h"
+#include"../../nclgl/Camera.h"
 
 #define POST_PASSES 10
 
@@ -32,4 +32,4 @@ class Renderer : public OGLRenderer {
 	 GLuint processFBO ;
 	 GLuint bufferColourTex [2];
 	 GLuint bufferDepthTex ;
-};
+};

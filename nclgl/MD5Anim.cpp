@@ -1,4 +1,4 @@
-#include "MD5Anim.h"
+#include"MD5Anim.h"
 
 MD5Anim::MD5Anim(std::string filename)	{
 	numAnimatedComponents = 0;
@@ -57,18 +57,18 @@ void MD5Anim::LoadMD5Anim( std::string filename )	{
 
 			//ifstream allows us to stream ints,floats etc into variables
 			f >> md5Version;
-			std::cout << "MD5 File version is: " << md5Version << std::endl;
+			std::cout <<"MD5 File version is:" << md5Version << std::endl;
 		}
 		else if(currentLine.find(MD5_COMMANDLINE_TAG) != std::string::npos) {
 			/*
 			MD5Anim files sometimes have a 'command line' value, used by the game
 			toolchain to generate some data. We don't care about it!
 			*/
-			std::cout << "Ignoring commandline value" << std::endl;
+			std::cout <<"Ignoring commandline value" << std::endl;
 		}
 		else if(currentLine.find(MD5_ANIM_NUMFRAMES) != std::string::npos) {
 			f >> numFrames;	//Loading in the number of frames held in this MD5Anim file
-			std::cout << "Expecting file to have " << numFrames << " frames" << std::endl;
+			std::cout <<"Expecting file to have" << numFrames <<" frames" << std::endl;
 
 			//If we have an incorrectly generated MD5Anim file, this might go wrong, as
 			//there might be more frames than we've generated space for...
@@ -77,7 +77,7 @@ void MD5Anim::LoadMD5Anim( std::string filename )	{
 		}
 		else if(currentLine.find(MD5_NUMJOINTS_TAG) != std::string::npos) {
 			f >> numJoints;	//Loading in the number of joints in this MD5Anim file
-			std::cout << "Expecting file to have " << numJoints << " joints" << std::endl;
+			std::cout <<"Expecting file to have" << numJoints <<" joints" << std::endl;
 
 			joints = new MD5AnimJoint[numJoints];
 		}
@@ -107,7 +107,7 @@ void MD5Anim::LoadMD5Anim( std::string filename )	{
 	//If what we've loaded in does not equal what we /should/ have loaded in, we'll output an error
 	//
 	if(numLoadedFrames != numFrames || numLoadedJoints != numJoints || numLoadedBounds != numFrames) {
-		std::cout << "MD5Anim file has incorrect data..." << std::endl;
+		std::cout <<"MD5Anim file has incorrect data..." << std::endl;
 	}
 }
 
@@ -133,7 +133,7 @@ void MD5Anim::LoadMD5AnimHierarchy( std::ifstream &from,unsigned int &count )	{
 	do {
 		from >> tempLine;	//Stream a line in
 
-		if(tempLine == "{") {			//In a well-behaved MD5 file, the first line will be '{'
+		if(tempLine =="{") {			//In a well-behaved MD5 file, the first line will be '{'
 		}
 		else if(tempLine[0] == '"'){	//It's a joint!
 			//substr cuts out a section of a string, exclusive of the first and second parameter
@@ -146,7 +146,7 @@ void MD5Anim::LoadMD5AnimHierarchy( std::ifstream &from,unsigned int &count )	{
 
 			++count;
 		}	
-	}while(tempLine != "}");	//Hit an end bracket...
+	}while(tempLine !="}");	//Hit an end bracket...
 }
 
 /*
@@ -172,7 +172,7 @@ void MD5Anim::LoadMD5AnimBounds( std::ifstream &from,unsigned int &count  )	{
 	do {
 		from >> tempLine;	
 
-		if(tempLine == "{") {				//In a well-behaved MD5 file, the first line will be '{'
+		if(tempLine =="{") {				//In a well-behaved MD5 file, the first line will be '{'
 		}
 		else if(tempLine[0] == '('){		//It's a bounding box!
 			from >> bounds[count].min.x;
@@ -190,7 +190,7 @@ void MD5Anim::LoadMD5AnimBounds( std::ifstream &from,unsigned int &count  )	{
 
 			++count;
 		}
-	}while(tempLine != "}");		//Hit an end bracket...
+	}while(tempLine !="}");		//Hit an end bracket...
 }
 
 /*
@@ -224,7 +224,7 @@ void MD5Anim::LoadMD5AnimBaseFrame( std::ifstream &from )	{
 	do {
 		from >> tempLine;	
 
-		if(tempLine == "{") {			//In a well-behaved MD5 file, the first line will be '{'
+		if(tempLine =="{") {			//In a well-behaved MD5 file, the first line will be '{'
 		}
 		else if(tempLine[0] == '('){	//It's a base frame (probably)!
 			from >> baseFrame.positions[current].x;
@@ -251,7 +251,7 @@ void MD5Anim::LoadMD5AnimBaseFrame( std::ifstream &from )	{
 			from >> skipChar;	//End Bracket
 			++current;
 		}
-	}while(tempLine != "}");
+	}while(tempLine !="}");
 }
 
 /*
@@ -285,9 +285,9 @@ void MD5Anim::LoadMD5AnimFrame( std::ifstream &from, unsigned int &count)	{
 	*/
 	frames[frameNum].components = new float[numAnimatedComponents];
 
-	from >> tempLine;	//Load in the next line, which /should/ be "{"
+	from >> tempLine;	//Load in the next line, which /should/ be"{"
 
-	if(tempLine == "{") {//In a well-behaved MD5 file, the first line will be '{'
+	if(tempLine =="{") {//In a well-behaved MD5 file, the first line will be '{'
 		for(unsigned int i = 0; i < numAnimatedComponents; ++i) {
 			//stream in the delta values of the current animation frame
 			from >> frames[frameNum].components[i];

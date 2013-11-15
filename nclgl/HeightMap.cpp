@@ -1,4 +1,4 @@
-#include "HeightMap.h"
+#include"HeightMap.h"
 
 HeightMap :: HeightMap ( std :: string name ) {
 	std :: ifstream file ( name . c_str () , ios :: binary );
@@ -9,7 +9,9 @@ HeightMap :: HeightMap ( std :: string name ) {
 	numIndices = ( RAW_WIDTH -1)*( RAW_HEIGHT -1)*6;
 	vertices = new Vector3 [ numVertices ];
 	textureCoords = new Vector2 [ numVertices ];
-	indices = new GLuint [ numIndices ];	unsigned char * data = new unsigned char [ numVertices ];
+	indices = new GLuint [ numIndices ];
+
+	unsigned char * data = new unsigned char [ numVertices ];
 	file.read (( char *) data , numVertices * sizeof ( unsigned char ));
 	file.close ();
 
@@ -50,4 +52,4 @@ HeightMap :: HeightMap ( std :: string name ) {
 	GenerateTangents ();
 	
 	BufferData ();
-}
+}

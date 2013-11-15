@@ -15,11 +15,11 @@ Update function)
 -_-_-_-_-_-_-_,------,   
 _-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
 -_-_-_-_-_-_-~|__( ^ .^) /
-_-_-_-_-_-_-_-""  ""   
+_-_-_-_-_-_-_-"" ""   
 
 *//////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include "InputDevice.h"
+#include"InputDevice.h"
 
 //http://msdn.microsoft.com/en-us/library/ms645540(VS.85).aspx
 enum KeyboardKeys {
