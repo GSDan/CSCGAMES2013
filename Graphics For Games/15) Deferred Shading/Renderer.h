@@ -16,7 +16,7 @@ public :
 	virtual void UpdateScene (float msec );
 
 protected :
-	void fillBuffers(); //G- Bufferfill Render Pass
+	void FillBuffers(); //G- Bufferfill Render Pass
 	void DrawPointLights (); // Lighting Render Pass
 	void CombineBuffers (); // Combination Render Pass
 	// Make a new texture ...

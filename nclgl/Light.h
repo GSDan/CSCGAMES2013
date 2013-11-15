@@ -12,9 +12,7 @@ Light ( Vector3 position , Vector4 colour ,float radius ) {
 }
 
 Light(){
-	this -> position = Vector3(0,0,0) ;
-	this -> colour = Vector4(1,1,1,1) ;
-	this -> radius = 1.0 ;
+	
 }
 
  ~ Light ( void ){};

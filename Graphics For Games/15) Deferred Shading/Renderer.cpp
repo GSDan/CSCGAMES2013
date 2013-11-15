@@ -26,7 +26,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 		}//end inner for loop
 	}//end outer for loop
 
-	heightMap = new HeightMap ("../ Textures / terrain .raw");
+	heightMap = new HeightMap ("../../Textures/world.raw");
 	heightMap -> SetTexture ( SOIL_load_OGL_texture ("../../Textures/Barren Reds.JPG", SOIL_LOAD_AUTO ,SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 
 	heightMap -> SetBumpMap ( SOIL_load_OGL_texture ("../../Textures/Barren RedsDOT3.jpg", SOIL_LOAD_AUTO ,SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
@@ -37,17 +37,17 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	sphere = new OBJMesh ();
 	if (! sphere -> LoadOBJMesh ("../../Meshes/ico.obj")) {
 		return ;
-	}	sceneShader = new Shader ("../../Shaders/BumpVertex.glsl","../../Shaders/bufferFragment.glsl");
+	}	sceneShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bufferFragment.glsl");
 	if (! sceneShader -> LinkProgram ()) {
 		return ;
 	}
 
-	combineShader = new Shader ("../../Shaders/combinevert.glsl","../../Shaders/combinefrag.glsl");
+	combineShader = new Shader ("../../Shaders/combineVert.glsl","../../Shaders/combineFrag.glsl");
 	if (! combineShader -> LinkProgram ()) {
 		return ;
 	}
 
-	pointlightShader = new Shader ("../../Shaders/pointlightvert.glsl","../../Shaders/pointlightfrag.glsl");
+	pointlightShader = new Shader ("../../Shaders/pointLightVertex.glsl","../../Shaders/pointLightFragment.glsl");
 	if (! pointlightShader -> LinkProgram ()) {
 		return ;
 	}	glGenFramebuffers (1 ,& bufferFBO );
@@ -115,10 +115,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_NEAREST );
 	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_NEAREST );
 
-	glTexImage2D ( GL_TEXTURE_2D , 0 ,	depth ? GL_DEPTH_COMPONENT24 : GL_RGBA8 ,
-					width , height , 0 , depth ? GL_DEPTH_COMPONENT : GL_RGBA ,
-					GL_UNSIGNED_BYTE , NULL );
-
+	glTexImage2D ( GL_TEXTURE_2D , 0 ,	depth ? GL_DEPTH_COMPONENT24 : GL_RGBA8 ,width , height , 0 , depth ? GL_DEPTH_COMPONENT : GL_RGBA ,GL_UNSIGNED_BYTE , NULL );
 	glBindTexture ( GL_TEXTURE_2D , 0);
 }void Renderer :: UpdateScene (float msec ) {
 	camera -> UpdateCamera ( msec );
@@ -128,11 +125,11 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	glBindFramebuffer ( GL_FRAMEBUFFER , 0);
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
-	FillBuffers ();
+	FillBuffers();
 	DrawPointLights ();
 	CombineBuffers ();
 	SwapBuffers ();
-}void Renderer ::fillBuffers () {
+}void Renderer ::FillBuffers () {
 	glBindFramebuffer ( GL_FRAMEBUFFER , bufferFBO );
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
@@ -141,23 +138,6 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"bumpTex") , 1);
 
 	projMatrix = Matrix4 :: Perspective (1.0f ,10000.0f , (float ) width / (float ) height , 45.0f );
-	modelMatrix . ToIdentity ();
-	UpdateShaderMatrices ();
-
-	heightMap -> Draw ();
-
-	glUseProgram (0);
-	glBindFramebuffer ( GL_FRAMEBUFFER , 0);
-}void Renderer ::fillBuffers () {
-	glBindFramebuffer ( GL_FRAMEBUFFER , bufferFBO );
-	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-
-	SetCurrentShader ( sceneShader );
-	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,	"diffuseTex") , 0);
-	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,	"bumpTex") , 1);
-
-	projMatrix = Matrix4 :: Perspective (1.0f ,10000.0f ,
-	(float ) width / (float ) height , 45.0f );
 	modelMatrix . ToIdentity ();
 	UpdateShaderMatrices ();
 
