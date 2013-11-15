@@ -1,7 +1,9 @@
 #version 150 core
 
-uniform sampler2D diffuseTex ;
-uniform sampler2D bumpTex ; // New !
+uniform sampler2D diffuseTexLower;
+uniform sampler2D bumpTexLower;
+uniform sampler2D diffuseTexUpper;
+uniform sampler2D bumpTexUpper;
 
 uniform vec3 cameraPos ;
 uniform vec4 lightColour ;
@@ -20,13 +22,16 @@ vec3 worldPos ;
 out vec4 gl_FragColor ;
 
 void main ( void ) {
-	vec4 diffuse = texture ( diffuseTex , IN . texCoord );
 
-	mat3 TBN = mat3 ( IN . tangent , IN . binormal , IN . normal );
+	vec3 normal;
+	vec4 diffuse;
 
-	vec3 normal = normalize ( TBN * ( texture ( bumpTex , IN . texCoord ). rgb * 2.0 - 1.0));
+	if(IN.worldPos.x > 2000.0 && IN.worldPos.y > 300){
+		diffuse = texture ( diffuseTexUpper , IN.texCoord );
+		mat3 TBN = mat3 ( IN.tangent , IN.binormal , IN.normal );
+		normal = normalize ( TBN * ( texture ( bumpTexUpper , IN.texCoord ). rgb * 2.0 - 1.0));
 
-	vec3 incident = normalize ( lightPos - IN . worldPos );
+		vec3 incident = normalize ( lightPos - IN . worldPos );
 	float lambert = max (0.0 , dot ( incident , normal )); 
 
 	float dist = length ( lightPos - IN . worldPos );
@@ -42,4 +47,56 @@ void main ( void ) {
 	colour += ( lightColour . rgb * sFactor ) * 0.33;
 	gl_FragColor = vec4 ( colour * atten * lambert , diffuse . a );
 	gl_FragColor . rgb += ( diffuse . rgb * lightColour . rgb ) * 0.1;
+
+	}else if(IN.worldPos.x > 1800.0 && IN.worldPos.y > 270){
+
+		//Jesse, we need to cook!
+		diffuse = mix(texture2D(diffuseTexUpper,IN.texCoord), texture2D(diffuseTexLower,IN.texCoord), 1.0 - ((IN.worldPos.x - 1800.0 )/200)); 
+		mat3 TBN = mat3 ( IN.tangent , IN.binormal , IN.normal );
+		normal = normalize ( TBN * ( texture ( bumpTexUpper , IN.texCoord ). rgb * 2.0 - 1.0));
+
+		vec3 incident = normalize ( lightPos - IN . worldPos );
+		float lambert = max (0.0 , dot ( incident , normal )); 
+
+		float dist = length ( lightPos - IN . worldPos );
+		float atten = 1.0 - clamp ( dist / lightRadius , 0.0 , 1.0);
+
+		vec3 viewDir = normalize ( cameraPos - IN . worldPos );
+		vec3 halfDir = normalize ( incident + viewDir );
+
+		float rFactor = max (0.0 , dot ( halfDir , normal )); 
+		float sFactor = pow ( rFactor , 33.0 );
+
+		vec3 colour = ( diffuse . rgb * lightColour . rgb );
+		colour += ( lightColour . rgb * sFactor ) * 0.33;
+				
+		gl_FragColor = vec4 ( colour * atten * lambert , diffuse . a );
+		gl_FragColor . rgb += ( diffuse . rgb * lightColour . rgb ) * 0.1;
+
+	}
+	else{
+		diffuse = texture ( diffuseTexLower , IN.texCoord );
+		mat3 TBN = mat3 ( IN . tangent , IN.binormal , IN.normal );
+		normal = normalize ( TBN * ( texture ( bumpTexLower , IN.texCoord ). rgb * 2.0 - 1.0));
+
+		vec3 incident = normalize ( lightPos - IN . worldPos );
+		float lambert = max (0.0 , dot ( incident , normal )); 
+
+		float dist = length ( lightPos - IN . worldPos );
+		float atten = 1.0 - clamp ( dist / lightRadius , 0.0 , 1.0);
+
+		vec3 viewDir = normalize ( cameraPos - IN . worldPos );
+		vec3 halfDir = normalize ( incident + viewDir );
+
+		float rFactor = max (0.0 , dot ( halfDir , normal )); 
+		float sFactor = pow ( rFactor , 33.0 );
+
+		vec3 colour = ( diffuse . rgb * lightColour . rgb );
+		colour += ( lightColour . rgb * sFactor ) * 0.33;
+		gl_FragColor = vec4 ( colour * atten * lambert , diffuse . a );
+		gl_FragColor . rgb += ( diffuse . rgb * lightColour . rgb ) * 0.1;
+		
+	}	
+
+	
 }

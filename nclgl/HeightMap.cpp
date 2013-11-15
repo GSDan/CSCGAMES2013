@@ -53,3 +53,30 @@ HeightMap :: HeightMap ( std :: string name ) {
 	
 	BufferData ();
 }
+
+
+void HeightMap :: Draw () {
+
+	//bind texture and bump for lower material
+	glActiveTexture ( GL_TEXTURE0 );
+	glBindTexture ( GL_TEXTURE_2D , textureLower);
+	glActiveTexture ( GL_TEXTURE1 );
+	glBindTexture ( GL_TEXTURE_2D , bumpLower ); 
+
+	//bind texture and bump for upper material
+	glActiveTexture ( GL_TEXTURE2 );
+	glBindTexture ( GL_TEXTURE_2D , textureUpper);
+	glActiveTexture ( GL_TEXTURE3 );
+	glBindTexture ( GL_TEXTURE_2D , bumpUpper ); 
+
+	glBindVertexArray ( arrayObject );
+
+	if( bufferObject [ INDEX_BUFFER ]) {
+		glDrawElements ( type , numIndices , GL_UNSIGNED_INT , 0);
+	}
+	else {
+		glDrawArrays ( type , 0 , numVertices );
+	}
+
+	glBindVertexArray (0);
+}

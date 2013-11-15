@@ -16,7 +16,6 @@ Renderer ( Window & parent );
  void DrawHeightmap ();
  void DrawWater ();
  void DrawSkybox ();
- void DrawUnderwater(Window & parent);
 
  Shader * lightShader ;
  Shader * reflectShader ;
