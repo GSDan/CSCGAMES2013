@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Vector4.h"
-#include "Vector3.h"
+#include"Vector4.h"
+#include"Vector3.h"
 
 class Light {
 public :
@@ -26,4 +26,4 @@ Light ( Vector3 position , Vector4 colour , float radius ) {
  Vector3 position ;
  Vector4 colour ;
  float radius ;
- };
+ };

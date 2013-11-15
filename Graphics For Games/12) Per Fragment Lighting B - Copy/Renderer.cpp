@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include"Renderer.h"
 
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
@@ -36,7 +36,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	init = true ;
 	waterRotate = 0.0f;
 	projMatrix = Matrix4 :: Perspective (1.0f ,15000.0f,
-		( float ) width / ( float )height , 45.0f);
+		(float ) width / (float )height , 45.0f);
 	glEnable ( GL_DEPTH_TEST );
 	glEnable ( GL_BLEND );
 	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
@@ -55,7 +55,7 @@ Renderer ::~ Renderer ( void ) {
 	currentShader = 0;
 }
 
-void Renderer :: UpdateScene ( float msec ) {
+void Renderer :: UpdateScene (float msec ) {
 	camera -> UpdateCamera ( msec/2.0f );
 	viewMatrix = camera -> BuildViewMatrix ();
 	waterRotate += msec / 2000.0f ;
@@ -67,7 +67,7 @@ void Renderer :: RenderScene () {
 	DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
-	DrawUnder
+	//DrawUnder
 
 	SwapBuffers ();
 }
@@ -85,7 +85,7 @@ void Renderer :: DrawSkybox () {
 
 void Renderer :: DrawHeightmap () {
 	SetCurrentShader ( lightShader );
-	SetShaderLight (* light );	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,( float *)& camera -> GetPosition ());
+	SetShaderLight (* light );	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTex") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"bumpTex") , 1);
@@ -102,7 +102,7 @@ void Renderer :: DrawHeightmap () {
 
 void Renderer :: DrawUnderwater(Window & parent){
 	SetCurrentShader(underwaterShader);
-	glUniform3fv(glGetUniformLocation(currentShader -> GetProgram(), "iResolution"),1, (float*)&resolution );
+	glUniform3fv(glGetUniformLocation(currentShader -> GetProgram(),"iResolution"),1, (float*)&resolution );
 	glUniform1f ( glGetUniformLocation ( currentShader -> GetProgram () ,"iGlobalTime") , parent.elapsedMS);
 	glUseProgram(0);
 }
@@ -110,7 +110,7 @@ void Renderer :: DrawUnderwater(Window & parent){
 void Renderer :: DrawWater () {
 	SetCurrentShader ( reflectShader );
 	SetShaderLight (* light );
-	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,( float *)& camera -> GetPosition ());
+	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTex") , 0);
 

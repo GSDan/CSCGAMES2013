@@ -8,13 +8,13 @@ GameTimers to trigger events at different time periods.
 -_-_-_-_-_-_-_,------,   
 _-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
 -_-_-_-_-_-_-~|__( ^ .^) /
-_-_-_-_-_-_-_-""  ""   
+_-_-_-_-_-_-_-"" ""   
 
 *//////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include "Windows.h"
+#include"Windows.h"
 
 class GameTimer	{
 public:

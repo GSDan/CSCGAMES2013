@@ -1,7 +1,7 @@
-#pragma comment(lib, "nclgl.lib")
+#pragma comment(lib,"nclgl.lib")
 
-#include "../../nclgl/window.h"
-#include "Renderer.h"
+#include"../../nclgl/window.h"
+#include"Renderer.h"
 
 int main() {
 	Window w("Skeletal Animation!", 800,600,false);

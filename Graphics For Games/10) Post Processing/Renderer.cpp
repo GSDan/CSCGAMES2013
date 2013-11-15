@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include"Renderer.h"
 
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	camera = new Camera (0.0f ,135.0f , Vector3 (0 ,500 ,0));
@@ -7,21 +7,25 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	heightMap = new HeightMap ("../../Textures/terrain.raw");
 	heightMap -> SetTexture (SOIL_load_OGL_texture ("../../Textures/Barren Reds.JPG", SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 
-	sceneShader = new Shader ("../../Shaders/TexturedVertex.glsl", "../../Shaders/TexturedFragment.glsl");
-	processShader = new Shader ("../../Shaders/TexturedVertex.glsl", "processfrag.glsl");
+	sceneShader = new Shader ("../../Shaders/TexturedVertex.glsl","../../Shaders/TexturedFragment.glsl");
+	processShader = new Shader ("../../Shaders/TexturedVertex.glsl","processfrag.glsl");
 
 	if (! processShader -> LinkProgram () || ! sceneShader -> LinkProgram () || ! heightMap -> GetTexture ()) {
 		 return ;
 	}
 
-	SetTextureRepeating ( heightMap -> GetTexture () , true );	// Generate our scene depth texture ...
+	SetTextureRepeating ( heightMap -> GetTexture () , true );
+
+	// Generate our scene depth texture ...
 	glGenTextures (1 , & bufferDepthTex );
 	glBindTexture ( GL_TEXTURE_2D , bufferDepthTex );
 	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_CLAMP );
 	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_CLAMP );
 	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_NEAREST );
 	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_NEAREST );
-	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_DEPTH24_STENCIL8 , width , height , 0 , GL_DEPTH_STENCIL , GL_UNSIGNED_INT_24_8 , NULL );	// And our colour texture ...
+	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_DEPTH24_STENCIL8 , width , height , 0 , GL_DEPTH_STENCIL , GL_UNSIGNED_INT_24_8 , NULL );
+
+	// And our colour texture ...
 	for (int i = 0; i < 2; ++ i ) {
 		glGenTextures (1 , & bufferColourTex [ i ]);
 		glBindTexture ( GL_TEXTURE_2D , bufferColourTex [ i ]);
@@ -30,7 +34,9 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 		glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_NEAREST );
 		glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_NEAREST );
 		glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA8 , width , height , 0 ,	GL_RGBA , GL_UNSIGNED_BYTE , NULL );
-	}	glGenFramebuffers (1 ,& bufferFBO ); // We 'll render the scene into this
+	}
+
+	glGenFramebuffers (1 ,& bufferFBO ); // We 'll render the scene into this
 	glGenFramebuffers (1 ,& processFBO ); // And do post processing in this
 
 	glBindFramebuffer ( GL_FRAMEBUFFER , bufferFBO );
@@ -45,7 +51,10 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	glBindFramebuffer ( GL_FRAMEBUFFER , 0);
 	glEnable ( GL_DEPTH_TEST );
-	init = true ;} Renderer ::~ Renderer ( void ) {
+	init = true ;
+}
+
+ Renderer ::~ Renderer ( void ) {
 	delete sceneShader ;
 	delete processShader ;
 	currentShader = NULL ;
@@ -58,7 +67,9 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	glDeleteTextures (1 ,& bufferDepthTex );
 	glDeleteFramebuffers (1 ,& bufferFBO );
 	glDeleteFramebuffers (1 ,& processFBO );
-}void Renderer :: UpdateScene ( float msec ) {
+}
+
+void Renderer :: UpdateScene ( float msec ) {
 	camera -> UpdateCamera ( msec );
 	viewMatrix = camera -> BuildViewMatrix ();
 }
@@ -68,7 +79,9 @@ void Renderer :: RenderScene () {
 	DrawPostProcess ();
 	PresentScene ();
 	SwapBuffers ();
-}void Renderer :: DrawScene () {
+}
+
+void Renderer :: DrawScene () {
 	glBindFramebuffer ( GL_FRAMEBUFFER , bufferFBO );
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT |GL_STENCIL_BUFFER_BIT );
 
@@ -80,7 +93,9 @@ void Renderer :: RenderScene () {
 
 	glUseProgram (0);
 	glBindFramebuffer ( GL_FRAMEBUFFER , 0);
-}void Renderer :: DrawPostProcess () {
+}
+
+void Renderer :: DrawPostProcess () {
 	glBindFramebuffer ( GL_FRAMEBUFFER , processFBO );
 	glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 , GL_TEXTURE_2D , bufferColourTex [1] , 0);
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
@@ -92,7 +107,9 @@ void Renderer :: RenderScene () {
 
 	glDisable ( GL_DEPTH_TEST );
 
-	glUniform2f ( glGetUniformLocation ( currentShader -> GetProgram () , "pixelSize") , 1.0f / width ,1.0f / height );	for (int i = 0; i < POST_PASSES ; ++ i ) {
+	glUniform2f ( glGetUniformLocation ( currentShader -> GetProgram () ,"pixelSize") , 1.0f / width ,1.0f / height );
+
+	for (int i = 0; i < POST_PASSES ; ++ i ) {
 		glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 ,
 		GL_TEXTURE_2D , bufferColourTex [1] , 0);
 		glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"isVertical") , 0);
@@ -106,11 +123,15 @@ void Renderer :: RenderScene () {
 
 		quad -> SetTexture ( bufferColourTex [1]);
 		quad -> Draw ();
-	}	glBindFramebuffer ( GL_FRAMEBUFFER , 0);
+	}
+
+	glBindFramebuffer ( GL_FRAMEBUFFER , 0);
 	glUseProgram (0);
 
 	glEnable ( GL_DEPTH_TEST );
-}void Renderer :: PresentScene () {
+}
+
+void Renderer :: PresentScene () {
 	glBindFramebuffer ( GL_FRAMEBUFFER , 0);
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 	SetCurrentShader ( sceneShader );

@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include"Camera.h"
 
 void Camera::UpdateCamera(float msec) {
 	pitch -= (Window::GetMouse()->GetRelativePosition().y);

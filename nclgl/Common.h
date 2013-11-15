@@ -6,7 +6,7 @@ to put them.
 -_-_-_-_-_-_-_,------,   
 _-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
 -_-_-_-_-_-_-~|__( ^ .^) /
-_-_-_-_-_-_-_-""  ""   
+_-_-_-_-_-_-_-"" ""   
 
 *//////////////////////////////////////////////////////////////////////////////
 
@@ -34,5 +34,5 @@ static inline double DegToRad(const double rad)	{
 
 #define SHADERDIR	"../../Shaders/"
 #define MESHDIR		"../../Meshes/"
-#define TEXTUREDIR  "../../Textures/"
+#define TEXTUREDIR "../../Textures/"
 #define SOUNDSDIR	"../../Sounds/"

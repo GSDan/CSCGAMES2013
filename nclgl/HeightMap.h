@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "Mesh.h"
+#include"Mesh.h"
 
 #define RAW_WIDTH 257
 #define RAW_HEIGHT 257
@@ -19,4 +19,4 @@ class HeightMap : public Mesh {
 public :
 	HeightMap ( std :: string name );
 	~ HeightMap ( void ){};
-};
+};
