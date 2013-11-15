@@ -1,7 +1,7 @@
-#pragma comment(lib, "nclgl.lib")
+#pragma comment(lib,"nclgl.lib")
 
-#include "./NCLGL/window.h"
-#include "Renderer.h"
+#include"./NCLGL/window.h"
+#include"Renderer.h"
 
 int main() {
 	Window w("Deferred Rendering!", 1280,720,false); //This is all boring win32 window creation stuff!
