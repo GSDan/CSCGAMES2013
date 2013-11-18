@@ -1,18 +1,25 @@
 #include"Renderer.h"
+#include"../../nclgl/MD5Node.h"
 
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
-	
 	resolution = Vector3((float) width, (float) height, 1);
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/world.raw");
 	quad = Mesh::GenerateQuad();
+
+	lampData = new MD5FileData("../../Meshes/boblampclean.md5mesh");
+	lampNode = new MD5Node(*lampData);
+	lampData->AddAnim("../../Meshes/boblampclean.md5anim");
+	lampNode->PlayAnim("../../Meshes/boblampclean.md5anim");
+	
 
 	camera->SetPosition ( Vector3 ( RAW_WIDTH * HEIGHTMAP_X / 2.0f,500.0f, RAW_WIDTH * HEIGHTMAP_X ));
 	light = new Light ( Vector3 (( RAW_HEIGHT * HEIGHTMAP_X / 2.0f ) ,450.0f,( RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)),Vector4 (0.9f ,0.9f ,1.0f ,1) ,( RAW_WIDTH * HEIGHTMAP_X ) / 1.1f);
 	reflectShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/reflectFragment.glsl");
 	skyboxShader = new Shader ("../../Shaders/skyboxVertex.glsl","../../Shaders/skyboxFragment.glsl");
 	lightShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bumpFragment.glsl");
+	md5Shader = new Shader ("../../Shaders/TexturedVertex.glsl","../../Shaders/TexturedFragment.glsl");
 
 	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram ()) {
 		return ;
@@ -20,10 +27,6 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	quad->SetTexture(SOIL_load_OGL_texture("../../Textures/anotherwater.JPG",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 	
-	//old code
-	//heightMap -> SetTexture ( SOIL_load_OGL_texture ("../../Textures/sand.JPG", SOIL_LOAD_AUTO ,SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
-	//heightMap -> SetBumpMap ( SOIL_load_OGL_texture ("../../Textures/sandbump.jpg", SOIL_LOAD_AUTO ,	SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
-
 	//set textures and bump maps for the two materials
 	heightMap -> SetTextureLower ( SOIL_load_OGL_texture ("../../Textures/sand.JPG", SOIL_LOAD_AUTO ,SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 	heightMap -> SetBumpMapLower ( SOIL_load_OGL_texture ("../../Textures/sandbump.jpg", SOIL_LOAD_AUTO ,	SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
@@ -43,6 +46,8 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	SetTextureRepeating (heightMap->GetTextureUpper (), true );
 	SetTextureRepeating (heightMap->GetBumpMapUpper (), true );
 	
+	root = new SceneNode();
+	root->AddChild(new World());
 
 	init = true ;
 	waterRotate = 0.2f;
@@ -61,7 +66,6 @@ Renderer ::~ Renderer ( void ) {
 	delete skyboxShader ;
 	delete lightShader ;
 	delete light ;
-	delete underwaterShader;
 	currentShader = 0;
 }
 
@@ -69,15 +73,31 @@ void Renderer :: UpdateScene (float msec ) {
 	camera -> UpdateCamera ( msec/2.0f );
 	viewMatrix = camera -> BuildViewMatrix ();
 	waterRotate += msec / 2000.0f ;
+
+	lampNode->Update(msec);
+
 }
 
 void Renderer :: RenderScene () {
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-
+	Vector3 ambientColour = Vector3(0.05f, 0.03f, 0.03f);
 	DrawSkybox ();
-	DrawHeightmap ();
+	DrawHeightmap (ambientColour);
 	DrawWater ();
-	//DrawUnder
+	DrawNode(root);
+	
+	/*SetCurrentShader ( md5Shader );
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"diffuseTex"), 0);
+	#ifdef MD5_USE_HARDWARE_SKINNING
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"weightTex"), MD5_WEIGHT_TEXNUM);
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"transformTex"), MD5_TRANSFORM_TEXNUM);
+	#endif 
+
+	UpdateShaderMatrices();
+
+	lampNode->Draw(*this);*/
+
+	glUseProgram(0);
 
 	SwapBuffers ();
 }
@@ -93,9 +113,11 @@ void Renderer :: DrawSkybox () {
 	glDepthMask ( GL_TRUE );
 }
 
-void Renderer :: DrawHeightmap () {
+void Renderer :: DrawHeightmap (Vector3 ambientColour) {
+	
 	SetCurrentShader ( lightShader );
 	SetShaderLight (* light );	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
+	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambient"), 1, (float*)&ambientColour); 
 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTexLower") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"bumpTexLower") , 1);
@@ -113,12 +135,12 @@ void Renderer :: DrawHeightmap () {
 }
 
 void Renderer :: DrawWater () {
+	
 	SetCurrentShader ( reflectShader );
 	SetShaderLight (* light );
-	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
+	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ()); 
 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTex") , 0);
-
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"cubeTex") , 2);
 
 	glActiveTexture ( GL_TEXTURE2 );
@@ -142,4 +164,20 @@ void Renderer :: DrawWater () {
 	quad -> Draw ();
 
 	glUseProgram (0);
-}
+}
+
+void Renderer :: DrawNode (SceneNode *n) {
+	if(n->GetMesh ()) 
+	{
+		Matrix4 transform = n->GetWorldTransform ()* Matrix4 ::Scale (n->GetModelScale());
+		glUniformMatrix4fv (glGetUniformLocation ( currentShader -> GetProgram (),"modelMatrix"), 1,false ,(float *)& transform );
+		glUniform4fv ( glGetUniformLocation ( currentShader -> GetProgram (),"nodeColour"),1,( float *)&n-> GetColour ());
+		glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram (),"useTexture"),( int )n-> GetMesh()->GetTexture());
+		n->Draw(*this);
+	}
+	for (vector < SceneNode * >:: const_iterator
+		i = n-> GetChildIteratorStart ();
+		i != n-> GetChildIteratorEnd (); ++i) {
+			DrawNode (*i);
+	}
+}
