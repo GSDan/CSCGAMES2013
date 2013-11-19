@@ -61,7 +61,8 @@ void main ( void ) {
 	}
 
 
-		vec3 ambient = lerp(weight, ambientMin, ambientMax);
+		float weightVal = abs(sin(weight));
+		vec3 ambient = lerp(weightVal, ambientMin, ambientMax);
 
 		mat3 TBN = mat3 ( IN . tangent , IN.binormal , IN.normal );
 		normal = normalize ( TBN * ( texture ( bumpTexLower , IN.texCoord ). rgb * 2.0 - 1.0));

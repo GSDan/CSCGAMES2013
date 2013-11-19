@@ -6,7 +6,9 @@ uniform samplerCube cubeTex ;
 uniform vec4 lightColour ;
 uniform vec3 lightPos ;
 uniform vec3 cameraPos ;
-uniform vec3 ambient;
+uniform vec3 ambientMax;
+uniform vec3 ambientMin;
+uniform float weight;
 uniform float lightRadius ;
 
 in Vertex {
@@ -18,7 +20,18 @@ vec3 worldPos ;
 
 out vec4 gl_FragColor ;
 
+vec3 lerp(float weight, vec3 lhs, vec3 rhs){
+
+	return (1-weight)*lhs + weight * rhs;
+
+}
+
 void main ( void ) {
+
+	float weightVal = abs(sin(weight));
+	vec3 ambient = lerp(weightVal, ambientMin, ambientMax);
+		
+
 	vec4 diffuse = texture ( diffuseTex , IN . texCoord ) * IN . colour ;
 	vec3 incident = normalize ( IN . worldPos - cameraPos );
 	float dist = length ( lightPos - IN . worldPos );

@@ -13,9 +13,10 @@ public :
 	 virtual void UpdateScene ( float msec );
 
  protected :
-	 void DrawHeightmap (Vector3 minAmbient, Vector3 maxAmbient);
-	 void DrawWater (Vector3 minAmbient, Vector3 maxAmbient);
+	 void DrawHeightmap ();
+	 void DrawWater ();
 	 void DrawSkybox ();
+	 void updateSun();
 	 void DrawSun(float msec);
 
 	 Shader * lightShader ;
@@ -28,7 +29,7 @@ public :
 	 HeightMap * heightMap ;
 	 Mesh * quad ;
 
-	 Light * light ;
+	 Light * sunlight ;
 	 Camera * camera ;
 
 	 GLuint cubeMap ;
@@ -37,5 +38,8 @@ public :
 	 Vector3 resolution;
 
 	 float time;
+	 Vector3 minAmbient;
+	 Vector3 maxAmbient;
+	 Vector3 twiAmbient;
 
  };
