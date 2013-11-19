@@ -8,7 +8,9 @@ uniform sampler2D bumpTexUpper;
 uniform vec3 cameraPos ;
 uniform vec4 lightColour ;
 uniform vec3 lightPos ;
-uniform vec3 ambient;
+uniform vec3 ambientMax;
+uniform vec3 ambientMin;
+uniform float weight;
 uniform float lightRadius ;
 
 in Vertex {
@@ -21,6 +23,12 @@ vec3 worldPos ;
 } IN ;
 
 out vec4 gl_FragColor ;
+
+vec3 lerp(float weight, vec3 lhs, vec3 rhs){
+
+	return (1-weight)*lhs + weight * rhs;
+
+}
 
 void main ( void ) {
 
@@ -52,6 +60,9 @@ void main ( void ) {
 		diffuse = texture ( diffuseTexLower , IN.texCoord );
 	}
 
+
+		vec3 ambient = lerp(weight, ambientMin, ambientMax);
+
 		mat3 TBN = mat3 ( IN . tangent , IN.binormal , IN.normal );
 		normal = normalize ( TBN * ( texture ( bumpTexLower , IN.texCoord ). rgb * 2.0 - 1.0));
 
@@ -76,3 +87,5 @@ void main ( void ) {
 
 	
 }
+
+

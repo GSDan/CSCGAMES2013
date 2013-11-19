@@ -1,10 +1,11 @@
 #include"Renderer.h"
 #include"../../nclgl/MD5Node.h"
+#include <cstdlib>
 
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	//0 = noon
-	time = 0;
+	time = 0.0f;
 
 	resolution = Vector3((float) width, (float) height, 1);
 	camera = new Camera();
@@ -68,7 +69,7 @@ void Renderer :: UpdateScene (float msec ) {
 	camera -> UpdateCamera ( msec/2.0f );
 	viewMatrix = camera -> BuildViewMatrix ();
 	waterRotate += msec / 2000.0f ;
-	time += 1;
+	time += 0.01;
 	if(time > 360){
 		time =0;
 	}
@@ -76,17 +77,21 @@ void Renderer :: UpdateScene (float msec ) {
 
 void Renderer :: RenderScene () {
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-	Vector3 ambientColour = Vector3(2.7f, 2.7f, 3.0f);
 
-	if((time >= 80 && time <=95) || (time >= 275 && time <= 290)){
+	Vector3 minAmbient = Vector3(0.0f, 0.0f, 0.6f);
+	Vector3 maxAmbient = Vector3(3.5f, 3.0f, 3.4f);
+
+	Vector3 ambientColour = Vector3(3.5f, 3.0f, 3.4f);
+
+	/*if((time >= 80 && time <=95) || (time >= 275 && time <= 290)){
 		ambientColour = Vector3(2.0f, 0.8f, 0.8f);
 	}
 	else if(time > 95 && time < 275){
 		ambientColour = Vector3(0.0f, 0.0f, 0.6f);
-	}
+	}*/
 	DrawSkybox ();
-	DrawHeightmap (ambientColour);
-	DrawWater (ambientColour);
+	DrawHeightmap (minAmbient, maxAmbient);
+	DrawWater (minAmbient, maxAmbient);
 	
 	glUseProgram(0);
 
@@ -104,11 +109,13 @@ void Renderer :: DrawSkybox () {
 	glDepthMask ( GL_TRUE );
 }
 
-void Renderer :: DrawHeightmap (Vector3 ambientColour) {
+void Renderer :: DrawHeightmap (Vector3 minAmbient, Vector3 maxAmbient) {
 	
 	SetCurrentShader ( lightShader );
-	SetShaderLight (* light );	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
-	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambient"), 1, (float*)&ambientColour); 
+	SetShaderLight (* light );	float weight = abs((int)time-180)%10;		glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
+	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
+	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
+	glUniform1f(glGetUniformLocation ( currentShader -> GetProgram () ,"weight"), weight/10);
 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTexLower") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"bumpTexLower") , 1);
@@ -125,12 +132,12 @@ void Renderer :: DrawHeightmap (Vector3 ambientColour) {
 	glUseProgram (0);
 }
 
-void Renderer :: DrawWater (Vector3 ambientColour) {
+void Renderer :: DrawWater (Vector3 minAmbient, Vector3 maxAmbient) {
 	
 	SetCurrentShader ( reflectShader );
 	SetShaderLight (* light );
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ()); 
-	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambient"), 1, (float*)&ambientColour); 
+	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambient"), 1, (float*)&maxAmbient); 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTex") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"cubeTex") , 2);
 

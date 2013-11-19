@@ -13,8 +13,8 @@ public :
 	 virtual void UpdateScene ( float msec );
 
  protected :
-	 void DrawHeightmap (Vector3 ambientColour);
-	 void DrawWater (Vector3 ambientColour);
+	 void DrawHeightmap (Vector3 minAmbient, Vector3 maxAmbient);
+	 void DrawWater (Vector3 minAmbient, Vector3 maxAmbient);
 	 void DrawSkybox ();
 	 void DrawSun(float msec);
 
@@ -36,6 +36,6 @@ public :
 	 float waterRotate ;
 	 Vector3 resolution;
 
-	 int time;
+	 float time;
 
  };
