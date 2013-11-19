@@ -3,8 +3,6 @@
 #include "../../nclgl/OGLRenderer.h"
 #include "../../nclgl/Camera.h"
 #include "../../nclgl/HeightMap.h"
-#include "..\..\nclgl\MD5Mesh.h"
-#include "World.h"
 
 class Renderer : public OGLRenderer {
 public :
@@ -16,7 +14,7 @@ public :
 
  protected :
 	 void DrawHeightmap (Vector3 ambientColour);
-	 void DrawWater ();
+	 void DrawWater (Vector3 ambientColour);
 	 void DrawSkybox ();
 	 void DrawSun(float msec);
 
@@ -25,6 +23,7 @@ public :
 	 Shader * skyboxShader ;
 	 Shader * basicShader;
 	 Shader * md5Shader;
+	 Shader * sceneShader;
 
 	 HeightMap * heightMap ;
 	 Mesh * quad ;
@@ -37,10 +36,6 @@ public :
 	 float waterRotate ;
 	 Vector3 resolution;
 
-	 MD5FileData*	lampData;
-	 MD5Node*		lampNode;
-
-	 void DrawNode(SceneNode *n);
-	 SceneNode* root;
+	 int time;
 
  };

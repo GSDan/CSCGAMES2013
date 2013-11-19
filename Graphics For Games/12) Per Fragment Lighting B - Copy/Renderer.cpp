@@ -3,23 +3,20 @@
 
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
+	//0 = noon
+	time = 0;
+
 	resolution = Vector3((float) width, (float) height, 1);
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/world.raw");
 	quad = Mesh::GenerateQuad();
-
-	lampData = new MD5FileData("../../Meshes/boblampclean.md5mesh");
-	lampNode = new MD5Node(*lampData);
-	lampData->AddAnim("../../Meshes/boblampclean.md5anim");
-	lampNode->PlayAnim("../../Meshes/boblampclean.md5anim");
-	
 
 	camera->SetPosition ( Vector3 ( RAW_WIDTH * HEIGHTMAP_X / 2.0f,500.0f, RAW_WIDTH * HEIGHTMAP_X ));
 	light = new Light ( Vector3 (( RAW_HEIGHT * HEIGHTMAP_X / 2.0f ) ,450.0f,( RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)),Vector4 (0.9f ,0.9f ,1.0f ,1) ,( RAW_WIDTH * HEIGHTMAP_X ) / 1.1f);
 	reflectShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/reflectFragment.glsl");
 	skyboxShader = new Shader ("../../Shaders/skyboxVertex.glsl","../../Shaders/skyboxFragment.glsl");
 	lightShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bumpFragment.glsl");
-	md5Shader = new Shader ("../../Shaders/TexturedVertex.glsl","../../Shaders/TexturedFragment.glsl");
+	
 
 	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram ()) {
 		return ;
@@ -35,6 +32,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	cubeMap = SOIL_load_OGL_cubemap ("../../Textures/rusted_west.jpg","../../Textures/rusted_east.jpg","../../Textures/rusted_up.jpg",
 									"../../Textures/rusted_down.jpg","../../Textures/rusted_south.jpg","../../Textures/rusted_north.jpg",SOIL_LOAD_RGB ,SOIL_CREATE_NEW_ID , 0);
+
 	if (!cubeMap || !quad->GetTexture()) {
 		return ;
 	}
@@ -44,14 +42,11 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	SetTextureRepeating (heightMap->GetTextureLower (), true );
 	SetTextureRepeating (heightMap->GetBumpMapLower (), true );
 	SetTextureRepeating (heightMap->GetTextureUpper (), true );
-	SetTextureRepeating (heightMap->GetBumpMapUpper (), true );
-	
-	root = new SceneNode();
-	root->AddChild(new World());
+	SetTextureRepeating (heightMap->GetBumpMapUpper (), true );	
 
 	init = true ;
 	waterRotate = 0.2f;
-	projMatrix = Matrix4 :: Perspective (1.0f ,15000.0f,(float ) width / (float )height , 45.0f);
+	projMatrix = Matrix4 :: Perspective (1.0f ,15000.0f,(float ) width / (float )height , 55.0f);
 	glEnable ( GL_DEPTH_TEST );
 	glEnable ( GL_BLEND );
 	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
@@ -73,30 +68,26 @@ void Renderer :: UpdateScene (float msec ) {
 	camera -> UpdateCamera ( msec/2.0f );
 	viewMatrix = camera -> BuildViewMatrix ();
 	waterRotate += msec / 2000.0f ;
-
-	lampNode->Update(msec);
-
+	time += 1;
+	if(time > 360){
+		time =0;
+	}
 }
 
 void Renderer :: RenderScene () {
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-	Vector3 ambientColour = Vector3(0.05f, 0.03f, 0.03f);
+	Vector3 ambientColour = Vector3(2.7f, 2.7f, 3.0f);
+
+	if((time >= 80 && time <=95) || (time >= 275 && time <= 290)){
+		ambientColour = Vector3(2.0f, 0.8f, 0.8f);
+	}
+	else if(time > 95 && time < 275){
+		ambientColour = Vector3(0.0f, 0.0f, 0.6f);
+	}
 	DrawSkybox ();
 	DrawHeightmap (ambientColour);
-	DrawWater ();
-	DrawNode(root);
+	DrawWater (ambientColour);
 	
-	/*SetCurrentShader ( md5Shader );
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"diffuseTex"), 0);
-	#ifdef MD5_USE_HARDWARE_SKINNING
-		glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"weightTex"), MD5_WEIGHT_TEXNUM);
-		glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"transformTex"), MD5_TRANSFORM_TEXNUM);
-	#endif 
-
-	UpdateShaderMatrices();
-
-	lampNode->Draw(*this);*/
-
 	glUseProgram(0);
 
 	SwapBuffers ();
@@ -134,12 +125,12 @@ void Renderer :: DrawHeightmap (Vector3 ambientColour) {
 	glUseProgram (0);
 }
 
-void Renderer :: DrawWater () {
+void Renderer :: DrawWater (Vector3 ambientColour) {
 	
 	SetCurrentShader ( reflectShader );
 	SetShaderLight (* light );
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ()); 
-
+	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambient"), 1, (float*)&ambientColour); 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTex") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"cubeTex") , 2);
 
@@ -164,20 +155,4 @@ void Renderer :: DrawWater () {
 	quad -> Draw ();
 
 	glUseProgram (0);
-}
-
-void Renderer :: DrawNode (SceneNode *n) {
-	if(n->GetMesh ()) 
-	{
-		Matrix4 transform = n->GetWorldTransform ()* Matrix4 ::Scale (n->GetModelScale());
-		glUniformMatrix4fv (glGetUniformLocation ( currentShader -> GetProgram (),"modelMatrix"), 1,false ,(float *)& transform );
-		glUniform4fv ( glGetUniformLocation ( currentShader -> GetProgram (),"nodeColour"),1,( float *)&n-> GetColour ());
-		glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram (),"useTexture"),( int )n-> GetMesh()->GetTexture());
-		n->Draw(*this);
-	}
-	for (vector < SceneNode * >:: const_iterator
-		i = n-> GetChildIteratorStart ();
-		i != n-> GetChildIteratorEnd (); ++i) {
-			DrawNode (*i);
-	}
 }

@@ -6,6 +6,7 @@ uniform samplerCube cubeTex ;
 uniform vec4 lightColour ;
 uniform vec3 lightPos ;
 uniform vec3 cameraPos ;
+uniform vec3 ambient;
 uniform float lightRadius ;
 
 in Vertex {
@@ -24,6 +25,6 @@ void main ( void ) {
 	float atten = 1.0 - clamp ( dist / lightRadius , 0.2 , 1.0);
 	vec4 reflection = texture ( cubeTex ,
 	reflect ( incident , normalize ( IN . normal )));
-
-	gl_FragColor = ( lightColour * diffuse * atten )*( diffuse + reflection );
+	vec4 newAmbient = vec4(ambient.r/3, ambient.g/3, ambient.b/3, 1.0);
+	gl_FragColor = ( lightColour * diffuse * atten * newAmbient)*( diffuse + reflection );
 }
