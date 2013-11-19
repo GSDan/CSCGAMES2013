@@ -39,5 +39,5 @@ void main ( void ) {
 	vec4 reflection = texture ( cubeTex ,
 	reflect ( incident , normalize ( IN . normal )));
 	vec4 newAmbient = vec4(ambient.r/3, ambient.g/3, ambient.b/3, 1.0);
-	gl_FragColor = ( lightColour * diffuse * atten * newAmbient)*( diffuse + reflection );
+	gl_FragColor = ( lightColour * diffuse * atten  * newAmbient)*( diffuse + reflection );
 }

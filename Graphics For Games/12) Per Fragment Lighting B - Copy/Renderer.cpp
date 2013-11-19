@@ -1,6 +1,5 @@
 #include"Renderer.h"
 #include"../../nclgl/MD5Node.h"
-#include <cstdlib>
 
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
@@ -13,6 +12,11 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/world.raw");
 	quad = Mesh::GenerateQuad();
+
+	OBJMesh *m = new OBJMesh ();
+	m-> LoadOBJMesh(MESHDIR"sphere.obj");
+	sun = m;
+
 
 	camera->SetPosition ( Vector3 ( RAW_WIDTH * HEIGHTMAP_X / 2.0f,500.0f, RAW_WIDTH * HEIGHTMAP_X ));
 	sunlight = new Light ( Vector3 (( RAW_HEIGHT * HEIGHTMAP_X / 2.0f ) ,450.0f,( RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)),Vector4 (0.9f ,0.9f ,1.0f ,1) ,( RAW_WIDTH * HEIGHTMAP_X ) / 1.1f);
@@ -81,6 +85,7 @@ void Renderer :: RenderScene () {
 	DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
+	sun->Draw();
 	
 	glUseProgram(0);
 

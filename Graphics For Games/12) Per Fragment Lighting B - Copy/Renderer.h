@@ -3,6 +3,7 @@
 #include "../../nclgl/OGLRenderer.h"
 #include "../../nclgl/Camera.h"
 #include "../../nclgl/HeightMap.h"
+#include "..\..\nclgl\OBJMesh.h"
 
 class Renderer : public OGLRenderer {
 public :
@@ -22,9 +23,7 @@ public :
 	 Shader * lightShader ;
 	 Shader * reflectShader ;
 	 Shader * skyboxShader ;
-	 Shader * basicShader;
 	 Shader * md5Shader;
-	 Shader * sceneShader;
 
 	 HeightMap * heightMap ;
 	 Mesh * quad ;
@@ -41,5 +40,7 @@ public :
 	 Vector3 minAmbient;
 	 Vector3 maxAmbient;
 	 Vector3 twiAmbient;
+
+	 static Mesh * sun;
 
  };
