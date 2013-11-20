@@ -4,9 +4,11 @@
     <ClCompile Include="Tutorial6.cpp" />
     <ClCompile Include="CubeRobot.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Island.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CubeRobot.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Island.h" />
   </ItemGroup>
 </Project>

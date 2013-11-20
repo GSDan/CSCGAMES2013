@@ -1,9 +1,9 @@
 #include"Renderer.h"
-#include"../../nclgl/MD5Node.h"
 
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	//0 = noon
+		Island :: CreateSphere();
 	time = 0.0f;
 	minAmbient = Vector3(-0.5f, -0.5f, 0.0f);
 	maxAmbient = Vector3(3.0f, 3.0f, 3.5f);
@@ -13,21 +13,24 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	heightMap = new HeightMap("../../Textures/world.raw");
 	quad = Mesh::GenerateQuad();
 
-	OBJMesh *m = new OBJMesh ();
-	m-> LoadOBJMesh(MESHDIR"sphere.obj");
-	sun = m;
-
+	
 
 	camera->SetPosition ( Vector3 ( RAW_WIDTH * HEIGHTMAP_X / 2.0f,500.0f, RAW_WIDTH * HEIGHTMAP_X ));
-	sunlight = new Light ( Vector3 (( RAW_HEIGHT * HEIGHTMAP_X / 2.0f ) ,450.0f,( RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)),Vector4 (0.9f ,0.9f ,1.0f ,1) ,( RAW_WIDTH * HEIGHTMAP_X ) / 1.1f);
+	sunlight = new Light ( Vector3 (( RAW_HEIGHT * HEIGHTMAP_X / 2.0f ) ,450.0f,( RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)),Vector4 (1.0f ,1.0f ,1.0f ,1) ,( RAW_WIDTH * HEIGHTMAP_X ) / 1.1f);
 	reflectShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/reflectFragment.glsl");
 	skyboxShader = new Shader ("../../Shaders/skyboxVertex.glsl","../../Shaders/skyboxFragment.glsl");
 	lightShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bumpFragment.glsl");
+	sceneShader  = new Shader("../../Shaders/SceneVertex.glsl","../../Shaders/SceneFragment.glsl");
 	
 
-	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram ()) {
+	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram () || !sceneShader->LinkProgram()) {
 		return ;
 	}
+
+
+	root = new SceneNode();
+	root->AddChild(new Island());
+	root->SetModelScale(Vector3(200,200,200));
 
 	quad->SetTexture(SOIL_load_OGL_texture("../../Textures/anotherwater.JPG",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 	
@@ -67,6 +70,9 @@ Renderer ::~ Renderer ( void ) {
 	delete reflectShader ;
 	delete skyboxShader ;
 	delete lightShader ;
+	delete sceneShader;
+	delete root;
+	Island::DeleteSphere();
 	delete sunlight ;
 	currentShader = 0;
 }
@@ -75,6 +81,8 @@ void Renderer :: UpdateScene (float msec ) {
 	camera -> UpdateCamera ( msec/2.0f );
 	viewMatrix = camera -> BuildViewMatrix ();
 	waterRotate += msec / 2000.0f ;
+	sunlight->SetPosition(root->GetTransform().GetPositionVector());
+	root->Update(msec);
 	time += 0.01;
 	
 }
@@ -82,11 +90,16 @@ void Renderer :: UpdateScene (float msec ) {
 void Renderer :: RenderScene () {
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
-	DrawSkybox ();
+  DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
-	sun->Draw();
-	
+	SetCurrentShader(sceneShader);
+
+	glUseProgram(sceneShader -> GetProgram());
+	UpdateShaderMatrices();
+	glUniform1i ( glGetUniformLocation ( sceneShader -> GetProgram (),"diffuseTex"), 1);
+	DrawNode(root);
+
 	glUseProgram(0);
 
 	SwapBuffers ();
@@ -161,6 +174,18 @@ void Renderer :: DrawWater () {
 	glUseProgram (0);
 }
 
-void updateSun(){
-
+void Renderer :: DrawNode (SceneNode *n) {
+	if(n->GetMesh ()) 
+	{
+		Matrix4 transform = n->GetWorldTransform ()* Matrix4 ::Scale (n->GetModelScale());
+		glUniformMatrix4fv (glGetUniformLocation ( sceneShader -> GetProgram (),"modelMatrix"), 1,false ,(float *)& transform );
+		glUniform4fv ( glGetUniformLocation ( sceneShader -> GetProgram (),"nodeColour"),1,( float *)&n-> GetColour ());
+		glUniform1i ( glGetUniformLocation ( sceneShader -> GetProgram (),"useTexture"),( int )n-> GetMesh()->GetTexture());
+		n->Draw(*this);
+	}
+	for (vector < SceneNode * >:: const_iterator
+		i = n-> GetChildIteratorStart ();
+		i != n-> GetChildIteratorEnd (); ++i) {
+			DrawNode (*i);
+	}
 }

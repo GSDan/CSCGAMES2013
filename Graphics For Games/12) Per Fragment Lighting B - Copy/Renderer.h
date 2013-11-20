@@ -4,6 +4,8 @@
 #include "../../nclgl/Camera.h"
 #include "../../nclgl/HeightMap.h"
 #include "..\..\nclgl\OBJMesh.h"
+#include "../../nclgl/SceneNode.h"
+#include "Island.h";
 
 class Renderer : public OGLRenderer {
 public :
@@ -17,13 +19,11 @@ public :
 	 void DrawHeightmap ();
 	 void DrawWater ();
 	 void DrawSkybox ();
-	 void updateSun();
-	 void DrawSun(float msec);
 
 	 Shader * lightShader ;
 	 Shader * reflectShader ;
 	 Shader * skyboxShader ;
-	 Shader * md5Shader;
+	 Shader * sceneShader;
 
 	 HeightMap * heightMap ;
 	 Mesh * quad ;
@@ -41,6 +41,7 @@ public :
 	 Vector3 maxAmbient;
 	 Vector3 twiAmbient;
 
-	 static Mesh * sun;
+	 void DrawNode ( SceneNode *n);
+	 SceneNode* root ;
 
  };
