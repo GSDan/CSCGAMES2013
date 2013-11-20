@@ -1,5 +1,5 @@
 #include"Renderer.h"
-float initTimer = 2.0f;
+
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	
 	Island :: CreateSphere();
@@ -7,8 +7,10 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	dayLengthSeconds = 60;
 	isNight = false;
 
-	minAmbient = Vector3(-0.5f, -0.5f, 0.0f);
-	maxAmbient = Vector3(3.0f, 3.0f, 3.5f);
+	initTimer = 2.0f;
+
+	minAmbient = Vector3(0.0f, 0.0f, 0.03f);
+	maxAmbient = Vector3(0.05f, 0.05f, 0.05f);
 
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/world.raw");
@@ -87,7 +89,7 @@ void Renderer :: UpdateScene (float msec ) {
 
 	//use the sun's position to determine if currently day or night
 	//if night, reduce the radius of the sun's light to 0
-	if(sunlight->GetPosition().y < -100){
+	if(sunlight->GetPosition().y < 130){
 		isNight = true;
 		sunlight->SetRadius(0);
 	}else if(sunlight->GetRadius() == 0){
@@ -135,7 +137,7 @@ void Renderer :: DrawHeightmap () {
 	SetShaderLight (* sunlight );		glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
-	//glUniform1f(glGetUniformLocation ( currentShader -> GetProgram () ,"weight"), time);
+	glUniform1i(glGetUniformLocation ( currentShader -> GetProgram () ,"isNight"), isNight);
 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTexLower") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"bumpTexLower") , 1);
@@ -159,7 +161,7 @@ void Renderer :: DrawWater () {
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ()); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
-	//glUniform1f(glGetUniformLocation ( currentShader -> GetProgram () ,"weight"), time);
+	glUniform1i(glGetUniformLocation ( currentShader -> GetProgram () ,"isNight"), isNight);
 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTex") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"cubeTex") , 2);

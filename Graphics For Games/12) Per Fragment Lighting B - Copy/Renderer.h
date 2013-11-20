@@ -37,6 +37,7 @@ public :
 	 Vector3 resolution;
 
 	 int dayLengthSeconds;
+	 float initTimer;
 
 	 Vector3 minAmbient;
 	 Vector3 maxAmbient;

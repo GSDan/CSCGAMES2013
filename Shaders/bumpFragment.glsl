@@ -67,8 +67,14 @@ void main ( void ) {
 
 		//float weightVal = abs(sin(weight));
 		//vec3 ambient = lerp(weightVal, ambientMin, ambientMax);
+		vec3 ambient;
 
-		
+		if(isNight){
+			ambient = ambientMin;
+		}else{
+			ambient = ambientMax;
+		}
+
 
 		vec3 incident = normalize ( lightPos - IN . worldPos );
 		float lambert = max (0.0 , dot ( incident , normal )); 
@@ -85,7 +91,7 @@ void main ( void ) {
 		vec3 colour = ( diffuse . rgb * lightColour . rgb );
 		colour +=  ( lightColour . rgb * sFactor ) * 0.33;
 		gl_FragColor = vec4 ( colour * atten * lambert , diffuse . a );
-		gl_FragColor . rgb += ( diffuse . rgb * lightColour . rgb ) * 0.1;
+		gl_FragColor.rgb += ambient + ( diffuse . rgb * lightColour . rgb) * 0.1;
 		
 	
 
