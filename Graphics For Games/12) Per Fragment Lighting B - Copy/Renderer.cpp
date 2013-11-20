@@ -30,7 +30,6 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	root = new SceneNode();
 	root->AddChild(new Island());
-	root->SetModelScale(Vector3(200,200,200));
 
 	quad->SetTexture(SOIL_load_OGL_texture("../../Textures/anotherwater.JPG",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 	
