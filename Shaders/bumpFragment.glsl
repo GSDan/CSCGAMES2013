@@ -10,7 +10,7 @@ uniform vec4 lightColour ;
 uniform vec3 lightPos ;
 uniform vec3 ambientMax;
 uniform vec3 ambientMin;
-uniform float weight;
+uniform bool isNight;
 uniform float lightRadius ;
 
 in Vertex {
@@ -34,9 +34,11 @@ void main ( void ) {
 
 	vec3 normal;
 	vec4 diffuse;
+	mat3 TBN = mat3 ( IN . tangent , IN.binormal , IN.normal );
 
 	if(IN.worldPos.x > 2000.0 && IN.worldPos.y > 300.0){
 		diffuse = texture ( diffuseTexUpper , IN.texCoord );			
+		normal = normalize ( TBN * ( texture ( bumpTexUpper , IN.texCoord ). rgb * 2.0 - 1.0));
 
 	}else if(IN.worldPos.x > 1800.0 && IN.worldPos.y > 270.0){
 
@@ -55,23 +57,24 @@ void main ( void ) {
 
 		
 		diffuse = mix(texture2D(diffuseTexUpper,IN.texCoord), texture2D(diffuseTexLower,IN.texCoord), texMix); 
+		normal = normalize ( TBN * ( texture ( bumpTexUpper , IN.texCoord ). rgb * 2.0 - 1.0));
 	}
 	else{
-		diffuse = texture ( diffuseTexLower , IN.texCoord );
+		diffuse = texture ( diffuseTexLower , IN.texCoord );			
+		normal = normalize ( TBN * ( texture ( bumpTexUpper , IN.texCoord ). rgb * 2.0 - 1.0));
 	}
 
 
-		float weightVal = abs(sin(weight));
-		vec3 ambient = lerp(weightVal, ambientMin, ambientMax);
+		//float weightVal = abs(sin(weight));
+		//vec3 ambient = lerp(weightVal, ambientMin, ambientMax);
 
-		mat3 TBN = mat3 ( IN . tangent , IN.binormal , IN.normal );
-		normal = normalize ( TBN * ( texture ( bumpTexLower , IN.texCoord ). rgb * 2.0 - 1.0));
+		
 
 		vec3 incident = normalize ( lightPos - IN . worldPos );
 		float lambert = max (0.0 , dot ( incident , normal )); 
 
 		float dist = length ( lightPos - IN . worldPos );
-		float atten = 1.0 - clamp ( dist / lightRadius , 0.0 , 1.0);
+		float atten = 1.0 - clamp ( dist / lightRadius , 0.5 , 1.0);
 
 		vec3 viewDir = normalize ( cameraPos - IN . worldPos );
 		vec3 halfDir = normalize ( incident + viewDir );

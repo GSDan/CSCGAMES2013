@@ -36,12 +36,14 @@ public :
 	 float waterRotate ;
 	 Vector3 resolution;
 
-	 float time;
+	 int dayLengthSeconds;
+
 	 Vector3 minAmbient;
 	 Vector3 maxAmbient;
 	 Vector3 twiAmbient;
 
 	 void DrawNode ( SceneNode *n);
-	 SceneNode* root ;
+	 Island* root ;
 
+	 bool isNight;
  };
