@@ -1,10 +1,11 @@
 #pragma comment(lib,"nclgl.lib")
 
 #include"../../nclGL/window.h"
+//#include "../../nclgl/FPS.cpp"
 #include"Renderer.h"
 
 int main() {
-	Window w("Per Pixel Lighting!", 1920,1080,true);
+	Window w("Island Coursework | Dan Richardson", 1280,720,false);
 	if(!w.HasInitialised()) {
 		return -1;
 	}
@@ -19,8 +20,10 @@ int main() {
 
 	while(w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)){
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
+		//calculateFPS();
 		renderer.RenderScene();
+		//drawFPS();
 	}
-
 	return 0;
 }
+

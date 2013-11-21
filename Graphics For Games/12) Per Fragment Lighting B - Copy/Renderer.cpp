@@ -1,29 +1,41 @@
 #include"Renderer.h"
 
+
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	
+	//create the island's node assets
 	Island :: CreateSphere();
+	Island:: CreateHell();
 
+	//how long the day should go on for
 	dayLengthSeconds = 60;
 	isNight = false;
 
 	initTimer = 2.0f;
 
+	//ambient colours for night and day
 	minAmbient = Vector3(0.0f, 0.0f, 0.03f);
 	maxAmbient = Vector3(0.05f, 0.05f, 0.05f);
+
+	//the colour the skybox fragments are multiplied by
+	skyColourMod = Vector3(1,1,1);
 
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/world.raw");
 	quad = Mesh::GenerateQuad();	
 
 	camera->SetPosition ( Vector3 ( RAW_WIDTH * HEIGHTMAP_X / 2.0f,500.0f, RAW_WIDTH * HEIGHTMAP_X ));
-	sunlight = new Light ( Vector3 (0,0,0),Vector4 (1.0f ,1.0f ,1.0f ,1) , 8000);
+
+	//assign shaders
+	sunlight = new Light ( Vector3 (0,0,0),Vector4 (1.0f ,1.0f ,1.0f ,1) , 6000);
+	ghostlight = new Light ( Vector3 (1600,470,1800),Vector4 (1,1,1,1) , 0);
 	reflectShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/reflectFragment.glsl");
 	skyboxShader = new Shader ("../../Shaders/skyboxVertex.glsl","../../Shaders/skyboxFragment.glsl");
 	lightShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bumpFragment.glsl");
-	sceneShader  = new Shader("../../Shaders/SceneVertex.glsl","../../Shaders/SceneFragment.glsl");	
+	sunShader  = new Shader("../../Shaders/SceneVertex.glsl","../../Shaders/SceneFragment.glsl");		
 
-	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram () || !sceneShader->LinkProgram()) {
+	//link shaders
+	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram () || !sunShader->LinkProgram() ){
 		return ;
 	}
 
@@ -37,10 +49,12 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	heightMap -> SetTextureUpper ( SOIL_load_OGL_texture ("../../Textures/rock.JPG", SOIL_LOAD_AUTO ,SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 	heightMap -> SetBumpMapUpper ( SOIL_load_OGL_texture ("../../Textures/Barren RedsDOT3.jpg", SOIL_LOAD_AUTO ,	SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 
-	cubeMap = SOIL_load_OGL_cubemap ("../../Textures/rusted_west.jpg","../../Textures/rusted_east.jpg","../../Textures/rusted_up.jpg",
-									"../../Textures/rusted_down.jpg","../../Textures/rusted_south.jpg","../../Textures/rusted_north.jpg",SOIL_LOAD_RGB ,SOIL_CREATE_NEW_ID , 0);
+	//set cube map
+	dayCubeMap = SOIL_load_OGL_cubemap ("../../Textures/ss_ft.tga","../../Textures/ss_bk.tga","../../Textures/ss_up.tga",
+									"../../Textures/ss_dn.tga","../../Textures/ss_rt.tga","../../Textures/ss_lf.tga",SOIL_LOAD_RGB ,SOIL_CREATE_NEW_ID , 0);
+	
 
-	if (!cubeMap || !quad->GetTexture()) {
+	if (!dayCubeMap || !quad->GetTexture()) {
 		return ;
 	}
 
@@ -69,10 +83,12 @@ Renderer ::~ Renderer ( void ) {
 	delete reflectShader ;
 	delete skyboxShader ;
 	delete lightShader ;
-	delete sceneShader;
+	delete sunShader;
 	delete root;
 	Island::DeleteSphere();
+	Island::DeleteHell();
 	delete sunlight ;
+	delete ghostlight;
 	currentShader = 0;
 }
 
@@ -92,9 +108,14 @@ void Renderer :: UpdateScene (float msec ) {
 	if(sunlight->GetPosition().y < 130){
 		isNight = true;
 		sunlight->SetRadius(0);
+		ghostlight->SetRadius(400);
+		skyColourMod = Vector3(0.3f, 0.3f, 0.4f);
 	}else if(sunlight->GetRadius() == 0){
+		skyColourMod = Vector3(1,1,1);
 		isNight = false;
 		sunlight->SetRadius(8000);
+		ghostlight->SetRadius(0);
+
 	}
 
 }
@@ -108,11 +129,19 @@ void Renderer :: RenderScene () {
 
 	//no need to draw the sun sphere at night
 	if(!isNight){
-		SetCurrentShader(sceneShader);
-		glUseProgram(sceneShader -> GetProgram());
+		SetCurrentShader(sunShader);
+		glUseProgram(sunShader -> GetProgram());
 		UpdateShaderMatrices();
-		glUniform1i ( glGetUniformLocation ( sceneShader -> GetProgram (),"diffuseTex"), 1);
-		DrawNode(root);
+		glUniform1i ( glGetUniformLocation ( sunShader -> GetProgram (),"diffuseTex"), 1);
+		DrawNode(root->ball);
+	}else{
+		//draw hell knight at night!
+		SetCurrentShader(sunShader);
+		glUseProgram(sunShader -> GetProgram());
+		UpdateShaderMatrices();
+		root->hellNode->SetColour(Vector4(1,1,1,0.4f));
+		glUniform1i ( glGetUniformLocation ( sunShader -> GetProgram (),"diffuseTex"), 1);
+		DrawNode(root->hellNode);
 	}
 
 	glUseProgram(0);
@@ -123,7 +152,7 @@ void Renderer :: RenderScene () {
 void Renderer :: DrawSkybox () {
 	glDepthMask ( GL_FALSE );
 	SetCurrentShader ( skyboxShader );
-
+	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"colourMod"), 1, (float*)&skyColourMod); 
 	UpdateShaderMatrices ();
 	quad -> Draw ();
 
@@ -134,7 +163,8 @@ void Renderer :: DrawSkybox () {
 void Renderer :: DrawHeightmap () {
 	
 	SetCurrentShader ( lightShader );
-	SetShaderLight (* sunlight );		glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
+	if(isNight)
+		SetShaderLight (* ghostlight );	else		SetShaderLight (* sunlight );		glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
 	glUniform1i(glGetUniformLocation ( currentShader -> GetProgram () ,"isNight"), isNight);
@@ -157,7 +187,8 @@ void Renderer :: DrawHeightmap () {
 void Renderer :: DrawWater () {
 	
 	SetCurrentShader ( reflectShader );
-	SetShaderLight (* sunlight );
+	if(isNight)
+		SetShaderLight (* ghostlight );	else		SetShaderLight (* sunlight );
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ()); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
@@ -167,7 +198,7 @@ void Renderer :: DrawWater () {
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"cubeTex") , 2);
 
 	glActiveTexture ( GL_TEXTURE2 );
-	glBindTexture ( GL_TEXTURE_CUBE_MAP , cubeMap );
+	glBindTexture ( GL_TEXTURE_CUBE_MAP , dayCubeMap );
 
 	float heightX = ( RAW_WIDTH * HEIGHTMAP_X /2);
 
@@ -193,9 +224,9 @@ void Renderer :: DrawNode (SceneNode *n) {
 	if(n->GetMesh ()) 
 	{
 		Matrix4 transform = n->GetWorldTransform ()* Matrix4 ::Scale (n->GetModelScale());
-		glUniformMatrix4fv (glGetUniformLocation ( sceneShader -> GetProgram (),"modelMatrix"), 1,false ,(float *)& transform );
-		glUniform4fv ( glGetUniformLocation ( sceneShader -> GetProgram (),"nodeColour"),1,( float *)&n-> GetColour ());
-		glUniform1i ( glGetUniformLocation ( sceneShader -> GetProgram (),"useTexture"),( int )n-> GetMesh()->GetTexture());
+		glUniformMatrix4fv (glGetUniformLocation ( sunShader -> GetProgram (),"modelMatrix"), 1,false ,(float *)& transform );
+		glUniform4fv ( glGetUniformLocation ( sunShader -> GetProgram (),"nodeColour"),1,( float *)&n-> GetColour ());
+		glUniform1i ( glGetUniformLocation ( sunShader -> GetProgram (),"useTexture"),( int )n-> GetMesh()->GetTexture());
 		n->Draw(*this);
 	}
 	for (vector < SceneNode * >:: const_iterator

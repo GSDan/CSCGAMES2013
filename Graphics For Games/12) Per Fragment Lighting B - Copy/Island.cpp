@@ -1,6 +1,8 @@
 #include "Island.h"
 
 Mesh * Island :: sphere = NULL;
+MD5FileData* Island :: hellData = NULL;
+
 float initTime = 2.0f;
 
 Island :: Island (void) {
@@ -11,13 +13,17 @@ Island :: Island (void) {
 
 	ball -> SetBoundingRadius (120.0f);
 	AddChild(ball);	
-	
+
+	hellNode = new MD5Node(*hellData);
+	hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+	hellNode-> SetTransform( Matrix4 :: Translation (Vector3 (1600,450,1800)));
+	AddChild(hellNode);
 }
 
 
 void Island::Update(Vector3 vec, float msec)
 {
         
-    transform =  Matrix4::Translation(vec);
+	ball->SetTransform(Matrix4::Translation(vec));
     SceneNode::Update(msec);
 }

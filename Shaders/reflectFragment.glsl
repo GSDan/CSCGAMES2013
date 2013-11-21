@@ -40,7 +40,7 @@ void main ( void ) {
 	vec4 diffuse = texture ( diffuseTex , IN . texCoord ) * IN . colour ;
 	vec3 incident = normalize ( IN . worldPos - cameraPos );
 	float dist = length ( lightPos - IN . worldPos );
-	float atten = 1.0 - clamp ( dist / lightRadius , 0.2 , 0.7);
+	float atten = 1.0 - clamp ( dist / lightRadius , 0.4 , 0.7);
 	vec4 reflection = texture ( cubeTex ,
 	reflect ( incident , normalize ( IN . normal )));
 	vec4 newAmbient = vec4(ambient.r, ambient.g, ambient.b, 1.0);

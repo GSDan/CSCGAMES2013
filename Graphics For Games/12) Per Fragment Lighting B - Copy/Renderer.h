@@ -23,15 +23,17 @@ public :
 	 Shader * lightShader ;
 	 Shader * reflectShader ;
 	 Shader * skyboxShader ;
-	 Shader * sceneShader;
+	 Shader * sunShader;
 
 	 HeightMap * heightMap ;
 	 Mesh * quad ;
 
 	 Light * sunlight ;
+	 Light * ghostlight;
 	 Camera * camera ;
 
-	 GLuint cubeMap ;
+	 GLuint dayCubeMap ;
+	 GLuint nightCubeMap;
 
 	 float waterRotate ;
 	 Vector3 resolution;
@@ -41,10 +43,12 @@ public :
 
 	 Vector3 minAmbient;
 	 Vector3 maxAmbient;
-	 Vector3 twiAmbient;
+	 Vector3 skyColourMod;
 
 	 void DrawNode ( SceneNode *n);
+	 void DrawMD5Node (MD5Node *n);
 	 Island* root ;
 
 	 bool isNight;
+
  };
