@@ -5,6 +5,8 @@
 #include "../../nclgl/HeightMap.h"
 #include "..\..\nclgl\OBJMesh.h"
 #include "../../nclgl/SceneNode.h"
+#include "TextMesh.h"
+#include <time.h> 
 #include "ParticleEmitter.h"
 #include "Island.h";
 
@@ -21,17 +23,24 @@ public :
 	 void decreaseDayLength();
 
  protected :
+
+	 float fps;
+
 	 void DrawHeightmap ();
 	 void DrawWater ();
 	 void DrawSkybox ();
 	 void DrawParticles();
 	 void DrawSnow();
+	 void DrawText(const std::string &text, const Vector3 &position, const float size, const bool perspective);
+
+	 Font*	basicFont;
 
 	 Shader * lightShader ;
 	 Shader * reflectShader ;
 	 Shader * skyboxShader ;
 	 Shader * sunShader;
 	 Shader * particleShader;
+	 Shader * textShader;
 
 	 HeightMap * heightMap ;
 	 Mesh * quad ;
@@ -40,6 +49,7 @@ public :
 	 Light * ghostlight;
 	 Camera * camera ;
 
+	 TextMesh * txtMesh;
 	 GLuint dayCubeMap ;
 	 GLuint nightCubeMap;
 

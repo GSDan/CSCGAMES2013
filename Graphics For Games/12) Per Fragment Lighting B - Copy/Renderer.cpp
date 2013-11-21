@@ -1,16 +1,15 @@
 #include"Renderer.h"
-
+#include <string> 
 
 Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
-	
+
 	//create the island's node assets
 	Island :: CreateSphere();
 	Island:: CreateHell();
 
 	//how long the day should go on for
-	dayLengthSeconds = 240;
+	dayLengthSeconds = 120; //default is 2 mins
 	isNight = false;
-
 	initTimer = 2.0f;
 
 	//start with no snow on ground
@@ -18,7 +17,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	snowAmount = 0.0f;
 
 	//ambient colours for night and day
-	minAmbient = Vector3(0.0f, 0.0f, 0.03f);
+	minAmbient = Vector3(0.0f, 0.0f, 0.07f);
 	maxAmbient = Vector3(0.05f, 0.05f, 0.05f);
 
 	//the colour the skybox fragments are multiplied by
@@ -38,12 +37,17 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	lightShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bumpFragment.glsl");
 	sunShader  = new Shader("../../Shaders/SceneVertex.glsl","../../Shaders/SceneFragment.glsl");		
 	particleShader = new Shader("../../Shaders/vertex.glsl","../../Shaders/fragment.glsl", "../../Shaders/geometry.glsl");
+	textShader = new Shader("../../Shaders/TexturedVertex.glsl", "../../Shaders/TexturedFragment.glsl");
+
+
 
 	//link shaders
 	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram () 
-		|| !sunShader->LinkProgram() || !particleShader->LinkProgram()){
-		return ;
+		|| !sunShader->LinkProgram() || !particleShader->LinkProgram() || !textShader->LinkProgram()){
+			return ;
 	}
+
+	
 
 	//create new particle emitters
 	emitter = new ParticleEmitter();
@@ -52,7 +56,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	root = new Island();
 
 	quad->SetTexture(SOIL_load_OGL_texture("../../Textures/anotherwater.JPG",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
-	
+
 	//set textures and bump maps for the two materials
 	heightMap -> SetTextureLower ( SOIL_load_OGL_texture ("../../Textures/sand.JPG", SOIL_LOAD_AUTO ,SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 	heightMap -> SetBumpMapLower ( SOIL_load_OGL_texture ("../../Textures/sandbump.jpg", SOIL_LOAD_AUTO ,	SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
@@ -62,8 +66,8 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	//set cube map
 	dayCubeMap = SOIL_load_OGL_cubemap ("../../Textures/ss_ft.tga","../../Textures/ss_bk.tga","../../Textures/ss_up.tga",
-									"../../Textures/ss_dn.tga","../../Textures/ss_rt.tga","../../Textures/ss_lf.tga",SOIL_LOAD_RGB ,SOIL_CREATE_NEW_ID , 0);
-	
+		"../../Textures/ss_dn.tga","../../Textures/ss_rt.tga","../../Textures/ss_lf.tga",SOIL_LOAD_RGB ,SOIL_CREATE_NEW_ID , 0);
+
 
 	if (!dayCubeMap || !quad->GetTexture()) {
 		return ;
@@ -81,17 +85,20 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	waterRotate = 0.2f;
 
+	//setup basic font
+	basicFont = new Font(SOIL_load_OGL_texture("../../Textures/tahoma.tga",SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_COMPRESS_TO_DXT),16,16);
+
 	projMatrix = Matrix4 :: Perspective (1.0f ,15000.0f,(float ) width / (float )height , 55.0f);
 	glEnable ( GL_DEPTH_TEST );
 	glEnable ( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 }
 
- inline float clamp(float x, float a, float b)
+inline float clamp(float x, float a, float b)
 {
 	return x < a ? a : (x > b ? b : x);
 }
 
- inline int lerp(float weight, int lhs, int rhs){
+inline int lerp(float weight, int lhs, int rhs){
 	return (1-weight)*lhs + weight * rhs;
 }
 
@@ -110,10 +117,14 @@ Renderer ::~ Renderer ( void ) {
 	delete sunlight ;
 	delete ghostlight;
 	delete emitter;
+	delete snowMachine;
+	delete basicFont;
 	currentShader = 0;
 }
 
 void Renderer :: UpdateScene (float msec ) {
+	fps = 1000.0f / msec;
+	
 	emitter->Update(msec);
 
 	//increase amount of lying snow if snowing, else start melting it
@@ -130,7 +141,7 @@ void Renderer :: UpdateScene (float msec ) {
 	initTimer  += msec * 0.001;
 
 	float y = cos(initTimer* 1.288 / (dayLengthSeconds/5)) * 1800;
-    float z = 1542 + sin (initTimer* 1.288 / (dayLengthSeconds/5)) * 1800;
+	float z = 1542 + sin (initTimer* 1.288 / (dayLengthSeconds/5)) * 1800;
 	sunlight->SetPosition(Vector3(1542,y,z));
 	root->Update(Vector3(1542,y,z), msec);
 
@@ -151,7 +162,7 @@ void Renderer :: UpdateScene (float msec ) {
 
 void Renderer :: RenderScene () {
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );	
-	
+
 	DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
@@ -179,21 +190,34 @@ void Renderer :: RenderScene () {
 		DrawNode(root->hellNode);
 	}
 
+	stringstream ss;
+	ss << dayLengthSeconds;
+	string dayLength = "Length of Day: " + ss.str() + " seconds";
+	DrawText(dayLength, Vector3(0,0,0), 16.0f, false);
+
+	ss.str("");
+	ss.clear();
+
+	ss << fps;
+	DrawText("FPS: " + ss.str(), Vector3(width-200,0,0), 16.0f, false);
+	DrawText("Start/Stop Snow: T/Y", Vector3(0,height - 60,0), 16.0f, false);
+	DrawText("Slow/Speed Up Time: O/P", Vector3(0,height - 30,0), 16.0f, false);
+
 	glUseProgram(0);
 
-	SwapBuffers ();
+	SwapBuffers ();	
 }
 
 void Renderer :: DrawParticles(){
 	modelMatrix = Matrix4 :: Translation (Vector3 (1600,450,1800)) * Matrix4::Scale(Vector3(5000,5000,5000));
-	
+
 	glEnable ( GL_BLEND );
 	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
 
 	SetCurrentShader(particleShader);
 	glUseProgram(particleShader->GetProgram());
 	glUniform1i(glGetUniformLocation(particleShader->GetProgram(), "diffuseTex"), 0);
-	
+
 	emitter->SetParticleSize(3.0f);
 	SetShaderParticleSize(emitter->GetParticleSize());
 	emitter->SetParticleVariance(1.0f);
@@ -212,14 +236,14 @@ void Renderer :: DrawParticles(){
 
 void Renderer :: DrawSnow(){
 	modelMatrix = Matrix4 :: Translation (Vector3 (2000,1700,1700)) * Matrix4::Scale(Vector3(5000,5000,5000));
-	
+
 	glEnable ( GL_BLEND );
 	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
 
 	SetCurrentShader(particleShader);
 	glUseProgram(particleShader->GetProgram());
 	glUniform1i(glGetUniformLocation(particleShader->GetProgram(), "diffuseTex"), 0);
-	
+
 	snowMachine->SetParticleSize(3.0f);
 	SetShaderParticleSize(snowMachine->GetParticleSize());
 	snowMachine->SetParticleVariance(1.0f);
@@ -249,9 +273,9 @@ void Renderer :: DrawSkybox () {
 }
 
 void Renderer :: DrawHeightmap () {
-	
+
 	SetCurrentShader ( lightShader );
-		SetShaderLight (* sunlight );	if(isNight)		SetShaderLight(* ghostlight);		glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
+	SetShaderLight (* sunlight );	if(isNight)		SetShaderLight(* ghostlight);	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
 	glUniform1f(glGetUniformLocation ( currentShader -> GetProgram () ,"sunHeight"), sunlight->GetPosition().y);
@@ -274,7 +298,7 @@ void Renderer :: DrawHeightmap () {
 }
 
 void Renderer :: DrawWater () {
-	
+
 	SetCurrentShader ( reflectShader );		SetShaderLight (* sunlight );
 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ()); 
@@ -295,12 +319,12 @@ void Renderer :: DrawWater () {
 	float heightZ = ( RAW_HEIGHT * HEIGHTMAP_Z /2);
 
 	modelMatrix =
-	Matrix4 :: Translation ( Vector3 ( heightX , heightY , heightZ )) *
-	Matrix4 :: Scale ( Vector3 ( heightX ,1 , heightZ )) *
-	Matrix4 :: Rotation (90 , Vector3 (1.0f ,0.0f ,0.0f ));
+		Matrix4 :: Translation ( Vector3 ( heightX , heightY , heightZ )) *
+		Matrix4 :: Scale ( Vector3 ( heightX ,1 , heightZ )) *
+		Matrix4 :: Rotation (90 , Vector3 (1.0f ,0.0f ,0.0f ));
 
 	textureMatrix = Matrix4 :: Scale ( Vector3 (10.0f ,10.0f ,10.0f )) *
-	Matrix4 :: Rotation ( waterRotate , Vector3 (0.0f ,0.0f ,1.0f ));
+		Matrix4 :: Rotation ( waterRotate , Vector3 (0.0f ,0.0f ,1.0f ));
 	UpdateShaderMatrices ();
 
 	quad -> Draw ();
@@ -309,8 +333,8 @@ void Renderer :: DrawWater () {
 }
 
 void Renderer :: DrawNode (SceneNode *n) {
-	glEnable ( GL_BLEND );
-	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
+	//glEnable ( GL_BLEND );
+	//glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
 	if(n->GetMesh ()) 
 	{
 		Matrix4 transform = n->GetWorldTransform ()* Matrix4 ::Scale (n->GetModelScale());
@@ -324,7 +348,7 @@ void Renderer :: DrawNode (SceneNode *n) {
 		i != n-> GetChildIteratorEnd (); ++i) {
 			DrawNode (*i);
 	}
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 }
 
 void	Renderer::SetShaderParticleSize(float f) {
@@ -346,4 +370,39 @@ void Renderer::startSnow(){
 
 void Renderer::stopSnow(){
 	isSnowing = false;
+}
+
+void Renderer::DrawText(const std::string &text, const Vector3 &position, const float size, const bool perspective)	{
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+
+	glUseProgram(textShader->GetProgram());
+	SetCurrentShader(textShader);
+	glUniform1i(glGetUniformLocation(textShader->GetProgram(), "diffuseTex"), 0);
+
+	//Create a new temporary TextMesh, using our line of text and our font
+	TextMesh* mesh = new TextMesh(text,*basicFont);
+
+	//This just does simple matrix setup to render in either perspective or
+	//orthographic mode, there's nothing here that's particularly tricky.
+	if(perspective) {
+		modelMatrix = Matrix4::Translation(position) * Matrix4::Scale(Vector3(size,size,1));
+		viewMatrix = camera->BuildViewMatrix();
+		projMatrix = Matrix4::Perspective(1.0f,10000.0f,(float)width / (float)height, 45.0f);
+	}
+	else{	
+		//In ortho mode, we subtract the y from the height, so that a height of 0
+		//is at the top left of the screen, which is more intuitive
+		//(for me anyway...)
+		modelMatrix = Matrix4::Translation(Vector3(position.x,height-position.y, position.z)) * Matrix4::Scale(Vector3(size,size,1));
+		viewMatrix.ToIdentity();
+		projMatrix = Matrix4::Orthographic(-1.0f,1.0f,(float)width, 0.0f,(float)height, 0.0f);
+		textureMatrix.ToIdentity();
+	}
+	//Either way, we update the matrices, and draw the mesh
+	UpdateShaderMatrices();
+	mesh->Draw();
+	projMatrix = Matrix4::Perspective(1.0f,10000.0f,(float)width / (float)height, 45.0f);
+	delete mesh; //Once it's drawn, we don't need it anymore!
+	glDisable(GL_BLEND);
 }

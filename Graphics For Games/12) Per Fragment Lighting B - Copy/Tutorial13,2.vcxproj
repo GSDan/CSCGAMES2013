@@ -72,11 +72,13 @@
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="GraphicsCoursework.cpp" />
+    <ClCompile Include="TextMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Island.h" />
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="TextMesh.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

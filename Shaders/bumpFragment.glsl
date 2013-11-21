@@ -66,7 +66,7 @@ void main ( void ) {
 	}
 
 		//time to add snow!
-		float texMix = 0.000005 * (snowAmount*(IN.worldPos.y*IN.worldPos.y));
+		float texMix = 0.00001 * (snowAmount*(IN.worldPos.y*IN.worldPos.y));
 
 		//max is 1.0, min 0.0
 		if(texMix < 0.0){
