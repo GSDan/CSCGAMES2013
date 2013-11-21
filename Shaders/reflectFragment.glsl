@@ -9,6 +9,7 @@ uniform vec3 cameraPos ;
 uniform vec3 ambientMax;
 uniform vec3 ambientMin;
 uniform bool isNight;
+uniform float sunHeight;
 uniform float lightRadius ;
 
 in Vertex {
@@ -26,16 +27,12 @@ vec3 lerp(float weight, vec3 lhs, vec3 rhs){
 
 void main ( void ) {
 
-	//float weightVal = abs(sin(weight));
-	//vec3 ambient = lerp(weightVal, ambientMin, ambientMax);
+	
 		
 	vec3 ambient;
-
-	if(isNight){
-		ambient = ambientMin;
-	}else{
-		ambient = ambientMax;
-	}	
+	float weightVal = clamp(sunHeight,0,550)/550;
+	ambient = lerp(weightVal, ambientMin, ambientMax);
+	
 
 	vec4 diffuse = texture ( diffuseTex , IN . texCoord ) * IN . colour ;
 	vec3 incident = normalize ( IN . worldPos - cameraPos );

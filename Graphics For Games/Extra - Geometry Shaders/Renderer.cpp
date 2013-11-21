@@ -41,9 +41,10 @@ void Renderer::RenderScene()	{
 
 	SetShaderParticleSize(emitter->GetParticleSize());
 	emitter->SetParticleSize(8.0f);
-	emitter->SetParticleVariance(1.0f);
+	emitter->SetParticleVariance(0.0f);
 	emitter->SetLaunchParticles(16.0f);
 	emitter->SetParticleLifetime(2000.0f);
+	emitter->SetDirection(Vector3(0,1,0));
 	emitter->SetParticleSpeed(0.1f);
 	UpdateShaderMatrices();
 

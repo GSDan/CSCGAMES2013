@@ -18,7 +18,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	maxAmbient = Vector3(0.05f, 0.05f, 0.05f);
 
 	//the colour the skybox fragments are multiplied by
-	skyColourMod = Vector3(1,1,1);
+	skyColourMod = Vector3(0.25f,0.25f,0.3f);
 
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/world.raw");
@@ -79,6 +79,15 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	glEnable ( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 }
 
+ inline float clamp(float x, float a, float b)
+{
+	return x < a ? a : (x > b ? b : x);
+}
+
+ inline int lerp(float weight, int lhs, int rhs){
+	return (1-weight)*lhs + weight * rhs;
+}
+
 Renderer ::~ Renderer ( void ) {
 	delete camera ;
 	delete heightMap ;
@@ -113,26 +122,27 @@ void Renderer :: UpdateScene (float msec ) {
 	//if night, reduce the radius of the sun's light to 0
 	if(sunlight->GetPosition().y < 130){
 		isNight = true;
-		sunlight->SetRadius(0);
 		ghostlight->SetRadius(400);
-		skyColourMod = Vector3(0.3f, 0.3f, 0.4f);
-	}else if(sunlight->GetRadius() == 0){
-		skyColourMod = Vector3(1,1,1);
+		//skyColourMod = Vector3(0.3f, 0.3f, 0.4f);
+	}else if(sunlight->GetRadius() < 5000){
+		//skyColourMod = Vector3(1,1,1);
 		isNight = false;
-		sunlight->SetRadius(8000);
 		ghostlight->SetRadius(0);
-
 	}
-
+	int radius = lerp(clamp(sunlight->GetPosition().y, 0, 550)/550,0,7000);
+	cout << radius << endl;
+	sunlight->SetRadius(radius);
 }
 
 void Renderer :: RenderScene () {
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 	
+	
 	DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
-	DrawParticles();
+	if(isNight)
+		DrawParticles();
 
 	//no need to draw the sun sphere at night
 	if(!isNight){
@@ -157,18 +167,22 @@ void Renderer :: RenderScene () {
 }
 
 void Renderer :: DrawParticles(){
+	modelMatrix = Matrix4 :: Translation (Vector3 (1600,450,1800)) * Matrix4::Scale(Vector3(5000,5000,5000));
+	
 	glEnable ( GL_BLEND );
 	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
+
 	SetCurrentShader(particleShader);
 	glUseProgram(particleShader->GetProgram());
 	glUniform1i(glGetUniformLocation(particleShader->GetProgram(), "diffuseTex"), 0);
-
+	
+	emitter->SetParticleSize(3.0f);
 	SetShaderParticleSize(emitter->GetParticleSize());
-	emitter->SetParticleSize(8.0f);
 	emitter->SetParticleVariance(1.0f);
-	emitter->SetLaunchParticles(16.0f);
-	emitter->SetParticleLifetime(2000.0f);
-	emitter->SetParticleSpeed(0.0001f);
+	emitter->SetLaunchParticles(10.0f);
+	emitter->SetParticleLifetime(1000.0f);
+	emitter->SetParticleSpeed(0.00005f);
+	//emitter->SetDirection(Vector3(0,0,0));
 	UpdateShaderMatrices();
 
 	emitter->Draw();
@@ -181,6 +195,7 @@ void Renderer :: DrawSkybox () {
 	glDepthMask ( GL_FALSE );
 	SetCurrentShader ( skyboxShader );
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"colourMod"), 1, (float*)&skyColourMod); 
+	glUniform1f(glGetUniformLocation ( currentShader -> GetProgram () ,"sunHeight"), sunlight->GetPosition().y);
 	UpdateShaderMatrices ();
 	quad -> Draw ();
 
@@ -191,8 +206,7 @@ void Renderer :: DrawSkybox () {
 void Renderer :: DrawHeightmap () {
 	
 	SetCurrentShader ( lightShader );
-	if(isNight)
-		SetShaderLight (* ghostlight );	else		SetShaderLight (* sunlight );		glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
+		SetShaderLight (* sunlight );	if(isNight)		SetShaderLight(* ghostlight);		glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
 	glUniform1i(glGetUniformLocation ( currentShader -> GetProgram () ,"isNight"), isNight);
@@ -214,14 +228,13 @@ void Renderer :: DrawHeightmap () {
 
 void Renderer :: DrawWater () {
 	
-	SetCurrentShader ( reflectShader );
-	if(isNight)
-		SetShaderLight (* ghostlight );	else		SetShaderLight (* sunlight );
+	SetCurrentShader ( reflectShader );		SetShaderLight (* sunlight );
+
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ()); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
 	glUniform1i(glGetUniformLocation ( currentShader -> GetProgram () ,"isNight"), isNight);
-
+	glUniform1f(glGetUniformLocation ( currentShader -> GetProgram () ,"sunHeight"), sunlight->GetPosition().y);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTex") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"cubeTex") , 2);
 
@@ -270,3 +283,4 @@ void Renderer :: DrawNode (SceneNode *n) {
 void	Renderer::SetShaderParticleSize(float f) {
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "particleSize"), f);
 }
+
