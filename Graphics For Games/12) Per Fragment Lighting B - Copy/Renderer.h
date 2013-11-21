@@ -15,6 +15,10 @@ public :
 
 	 virtual void RenderScene ();
 	 virtual void UpdateScene ( float msec );
+	 void startSnow();
+	 void stopSnow();
+	 void increaseDayLength();
+	 void decreaseDayLength();
 
  protected :
 	 void DrawHeightmap ();
@@ -54,6 +58,8 @@ public :
 	 Island* root ;
 
 	 bool isNight;
+	 bool isSnowing;
+	 float snowAmount;
 
 	 void	SetShaderParticleSize(float f);	
 	 ParticleEmitter* emitter;

@@ -24,9 +24,11 @@ public :
 
 	void SetTextureLower(GLuint tex ) { textureLower = tex ;}
 	void SetTextureUpper(GLuint tex ) { textureUpper = tex ;}
+	void SetTextureSnow(GLuint tex){ textureSnow = tex ;}
 
 	GLuint GetTextureLower () { return textureLower;}
 	GLuint GetTextureUpper () { return textureUpper;}
+	GLuint GetTextureSnow () { return textureSnow;}
 
 	void SetBumpMapLower ( GLuint tex ) { bumpLower = tex ;}
 	void SetBumpMapUpper ( GLuint tex ) { bumpUpper = tex ;}
@@ -37,6 +39,7 @@ public :
 protected:
 	GLuint textureLower;
 	GLuint textureUpper;
+	GLuint textureSnow;
 
 	GLuint bumpLower;
 	GLuint bumpUpper;

@@ -69,6 +69,10 @@ void HeightMap :: Draw () {
 	glActiveTexture ( GL_TEXTURE3 );
 	glBindTexture ( GL_TEXTURE_2D , bumpUpper ); 
 
+	//bind snow texture
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture ( GL_TEXTURE_2D , textureSnow);
+
 	glBindVertexArray ( arrayObject );
 
 	if( bufferObject [ INDEX_BUFFER ]) {

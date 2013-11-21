@@ -19,8 +19,24 @@ int main() {
 	w.ShowOSPointer(false);
 
 	while(w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)){
+		
+		if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_T)){
+			//start snow
+			renderer.startSnow();
+		}else if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_Y)){
+			//stop snow
+			renderer.stopSnow();
+		}
+
+		if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_O)){
+			//decrease day length
+			renderer.decreaseDayLength();
+		}else if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)){
+			//increase day length
+			renderer.increaseDayLength();
+		}
+
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
-		//calculateFPS();
 		renderer.RenderScene();
 		//drawFPS();
 	}

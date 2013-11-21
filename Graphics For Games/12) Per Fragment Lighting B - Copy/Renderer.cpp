@@ -8,17 +8,21 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	Island:: CreateHell();
 
 	//how long the day should go on for
-	dayLengthSeconds = 60;
+	dayLengthSeconds = 240;
 	isNight = false;
 
 	initTimer = 2.0f;
+
+	//start with no snow on ground
+	isSnowing = false;
+	snowAmount = 0.0f;
 
 	//ambient colours for night and day
 	minAmbient = Vector3(0.0f, 0.0f, 0.03f);
 	maxAmbient = Vector3(0.05f, 0.05f, 0.05f);
 
 	//the colour the skybox fragments are multiplied by
-	skyColourMod = Vector3(0.25f,0.25f,0.3f);
+	skyColourMod = Vector3(0.2f,0.2f,0.25f);
 
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/world.raw");
@@ -54,6 +58,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	heightMap -> SetBumpMapLower ( SOIL_load_OGL_texture ("../../Textures/sandbump.jpg", SOIL_LOAD_AUTO ,	SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 	heightMap -> SetTextureUpper ( SOIL_load_OGL_texture ("../../Textures/rock.JPG", SOIL_LOAD_AUTO ,SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 	heightMap -> SetBumpMapUpper ( SOIL_load_OGL_texture ("../../Textures/Barren RedsDOT3.jpg", SOIL_LOAD_AUTO ,	SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
+	heightMap -> SetTextureSnow (SOIL_load_OGL_texture ("../../Textures/anotherSnow.jpg", SOIL_LOAD_AUTO ,	SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS ));
 
 	//set cube map
 	dayCubeMap = SOIL_load_OGL_cubemap ("../../Textures/ss_ft.tga","../../Textures/ss_bk.tga","../../Textures/ss_up.tga",
@@ -70,6 +75,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	SetTextureRepeating (heightMap->GetBumpMapLower (), true );
 	SetTextureRepeating (heightMap->GetTextureUpper (), true );
 	SetTextureRepeating (heightMap->GetBumpMapUpper (), true );	
+	SetTextureRepeating (heightMap->GetTextureSnow(), true );	
 
 	init = true ;
 
@@ -109,12 +115,20 @@ Renderer ::~ Renderer ( void ) {
 
 void Renderer :: UpdateScene (float msec ) {
 	emitter->Update(msec);
-	snowMachine->Update(msec);
+
+	//increase amount of lying snow if snowing, else start melting it
+	if(isSnowing){
+		snowMachine->Update(msec);
+		snowAmount += 0.001;
+	}else
+		snowAmount -= 0.001;
+
 	camera -> UpdateCamera ( msec/2.0f );
 	viewMatrix = camera -> BuildViewMatrix ();
 	waterRotate += msec / 2000.0f ;
 
 	initTimer  += msec * 0.001;
+
 	float y = cos(initTimer* 1.288 / (dayLengthSeconds/5)) * 1800;
     float z = 1542 + sin (initTimer* 1.288 / (dayLengthSeconds/5)) * 1800;
 	sunlight->SetPosition(Vector3(1542,y,z));
@@ -132,21 +146,21 @@ void Renderer :: UpdateScene (float msec ) {
 		ghostlight->SetRadius(0);
 	}
 	int radius = lerp(clamp(sunlight->GetPosition().y, 0, 550)/550,0,7000);
-	cout << radius << endl;
 	sunlight->SetRadius(radius);
 }
 
 void Renderer :: RenderScene () {
-	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-	
+	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );	
 	
 	DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
-	DrawSnow();
+
+	if(isSnowing)
+		DrawSnow();
+
 	if(isNight)
-		DrawParticles();
-		
+		DrawParticles();		
 
 	//no need to draw the sun sphere at night
 	if(!isNight){
@@ -240,12 +254,14 @@ void Renderer :: DrawHeightmap () {
 		SetShaderLight (* sunlight );	if(isNight)		SetShaderLight(* ghostlight);		glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"cameraPos") ,1 ,(float *)& camera -> GetPosition ());
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMax"), 1, (float*)&maxAmbient); 
 	glUniform3fv ( glGetUniformLocation ( currentShader -> GetProgram () ,"ambientMin"), 1, (float*)&minAmbient); 
-	glUniform1i(glGetUniformLocation ( currentShader -> GetProgram () ,"isNight"), isNight);
+	glUniform1f(glGetUniformLocation ( currentShader -> GetProgram () ,"sunHeight"), sunlight->GetPosition().y);
+	glUniform1f(glGetUniformLocation ( currentShader -> GetProgram () ,"snowAmount"), snowAmount);
 
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTexLower") , 0);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"bumpTexLower") , 1);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"diffuseTexUpper") , 2);
 	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"bumpTexUpper") , 3);
+	glUniform1i ( glGetUniformLocation ( currentShader -> GetProgram () ,"snowTexture") , 5);
 
 	modelMatrix.ToIdentity ();
 	textureMatrix.ToIdentity ();
@@ -315,3 +331,19 @@ void	Renderer::SetShaderParticleSize(float f) {
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "particleSize"), f);
 }
 
+void Renderer::increaseDayLength(){
+	dayLengthSeconds += 10;
+}
+
+void Renderer::decreaseDayLength(){
+	if(dayLengthSeconds - 10 > 0)
+		dayLengthSeconds -= 10;
+}
+
+void Renderer::startSnow(){
+	isSnowing = true;
+}
+
+void Renderer::stopSnow(){
+	isSnowing = false;
+}

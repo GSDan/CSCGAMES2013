@@ -4,14 +4,16 @@ uniform sampler2D diffuseTexLower;
 uniform sampler2D bumpTexLower;
 uniform sampler2D diffuseTexUpper;
 uniform sampler2D bumpTexUpper;
+uniform sampler2D snowTexture;
 
 uniform vec3 cameraPos ;
 uniform vec4 lightColour ;
 uniform vec3 lightPos ;
 uniform vec3 ambientMax;
 uniform vec3 ambientMin;
-uniform bool isNight;
 uniform float lightRadius ;
+uniform float sunHeight;
+uniform float snowAmount;
 
 in Vertex {
 vec3 colour ;
@@ -54,9 +56,8 @@ void main ( void ) {
 		}else if(texMix > 1.0){
 			texMix = 1.0;
 		}
-
-		
 		diffuse = mix(texture2D(diffuseTexUpper,IN.texCoord), texture2D(diffuseTexLower,IN.texCoord), texMix); 
+
 		normal = normalize ( TBN * ( texture ( bumpTexUpper , IN.texCoord ). rgb * 2.0 - 1.0));
 	}
 	else{
@@ -64,16 +65,22 @@ void main ( void ) {
 		normal = normalize ( TBN * ( texture ( bumpTexUpper , IN.texCoord ). rgb * 2.0 - 1.0));
 	}
 
+		//time to add snow!
+		float texMix = 0.000005 * (snowAmount*(IN.worldPos.y*IN.worldPos.y));
 
-		//float weightVal = abs(sin(weight));
-		//vec3 ambient = lerp(weightVal, ambientMin, ambientMax);
+		//max is 1.0, min 0.0
+		if(texMix < 0.0){
+			texMix = 0.0;
+		}else if(texMix > 1.0){
+			texMix = 1.0;
+		}
+		diffuse = mix(diffuse, texture2D(snowTexture,IN.texCoord), texMix); 
+
+
 		vec3 ambient;
 
-		if(isNight){
-			ambient = ambientMin;
-		}else{
-			ambient = ambientMax;
-		}
+		float weightVal = clamp(sunHeight,0,550)/550;
+		ambient = lerp(weightVal, ambientMin, ambientMax);
 
 
 		vec3 incident = normalize ( lightPos - IN . worldPos );
