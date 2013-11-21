@@ -126,7 +126,7 @@ Particle* ParticleEmitter::GetFreeParticle()	{
 	//Now we have to reset its values - if it was popped off the
 	//free list, it'll still have the values of its 'previous life'
 
-	p->colour		= Vector4(RAND(),RAND(),RAND(),1.0);
+	p->colour		= colour;
 	p->direction	= initialDirection;
 	p->direction.x += ((RAND()-RAND()) * particleVariance);
 	p->direction.y += ((RAND()-RAND()) * particleVariance);

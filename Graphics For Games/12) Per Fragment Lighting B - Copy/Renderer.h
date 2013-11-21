@@ -21,6 +21,7 @@ public :
 	 void DrawWater ();
 	 void DrawSkybox ();
 	 void DrawParticles();
+	 void DrawSnow();
 
 	 Shader * lightShader ;
 	 Shader * reflectShader ;
@@ -56,5 +57,5 @@ public :
 
 	 void	SetShaderParticleSize(float f);	
 	 ParticleEmitter* emitter;
-
+	 ParticleEmitter* snowMachine;
  };

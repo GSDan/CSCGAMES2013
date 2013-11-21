@@ -28,7 +28,7 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	//assign shaders
 	sunlight = new Light ( Vector3 (0,0,0),Vector4 (1.0f ,1.0f ,1.0f ,1) , 6000);
-	ghostlight = new Light ( Vector3 (1600,470,1800),Vector4 (1,1,1,1) , 0);
+	ghostlight = new Light ( Vector3 (1600,470,1800),Vector4 (1,0.7,0.7,1) , 0);
 	reflectShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/reflectFragment.glsl");
 	skyboxShader = new Shader ("../../Shaders/skyboxVertex.glsl","../../Shaders/skyboxFragment.glsl");
 	lightShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bumpFragment.glsl");
@@ -41,8 +41,9 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 		return ;
 	}
 
-	//create new particle emitter
+	//create new particle emitters
 	emitter = new ParticleEmitter();
+	snowMachine = new ParticleEmitter();
 
 	root = new Island();
 
@@ -108,6 +109,7 @@ Renderer ::~ Renderer ( void ) {
 
 void Renderer :: UpdateScene (float msec ) {
 	emitter->Update(msec);
+	snowMachine->Update(msec);
 	camera -> UpdateCamera ( msec/2.0f );
 	viewMatrix = camera -> BuildViewMatrix ();
 	waterRotate += msec / 2000.0f ;
@@ -141,8 +143,10 @@ void Renderer :: RenderScene () {
 	DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
+	DrawSnow();
 	if(isNight)
 		DrawParticles();
+		
 
 	//no need to draw the sun sphere at night
 	if(!isNight){
@@ -156,7 +160,7 @@ void Renderer :: RenderScene () {
 		SetCurrentShader(sunShader);
 		glUseProgram(sunShader -> GetProgram());
 		UpdateShaderMatrices();
-		root->hellNode->SetColour(Vector4(1,1,1,0.4f));
+		root->hellNode->SetColour(Vector4(1,0.8f,0.8f,0.4f));
 		glUniform1i ( glGetUniformLocation ( sunShader -> GetProgram (),"diffuseTex"), 1);
 		DrawNode(root->hellNode);
 	}
@@ -181,11 +185,38 @@ void Renderer :: DrawParticles(){
 	emitter->SetParticleVariance(1.0f);
 	emitter->SetLaunchParticles(10.0f);
 	emitter->SetParticleLifetime(1000.0f);
-	emitter->SetParticleSpeed(0.00005f);
-	//emitter->SetDirection(Vector3(0,0,0));
+	emitter->SetParticleSpeed(0.00003f);
+	emitter->setColour(Vector4(1,0,0,1));
+	//emitter->SetDirection(Vector3(0,1,0));
 	UpdateShaderMatrices();
 
 	emitter->Draw();
+
+	glUseProgram(0);
+	glDisable(GL_BLEND);
+}
+
+void Renderer :: DrawSnow(){
+	modelMatrix = Matrix4 :: Translation (Vector3 (2000,1700,1700)) * Matrix4::Scale(Vector3(5000,5000,5000));
+	
+	glEnable ( GL_BLEND );
+	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
+
+	SetCurrentShader(particleShader);
+	glUseProgram(particleShader->GetProgram());
+	glUniform1i(glGetUniformLocation(particleShader->GetProgram(), "diffuseTex"), 0);
+	
+	snowMachine->SetParticleSize(3.0f);
+	SetShaderParticleSize(snowMachine->GetParticleSize());
+	snowMachine->SetParticleVariance(1.0f);
+	snowMachine->SetLaunchParticles(16.0f);
+	snowMachine->SetParticleLifetime(10000.0f);
+	snowMachine->SetParticleSpeed(0.00005f);
+	snowMachine->setColour(Vector4(1,1,1,1));
+	snowMachine->SetDirection(Vector3(0,-1,0));
+	UpdateShaderMatrices();
+
+	snowMachine->Draw();
 
 	glUseProgram(0);
 	glDisable(GL_BLEND);

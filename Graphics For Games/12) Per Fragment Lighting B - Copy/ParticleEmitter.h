@@ -105,6 +105,8 @@ public:
 	int		GetLaunchParticles()			{return numLaunchParticles;}
 	void	SetLaunchParticles(int num)		{numLaunchParticles = num;}
 
+	Vector4 getColour() { return colour; }
+	void setColour(Vector4 vec) { colour = vec; }
 	/*
 	Launch direction of the particles
 	*/
@@ -129,6 +131,8 @@ protected:
 	float particleVariance;
 	float particleSpeed;
 	int	  numLaunchParticles;
+
+	Vector4 colour;
 
 	Vector3 initialDirection;
 
