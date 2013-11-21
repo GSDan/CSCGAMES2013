@@ -5,6 +5,7 @@
 #include "../../nclgl/HeightMap.h"
 #include "..\..\nclgl\OBJMesh.h"
 #include "../../nclgl/SceneNode.h"
+#include "ParticleEmitter.h"
 #include "Island.h";
 
 class Renderer : public OGLRenderer {
@@ -19,11 +20,13 @@ public :
 	 void DrawHeightmap ();
 	 void DrawWater ();
 	 void DrawSkybox ();
+	 void DrawParticles();
 
 	 Shader * lightShader ;
 	 Shader * reflectShader ;
 	 Shader * skyboxShader ;
 	 Shader * sunShader;
+	 Shader * particleShader;
 
 	 HeightMap * heightMap ;
 	 Mesh * quad ;
@@ -50,5 +53,8 @@ public :
 	 Island* root ;
 
 	 bool isNight;
+
+	 void	SetShaderParticleSize(float f);	
+	 ParticleEmitter* emitter;
 
  };

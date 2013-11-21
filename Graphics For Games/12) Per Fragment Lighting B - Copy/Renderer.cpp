@@ -33,11 +33,16 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	skyboxShader = new Shader ("../../Shaders/skyboxVertex.glsl","../../Shaders/skyboxFragment.glsl");
 	lightShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bumpFragment.glsl");
 	sunShader  = new Shader("../../Shaders/SceneVertex.glsl","../../Shaders/SceneFragment.glsl");		
+	particleShader = new Shader("../../Shaders/vertex.glsl","../../Shaders/fragment.glsl", "../../Shaders/geometry.glsl");
 
 	//link shaders
-	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram () || !sunShader->LinkProgram() ){
+	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram () 
+		|| !sunShader->LinkProgram() || !particleShader->LinkProgram()){
 		return ;
 	}
+
+	//create new particle emitter
+	emitter = new ParticleEmitter();
 
 	root = new Island();
 
@@ -71,8 +76,6 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 
 	projMatrix = Matrix4 :: Perspective (1.0f ,15000.0f,(float ) width / (float )height , 55.0f);
 	glEnable ( GL_DEPTH_TEST );
-	glEnable ( GL_BLEND );
-	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
 	glEnable ( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 }
 
@@ -84,15 +87,18 @@ Renderer ::~ Renderer ( void ) {
 	delete skyboxShader ;
 	delete lightShader ;
 	delete sunShader;
+	delete particleShader;
 	delete root;
 	Island::DeleteSphere();
 	Island::DeleteHell();
 	delete sunlight ;
 	delete ghostlight;
+	delete emitter;
 	currentShader = 0;
 }
 
 void Renderer :: UpdateScene (float msec ) {
+	emitter->Update(msec);
 	camera -> UpdateCamera ( msec/2.0f );
 	viewMatrix = camera -> BuildViewMatrix ();
 	waterRotate += msec / 2000.0f ;
@@ -122,10 +128,11 @@ void Renderer :: UpdateScene (float msec ) {
 
 void Renderer :: RenderScene () {
 	glClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-
+	
 	DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
+	DrawParticles();
 
 	//no need to draw the sun sphere at night
 	if(!isNight){
@@ -147,6 +154,27 @@ void Renderer :: RenderScene () {
 	glUseProgram(0);
 
 	SwapBuffers ();
+}
+
+void Renderer :: DrawParticles(){
+	glEnable ( GL_BLEND );
+	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
+	SetCurrentShader(particleShader);
+	glUseProgram(particleShader->GetProgram());
+	glUniform1i(glGetUniformLocation(particleShader->GetProgram(), "diffuseTex"), 0);
+
+	SetShaderParticleSize(emitter->GetParticleSize());
+	emitter->SetParticleSize(8.0f);
+	emitter->SetParticleVariance(1.0f);
+	emitter->SetLaunchParticles(16.0f);
+	emitter->SetParticleLifetime(2000.0f);
+	emitter->SetParticleSpeed(0.0001f);
+	UpdateShaderMatrices();
+
+	emitter->Draw();
+
+	glUseProgram(0);
+	glDisable(GL_BLEND);
 }
 
 void Renderer :: DrawSkybox () {
@@ -221,6 +249,8 @@ void Renderer :: DrawWater () {
 }
 
 void Renderer :: DrawNode (SceneNode *n) {
+	glEnable ( GL_BLEND );
+	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
 	if(n->GetMesh ()) 
 	{
 		Matrix4 transform = n->GetWorldTransform ()* Matrix4 ::Scale (n->GetModelScale());
@@ -234,4 +264,9 @@ void Renderer :: DrawNode (SceneNode *n) {
 		i != n-> GetChildIteratorEnd (); ++i) {
 			DrawNode (*i);
 	}
+	glDisable(GL_BLEND);
+}
+
+void	Renderer::SetShaderParticleSize(float f) {
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "particleSize"), f);
 }

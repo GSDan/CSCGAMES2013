@@ -4,7 +4,7 @@
 #pragma comment(lib, "nclgl.lib")
 
 int main() {
-	Window w("Geometry Particles!!", 800,600,false);	//This is all boring win32 window creation stuff!
+	Window w("Geometry Particles!!", 1920,1080,true);	//This is all boring win32 window creation stuff!
 	if(!w.HasInitialised()) {
 		return -1;
 	}

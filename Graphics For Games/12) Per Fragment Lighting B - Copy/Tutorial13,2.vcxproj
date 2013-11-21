@@ -69,11 +69,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Island.cpp" />
+    <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Tutorial13.cpp" />
+    <ClCompile Include="GraphicsCoursework.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Island.h" />
+    <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

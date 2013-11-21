@@ -17,7 +17,7 @@ ParticleEmitter::ParticleEmitter(void)	{
 	particleSize		= 24.0f;
 	particleVariance	= 0.2f;
 	nextParticleTime	= 0.0f;
-	particleSpeed		= 0.2f;
+	particleSpeed		= 0.1f;
 	numLaunchParticles	= 10;
 	largestSize			= 0;
 
