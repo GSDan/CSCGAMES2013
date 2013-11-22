@@ -15,7 +15,7 @@ protected :
 public :
 	Island ( void );
 	~ Island ( void ){};
-	virtual void Update ( Vector3 vec, float msec);
+	virtual void Update ( Vector3 sunvec, float msec);
 	static void CreateSphere () {
 		OBJMesh *m = new OBJMesh ();
 		m-> LoadOBJMesh(MESHDIR"sphere.obj");

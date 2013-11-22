@@ -20,9 +20,8 @@ Island :: Island (void) {
 }
 
 
-void Island::Update(Vector3 vec, float msec)
-{
-        
-	ball->SetTransform(Matrix4::Translation(vec));
+void Island::Update(Vector3 sunvec, float msec)
+{	
+	ball->SetTransform(Matrix4::Translation(sunvec));
     SceneNode::Update(msec);
 }

@@ -31,6 +31,7 @@ public :
 	 void DrawSkybox ();
 	 void DrawParticles();
 	 void DrawSnow();
+	 void DrawCloud();
 	 void DrawText(const std::string &text, const Vector3 &position, const float size, const bool perspective);
 
 	 Font*	basicFont;
@@ -41,6 +42,7 @@ public :
 	 Shader * sunShader;
 	 Shader * particleShader;
 	 Shader * textShader;
+	 Shader * textureShader;
 
 	 HeightMap * heightMap ;
 	 Mesh * quad ;
@@ -61,6 +63,7 @@ public :
 
 	 Vector3 minAmbient;
 	 Vector3 maxAmbient;
+
 	 Vector3 skyColourMod;
 
 	 void DrawNode ( SceneNode *n);
@@ -74,4 +77,5 @@ public :
 	 void	SetShaderParticleSize(float f);	
 	 ParticleEmitter* emitter;
 	 ParticleEmitter* snowMachine;
+	 ParticleEmitter* cloudMachine;
  };

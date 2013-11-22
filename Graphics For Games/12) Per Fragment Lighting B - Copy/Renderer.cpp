@@ -34,24 +34,23 @@ Renderer :: Renderer ( Window & parent ) : OGLRenderer ( parent ) {
 	ghostlight = new Light ( Vector3 (1600,470,1800),Vector4 (1,0.7,0.7,1) , 0);
 	reflectShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/reflectFragment.glsl");
 	skyboxShader = new Shader ("../../Shaders/skyboxVertex.glsl","../../Shaders/skyboxFragment.glsl");
+	textureShader = new Shader ("../../Shaders/TexturedVertex.glsl","../../Shaders/TexturedFragment.glsl");
 	lightShader = new Shader ("../../Shaders/bumpVertex.glsl","../../Shaders/bumpFragment.glsl");
 	sunShader  = new Shader("../../Shaders/SceneVertex.glsl","../../Shaders/SceneFragment.glsl");		
 	particleShader = new Shader("../../Shaders/vertex.glsl","../../Shaders/fragment.glsl", "../../Shaders/geometry.glsl");
 	textShader = new Shader("../../Shaders/TexturedVertex.glsl", "../../Shaders/TexturedFragment.glsl");
-
-
-
-	//link shaders
-	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram () 
-		|| !sunShader->LinkProgram() || !particleShader->LinkProgram() || !textShader->LinkProgram()){
-			return ;
-	}
-
 	
+	//link shaders
+	if (! reflectShader -> LinkProgram () || ! lightShader -> LinkProgram () ||! skyboxShader -> LinkProgram () || !sunShader->LinkProgram()
+		|| !particleShader->LinkProgram() || !textShader->LinkProgram() || !textureShader->LinkProgram()){
+			return ;
+	}	
 
 	//create new particle emitters
 	emitter = new ParticleEmitter();
 	snowMachine = new ParticleEmitter();
+	cloudMachine = new ParticleEmitter();
+	cloudMachine->SetTexture(SOIL_load_OGL_texture ("../../Textures/Cartoon_Cloud1.png",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 
 	root = new Island();
 
@@ -111,6 +110,7 @@ Renderer ::~ Renderer ( void ) {
 	delete lightShader ;
 	delete sunShader;
 	delete particleShader;
+	delete textureShader;
 	delete root;
 	Island::DeleteSphere();
 	Island::DeleteHell();
@@ -126,6 +126,7 @@ void Renderer :: UpdateScene (float msec ) {
 	fps = 1000.0f / msec;
 	
 	emitter->Update(msec);
+	cloudMachine->Update(msec);
 
 	//increase amount of lying snow if snowing, else start melting it
 	if(isSnowing){
@@ -144,7 +145,7 @@ void Renderer :: UpdateScene (float msec ) {
 	float z = 1542 + sin (initTimer* 1.288 / (dayLengthSeconds/5)) * 1800;
 	sunlight->SetPosition(Vector3(1542,y,z));
 	root->Update(Vector3(1542,y,z), msec);
-
+	
 	//use the sun's position to determine if currently day or night
 	//if night, reduce the radius of the sun's light to 0
 	if(sunlight->GetPosition().y < 130){
@@ -166,6 +167,7 @@ void Renderer :: RenderScene () {
 	DrawSkybox ();
 	DrawHeightmap ();
 	DrawWater ();
+	DrawCloud();
 
 	if(isSnowing)
 		DrawSnow();
@@ -260,6 +262,33 @@ void Renderer :: DrawSnow(){
 	glDisable(GL_BLEND);
 }
 
+void Renderer :: DrawCloud(){
+	modelMatrix = Matrix4 :: Translation (Vector3 (-1000,2500,1700)) * Matrix4::Scale(Vector3(5000,5000,5000));
+
+	glEnable ( GL_BLEND );
+	//glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
+
+	SetCurrentShader(particleShader);
+	glUseProgram(particleShader->GetProgram());
+	glUniform1i(glGetUniformLocation(particleShader->GetProgram(), "diffuseTex"), 0);
+
+	SetShaderParticleSize(cloudMachine->GetParticleSize());
+	cloudMachine->SetDirection(Vector3(1.0f,0.0f,0.0f));
+	cloudMachine->SetParticleSize(1000.0f);
+	cloudMachine->SetParticleVariance(0.300);
+	cloudMachine->SetLaunchParticles(1.0f);
+	cloudMachine->SetParticleLifetime(300000.0f);
+	cloudMachine->SetParticleSpeed(0.00002f);
+	cloudMachine->SetParticleRate(20000.0f);
+	cloudMachine->setColour(Vector4(0.9,0.9,0.9,0.6));
+	UpdateShaderMatrices();
+
+	cloudMachine->Draw();
+
+	glUseProgram(0);
+	glDisable(GL_BLEND);
+}
+
 void Renderer :: DrawSkybox () {
 	glDepthMask ( GL_FALSE );
 	SetCurrentShader ( skyboxShader );
@@ -333,8 +362,8 @@ void Renderer :: DrawWater () {
 }
 
 void Renderer :: DrawNode (SceneNode *n) {
-	//glEnable ( GL_BLEND );
-	//glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
+	glEnable ( GL_BLEND );
+	glBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
 	if(n->GetMesh ()) 
 	{
 		Matrix4 transform = n->GetWorldTransform ()* Matrix4 ::Scale (n->GetModelScale());
@@ -348,7 +377,7 @@ void Renderer :: DrawNode (SceneNode *n) {
 		i != n-> GetChildIteratorEnd (); ++i) {
 			DrawNode (*i);
 	}
-	//glDisable(GL_BLEND);
+	glDisable(GL_BLEND);
 }
 
 void	Renderer::SetShaderParticleSize(float f) {

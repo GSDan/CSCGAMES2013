@@ -134,7 +134,6 @@ Particle* ParticleEmitter::GetFreeParticle()	{
 
 	p->direction.Normalise();	//Keep its direction normalised!
 	p->position.ToZero();
-
 	return p;	//return the new particle :-)
 }
 
