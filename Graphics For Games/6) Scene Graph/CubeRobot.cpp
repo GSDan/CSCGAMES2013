@@ -25,7 +25,7 @@ CubeRobot :: CubeRobot ( void ) {
 	leftLeg -> SetTransform ( Matrix4 :: Translation ( Vector3 ( -8 ,0 ,0)));
 	body -> AddChild ( leftLeg );
 	SceneNode * rightLeg = new SceneNode (cube , Vector4 (0 ,0 ,1 ,1)); // Blue !
-	rightLeg -> SetModelScale ( Vector3 (3 , -17.5 ,3));
+	rightLeg -> SetModelScale ( Vector3 (3 , -17.5 ,3))
 	rightLeg -> SetTransform ( Matrix4 :: Translation ( Vector3 (8 ,0 ,0)));
 	body -> AddChild ( rightLeg );
 

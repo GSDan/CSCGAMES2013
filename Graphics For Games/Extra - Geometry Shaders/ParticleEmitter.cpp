@@ -25,11 +25,10 @@ ParticleEmitter::ParticleEmitter(void)	{
 	Each particle is a white dot, which has an alpha fade on it,
 	so the edges fade to 0.0 alpha.
 	*/
-	//texture = SOIL_load_OGL_texture("../Textures/particle.tga",
-	//SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_COMPRESS_TO_DXT);
+	texture = SOIL_load_OGL_texture("../../Textures/particle.tga",	SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_COMPRESS_TO_DXT);
 
-	texture = SOIL_load_OGL_texture(TEXTUREDIR"nyan.png",
-		SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_COMPRESS_TO_DXT);
+	//texture = SOIL_load_OGL_texture("../../Textures/water.jpg",
+	//	SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_COMPRESS_TO_DXT);
 }
 
 /*

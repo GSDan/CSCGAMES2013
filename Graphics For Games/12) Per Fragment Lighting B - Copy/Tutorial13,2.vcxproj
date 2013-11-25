@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8CA341C0-6E95-489D-AE28-5053325D4869}</ProjectGuid>
     <RootNamespace>Tutorial1</RootNamespace>
-    <ProjectName>Tutorial13 - Cube Mapping</ProjectName>
+    <ProjectName>GraphicsCourseworkDanRichardson</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -68,11 +68,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Island.cpp" />
+    <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Tutorial13.cpp" />
+    <ClCompile Include="GraphicsCoursework.cpp" />
+    <ClCompile Include="TextMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Island.h" />
+    <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="TextMesh.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

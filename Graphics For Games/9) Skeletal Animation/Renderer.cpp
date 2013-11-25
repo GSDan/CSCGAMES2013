@@ -47,10 +47,10 @@ void Renderer::RenderScene()	{
 
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"diffuseTex"), 0);
 
-#ifdef MD5_USE_HARDWARE_SKINNING
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"weightTex"), MD5_WEIGHT_TEXNUM);
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"transformTex"), MD5_TRANSFORM_TEXNUM);
-#endif
+	#ifdef MD5_USE_HARDWARE_SKINNING
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"weightTex"), MD5_WEIGHT_TEXNUM);
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"transformTex"), MD5_TRANSFORM_TEXNUM);
+	#endif
 
 	UpdateShaderMatrices();
 
