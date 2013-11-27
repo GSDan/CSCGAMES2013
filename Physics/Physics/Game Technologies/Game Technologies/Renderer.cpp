@@ -3,19 +3,20 @@
 Renderer* Renderer::instance = NULL;
 
 Renderer::Renderer(Window &parent) : OGLRenderer(parent)	{	
-	camera			= NULL;
 
-	root			= new SceneNode();
+	camera = NULL;
 
-	simpleShader	= new Shader(SHADERDIR"TechVertex.glsl", SHADERDIR"TechFragment.glsl");
+	root = new SceneNode();
+
+	simpleShader = new Shader(SHADERDIR"TechVertex.glsl", SHADERDIR"TechFragment.glsl");
 
 	if(!simpleShader->LinkProgram() ){
 		return;
 	}
 
-	instance		= this;
+	instance = this;
 
-	init			= true;
+	init = true;
 }
 
 Renderer::~Renderer(void)	{

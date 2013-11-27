@@ -59,5 +59,7 @@ protected:
 	Mesh* cube;
 	Mesh* quad;
 	Mesh* sphere;
+
+	Vector3 gravity;
 };
 

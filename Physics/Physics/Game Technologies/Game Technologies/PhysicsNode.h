@@ -46,18 +46,32 @@ public:
 	~PhysicsNode(void);
 
 	Vector3		GetPosition()			{ return m_position;}
+	void		setPosition(Vector3 pos) { m_position = pos;}
+
 	Vector3		GetLinearVelocity()		{ return m_linearVelocity;}
+	void		setLinearVelocity(Vector3 vel) { m_linearVelocity = vel;}
 	
 	float		GetInverseMass()		{return m_invMass;}
+	void		setInverseMass(float mass) { m_invMass = mass;}
+
+	float		getAirResistance()		{return m_airResistance;}
+	void		setAirResistance(float air) { m_airResistance = air;}
 
 	Quaternion	GetOrientation()		{ return m_orientation;}
+	void		setOrientation(Quaternion orient) { m_orientation = orient;}
+
 	Vector3		GetAngularVelocity()	{ return m_angularVelocity;}
+	void		setAngularVelocity(Vector3 angVel) { m_angularVelocity = angVel;}
+
+	Vector3		getAcceleration() { return m_acceleration; }
+	void		setAcceleration(Vector3 accel) { m_acceleration = accel; }
 
 	Matrix4		BuildTransform();
 
 	virtual void		Update(float msec);
 
 	void	SetTarget(SceneNode *s) { target = s;}
+
 
 	//Vector3	GetForce()	{ return m_force;}
 	//Vector3	GetTorque() { return m_torque;}
@@ -68,6 +82,9 @@ protected:
 	Vector3		m_linearVelocity;
 	Vector3		m_force;
 	float		m_invMass;
+
+	Vector3		m_acceleration;
+	float		m_airResistance;
 
 	//<----------ANGULAR--------------->
 	Quaternion  m_orientation;

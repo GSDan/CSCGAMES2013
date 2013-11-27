@@ -17,7 +17,17 @@ PhysicsNode::~PhysicsNode(void)	{
 //I've added in a bit that will set the transform of the
 //graphical representation of this object, too.
 void	PhysicsNode::Update(float msec) {
-	//FUN GOES HERE
+	
+	//semi-implicit Euler Integration
+	//next velocity = this velocity + this acceleration * change in time
+	//next position = this position + next velocity * change in time
+	Vector3 finalAcceleration = m_acceleration;
+
+	//apply air resistance, positive or negative depending on the current direction
+	(finalAcceleration.x > 0)?(finalAcceleration.x -= m_airResistance):(finalAcceleration.x += m_airResistance);
+
+	m_linearVelocity = m_linearVelocity + m_acceleration * msec;
+	m_position = m_position + m_linearVelocity * msec;
 
 	if(target) {
 		target->SetTransform(BuildTransform());

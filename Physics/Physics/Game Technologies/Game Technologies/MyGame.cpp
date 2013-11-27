@@ -16,6 +16,9 @@ MyGame::MyGame()	{
 
 	CubeRobot::CreateCube();
 
+	//earth gravity = 9.81 m/s acceleration downwards
+	gravity = Vector3(0, -0.00981f, 0);
+
 	/*
 	We're going to manage the meshes we need in our game in the game class!
 
@@ -62,6 +65,17 @@ void MyGame::UpdateGame(float msec) {
 
 	for(vector<GameEntity*>::iterator i = allEntities.begin(); i != allEntities.end(); ++i) {
 		(*i)->Update(msec);
+	}
+
+	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q)){
+		//shoot a projectile
+		GameEntity* cube = BuildCubeEntity(10);
+		//start the projectile at the camera position
+		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, 5, 0));
+		cube->GetPhysicsNode().setLinearVelocity(gameCamera->GetForwardVector()*-5);
+		cube->GetPhysicsNode().setAcceleration(gravity);
+		cube->GetPhysicsNode().setAirResistance(0.001f);
+		allEntities.push_back(cube);
 	}
 
 	/*
