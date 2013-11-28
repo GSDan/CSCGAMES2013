@@ -63,8 +63,11 @@ public:
 	Vector3		GetAngularVelocity()	{ return m_angularVelocity;}
 	void		setAngularVelocity(Vector3 angVel) { m_angularVelocity = angVel;}
 
-	Vector3		getAcceleration() { return m_acceleration; }
-	void		setAcceleration(Vector3 accel) { m_acceleration = accel; }
+	Vector3		getGravity() { return m_gravity; }
+	void		setGravity(Vector3 accel) { m_gravity = accel; }
+
+	Vector3		getForce() { return m_force; }
+	void		setForce(Vector3 force) { m_force = force; }
 
 	Matrix4		BuildTransform();
 
@@ -72,18 +75,25 @@ public:
 
 	void	SetTarget(SceneNode *s) { target = s;}
 
+	void setIsCube(){ isCube = !isCube; }
+	void setIsSphere(){ isSphere = !isSphere; }
 
 	//Vector3	GetForce()	{ return m_force;}
-	//Vector3	GetTorque() { return m_torque;}
+	Vector3	GetTorque() { return m_torque;}
+	void setTorque(Vector3 d, Vector3 f) { m_torque = Vector3::Cross(d, f); }
 
 protected:
+
+	bool isCube;
+	bool isSphere;
+
 	//<---------LINEAR-------------->
 	Vector3		m_position;
 	Vector3		m_linearVelocity;
 	Vector3		m_force;
 	float		m_invMass;
 
-	Vector3		m_acceleration;
+	Vector3		m_gravity;
 	float		m_airResistance;
 
 	//<----------ANGULAR--------------->

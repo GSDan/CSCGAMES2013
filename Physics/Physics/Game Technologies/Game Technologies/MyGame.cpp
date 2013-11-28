@@ -28,7 +28,7 @@ MyGame::MyGame()	{
 	we don't care whether the renderer is OpenGL / Direct3D / using SOIL or 
 	something else...
 	*/
-	cube	= new OBJMesh("../../Meshes/cube.obj");
+	cube	= new OBJMesh("../../Meshes/centeredcube.obj");
 	quad	= Mesh::GenerateQuad();
 	sphere	= new OBJMesh("../../Meshes/ico.obj");
 
@@ -70,11 +70,16 @@ void MyGame::UpdateGame(float msec) {
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q)){
 		//shoot a projectile
 		GameEntity* cube = BuildCubeEntity(10);
-		//start the projectile at the camera position
-		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, 5, 0));
-		cube->GetPhysicsNode().setLinearVelocity(gameCamera->GetForwardVector()*-5);
-		cube->GetPhysicsNode().setAcceleration(gravity);
-		cube->GetPhysicsNode().setAirResistance(0.001f);
+		cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
+		//start the projectile at the camera position and set object physics properties
+		Vector3 force = gameCamera->GetForwardVector()*-5;
+		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, -5, 0));
+		cube->GetPhysicsNode().setForce(force);
+		cube->GetPhysicsNode().setTorque(Vector3(0,1,0), force);
+		cube->GetPhysicsNode().setInverseMass(0.1f);
+		cube->GetPhysicsNode().setGravity(gravity);
+		cube->GetPhysicsNode().setAirResistance(0.005f);
+		cube->GetPhysicsNode().setIsCube();
 		allEntities.push_back(cube);
 	}
 
