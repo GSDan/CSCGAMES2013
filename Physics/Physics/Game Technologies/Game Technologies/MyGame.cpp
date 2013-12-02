@@ -38,6 +38,20 @@ MyGame::MyGame()	{
 	*/
 	allEntities.push_back(BuildRobotEntity());
 	allEntities.push_back(BuildQuadEntity(1000.0f));
+
+	
+		GameEntity* target = BuildCubeEntity(10);
+		target->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
+		//start the projectile at the camera position and set object physics properties
+		//Vector3 force = gameCamera->GetForwardVector()*-5;
+		target->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(1000, -5, 0));
+		//cube->GetPhysicsNode().setForce(force);
+		target->GetPhysicsNode().setInverseMass(0.1f);
+		//cube->GetPhysicsNode().setGravity(gravity);
+		target->GetPhysicsNode().setAirResistance(0.001f);
+		target->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+		allEntities.push_back(target);
+
 }
 
 MyGame::~MyGame(void)	{
@@ -75,11 +89,10 @@ void MyGame::UpdateGame(float msec) {
 		Vector3 force = gameCamera->GetForwardVector()*-5;
 		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, -5, 0));
 		cube->GetPhysicsNode().setForce(force);
-		cube->GetPhysicsNode().setTorque(Vector3(0,1,0), force);
 		cube->GetPhysicsNode().setInverseMass(0.1f);
 		cube->GetPhysicsNode().setGravity(gravity);
-		cube->GetPhysicsNode().setAirResistance(0.005f);
-		cube->GetPhysicsNode().setIsCube();
+		cube->GetPhysicsNode().setAirResistance(0.001f);
+		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
 		allEntities.push_back(cube);
 	}
 
@@ -184,6 +197,7 @@ GameEntity* MyGame::BuildQuadEntity(float size) {
 	PhysicsNode*p = new PhysicsNode(Quaternion::AxisAngleToQuaterion(Vector3(1,0,0), 90.0f), Vector3());
 
 	GameEntity*g = new GameEntity(s, p);
+	g->GetPhysicsNode().SetCollisionType(COLLISION_PLANE);
 	g->ConnectToSystems();
 	return g;
 }

@@ -39,6 +39,12 @@ _-_-_-_-_-_-_-""  ""
 #include "../../nclgl/SceneNode.h"
 
 
+enum CollisionVolumeType {
+	COLLISION_SPHERE,
+	COLLISION_AABB,
+	COLLISION_PLANE
+};
+
 class PhysicsNode	{
 public:
 	PhysicsNode(void);
@@ -69,23 +75,23 @@ public:
 	Vector3		getForce() { return m_force; }
 	void		setForce(Vector3 force) { m_force = force; }
 
+	Matrix4		getInertia() { return m_invInertia; }
+	void		setInertia(Matrix4 inertia){ m_invInertia = inertia; }
+
 	Matrix4		BuildTransform();
+
+	void		SetCollisionType(CollisionVolumeType inCollisionType){  collisionType = inCollisionType;}
+	int			GetCollisionType() {return collisionType;}
 
 	virtual void		Update(float msec);
 
 	void	SetTarget(SceneNode *s) { target = s;}
-
-	void setIsCube(){ isCube = !isCube; }
-	void setIsSphere(){ isSphere = !isSphere; }
 
 	//Vector3	GetForce()	{ return m_force;}
 	Vector3	GetTorque() { return m_torque;}
 	void setTorque(Vector3 d, Vector3 f) { m_torque = Vector3::Cross(d, f); }
 
 protected:
-
-	bool isCube;
-	bool isSphere;
 
 	//<---------LINEAR-------------->
 	Vector3		m_position;
@@ -102,6 +108,7 @@ protected:
 	Vector3		m_torque;
 	Matrix4     m_invInertia;
 
+	CollisionVolumeType collisionType;
+
 	SceneNode*	target;  
 };
-

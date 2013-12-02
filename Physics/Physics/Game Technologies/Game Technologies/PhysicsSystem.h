@@ -29,6 +29,7 @@ _-_-_-_-_-_-_-""  ""
 #pragma once
 
 #include "PhysicsNode.h"
+#include "../../nclgl/Plane.h"
 #include <vector>
 
 using std::vector;
@@ -65,17 +66,38 @@ protected:
 */
 
 //
-class CollisionSphere {
+class CollisionSphere{
+
+public :
+    CollisionSphere ( const Vector3 & p, float r )
+    {
+        m_pos = p;
+        m_radius = r;
+    }
+
+    Vector3 m_pos ;
+    float m_radius ;
+
 
 };
 
-class CollisionAABB {
+class CollisionAABB{
+public:
+    CollisionAABB ( const Vector3 & p )
+    {
+        pos = p;
 
+    }
+    Vector3 pos ;
 };
 
-class CollisionData {
-
+class CollisionData{
+public :
+    Vector3 m_point ;
+    Vector3 m_normal ;
+    float m_penetration ;
 };
+
 
 
 class PhysicsSystem	{
@@ -108,9 +130,9 @@ protected:
 	PhysicsSystem(void);
 	~PhysicsSystem(void);
 
-	bool SphereSphereCollision(const CollisionSphere &s0, const CollisionSphere &s1, CollisionData *collisionData = NULL) const;
+	bool SphereCollision(const CollisionSphere &s0, const CollisionSphere &s1, CollisionData *collisionData = NULL) const;
 	bool AABBCollision(const CollisionAABB &cube0, const CollisionAABB &cube1) const;
-
+	
 	//bool SphereAABBCollision(const CollisionSphere &sphere, const CollisionAABB &cube, CollisionData *collisionData = NULL) const; //Research!!!! :-)
 
 
@@ -124,5 +146,11 @@ protected:
 	static PhysicsSystem* instance;
 
 	vector<PhysicsNode*> allNodes;
+
+	//split nodes into broad phase sectors
+	/*vector<PhysicsNode*> sector1; // x: 0-550 y: 0-550 (top left)
+	vector<PhysicsNode*> sector2; // x: 450-1000 y: 0-450 (top right)
+	vector<PhysicsNode*> sector3; // x: 0-550 y:450-1000 (bottom left)
+	vector<PhysicsNode*> sector4; // x: 450-1000 y: 450-1000 (bottom right)*/
 };
 

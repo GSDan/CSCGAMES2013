@@ -56,6 +56,7 @@ public:
 
 	Quaternion operator *(const Quaternion &a) const;
 	Quaternion operator *(const Vector3 &a) const;
+	Quaternion operator +(const Quaternion &a) const { return Quaternion(x + a.x, y + a.y, z + a.z, w + a.w); }
 
 	inline friend std::ostream& operator<<(std::ostream& o, const Quaternion& q){
 		o << "Quat(" << q.x << "," << q.y << "," << q.z <<  "," << q.w << ")" << std::endl;

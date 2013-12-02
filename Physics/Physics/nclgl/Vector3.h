@@ -51,6 +51,9 @@ public:
 		return sqrt((x*x)+(y*y)+(z*z));	
 	}
 
+	float			LengthSq() const {
+		return ((x*x)+(y*y)+(z*z));	
+	}
 	void			Invert() {
 		x = -x;
 		y = -y;	
