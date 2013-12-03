@@ -104,7 +104,7 @@ class PhysicsSystem	{
 public:
 	friend class GameClass;
 
-	void		Update(float msec);
+	void		Update(float msec, Vector3& OGGravity);
 
 	void		BroadPhaseCollisions();
 	void		NarrowPhaseCollisions();
@@ -132,6 +132,7 @@ protected:
 
 	bool SphereCollision(const CollisionSphere &s0, const CollisionSphere &s1, CollisionData *collisionData = NULL) const;
 	bool AABBCollision(const CollisionAABB &cube0, const CollisionAABB &cube1) const;
+	//static void AddCollisionImpluse(CollisionData collision);
 	
 	//bool SphereAABBCollision(const CollisionSphere &sphere, const CollisionAABB &cube, CollisionData *collisionData = NULL) const; //Research!!!! :-)
 
@@ -140,7 +141,7 @@ protected:
 
 	bool PointInConvexPolygon(const Vector3 testPosition, Vector3 * convexShapePoints, int numPointsL) const;
 
-
+	Vector3 gravity;
 
 //Statics
 	static PhysicsSystem* instance;

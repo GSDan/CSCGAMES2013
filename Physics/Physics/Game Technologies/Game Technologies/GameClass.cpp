@@ -16,7 +16,7 @@ GameClass::~GameClass(void)	{
 	delete gameCamera;
 }
 
-void GameClass::UpdateCore(float msec) {
+void GameClass::UpdateCore(float msec, Vector3& gravity) {
 	renderCounter	-= msec;
 	physicsCounter	+= msec;
 
@@ -28,7 +28,7 @@ void GameClass::UpdateCore(float msec) {
 
 	while(physicsCounter >= 0.0f) {
 		physicsCounter -= PHYSICS_TIMESTEP;
-		PhysicsSystem::GetPhysicsSystem().Update(PHYSICS_TIMESTEP);
+		PhysicsSystem::GetPhysicsSystem().Update(PHYSICS_TIMESTEP, gravity);
 	}
 
 	Renderer::GetRenderer().UpdateScene(msec);

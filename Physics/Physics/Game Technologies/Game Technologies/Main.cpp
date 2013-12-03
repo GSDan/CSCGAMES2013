@@ -53,9 +53,12 @@ int main() {
 		return Quit(true, "Renderer failed to initialise!");
 	}
 
+	//set gravity here and pass it so that other classes can modify/access it
+	Vector3 gravity (0, -0.00981f, 0);
+
 	PhysicsSystem::Initialise();
 
-	MyGame* game = new MyGame();
+	MyGame* game = new MyGame(gravity);
 
 	Window::GetWindow().LockMouseToWindow(true);
 	Window::GetWindow().ShowOSPointer(false);
@@ -63,7 +66,7 @@ int main() {
 	while(Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)){
 		float msec = Window::GetWindow().GetTimer()->GetTimedMS();	//How many milliseconds since last update?
 
-		game->UpdateCore(msec);	//Update our 'sybsystem' logic (renderer and physics!)
+		game->UpdateCore(msec,gravity);	//Update our 'sybsystem' logic (renderer and physics!)
 		game->UpdateGame(msec);	//Update our game logic
 	}
 

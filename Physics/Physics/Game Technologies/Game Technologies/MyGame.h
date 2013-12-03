@@ -41,7 +41,7 @@ _-_-_-_-_-_-_-""  ""
 
 class MyGame : public GameClass	{
 public:
-	MyGame();
+	MyGame(Vector3& OGGravity);
 	~MyGame(void);
 
 	virtual void UpdateGame(float msec);

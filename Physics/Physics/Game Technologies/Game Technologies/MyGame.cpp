@@ -9,15 +9,14 @@ through the floor as gravity is added to the scene.
 You can completely change all of this if you want, it's your game!
 
 */
-MyGame::MyGame()	{
+MyGame::MyGame(Vector3& OGGravity)	{
 	gameCamera = new Camera(-30.0f,0.0f,Vector3(0,450,850));
 
 	Renderer::GetRenderer().SetCamera(gameCamera);
 
 	CubeRobot::CreateCube();
 
-	//earth gravity = 9.81 m/s acceleration downwards
-	gravity = Vector3(0, -0.00981f, 0);
+	gravity = OGGravity;
 
 	/*
 	We're going to manage the meshes we need in our game in the game class!
@@ -36,21 +35,16 @@ MyGame::MyGame()	{
 	A more 'robust' system would check the entities vector for duplicates so as
 	to not cause problems...why not give it a go?
 	*/
-	allEntities.push_back(BuildRobotEntity());
 	allEntities.push_back(BuildQuadEntity(1000.0f));
-
+	allEntities.push_back(BuildRobotEntity());
 	
-		GameEntity* target = BuildCubeEntity(10);
-		target->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
-		//start the projectile at the camera position and set object physics properties
-		//Vector3 force = gameCamera->GetForwardVector()*-5;
-		target->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(1000, -5, 0));
-		//cube->GetPhysicsNode().setForce(force);
-		target->GetPhysicsNode().setInverseMass(0.1f);
-		//cube->GetPhysicsNode().setGravity(gravity);
-		target->GetPhysicsNode().setAirResistance(0.001f);
-		target->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
-		allEntities.push_back(target);
+	//create target cube
+	GameEntity* target = BuildCubeEntity(10);
+	target->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
+	target->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(1000, -5, 0));		
+	target->GetPhysicsNode().setInverseMass(0.1f);
+	target->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+	allEntities.push_back(target);
 
 }
 
