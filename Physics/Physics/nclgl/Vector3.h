@@ -117,6 +117,13 @@ public:
 		return Vector3(x / v,y / v, z / v);
 	};
 
+	inline bool operator<(const Vector3 &rhs) const{
+		if(rhs.x > x && rhs.y > y && rhs.z > z)
+			return true;
+		else
+			return false;
+	};
+
 	inline bool	operator==(const Vector3 &A)const {return (A.x == x && A.y == y && A.z == z) ? true : false;};
 	inline bool	operator!=(const Vector3 &A)const {return (A.x == x && A.y == y && A.z == z) ? false : true;};
 };

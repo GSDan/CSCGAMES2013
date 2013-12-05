@@ -58,7 +58,10 @@ public:
 	void		setLinearVelocity(Vector3 vel) { m_linearVelocity = vel;}
 	
 	float		GetInverseMass()		{return m_invMass;}
-	void		setInverseMass(float mass) { m_invMass = mass;}
+	void		calcInverseMass() { if(m_mass > 0) m_invMass = 1/m_mass; else m_invMass = 0.0f;}
+
+	float		GetMass()				{return m_mass;}
+	void		SetMass(float mass)		{m_mass = mass; calcInverseMass();}
 
 	float		getAirResistance()		{return m_airResistance;}
 	void		setAirResistance(float air) { m_airResistance = air;}
@@ -78,10 +81,15 @@ public:
 	Matrix4		getInertia() { return m_invInertia; }
 	void		setInertia(Matrix4 inertia){ m_invInertia = inertia; }
 
+	void calcTorqueDistance(Vector3 &a){ m_torqueDistance = Vector3(a.x - m_position.x, a.y - m_position.y, a.z - m_position.z);}
+	void SetTorqueForce(Vector3 t) { m_torqueForce = t; }
+
 	Matrix4		BuildTransform();
 
 	void		SetCollisionType(CollisionVolumeType inCollisionType){  collisionType = inCollisionType;}
 	int			GetCollisionType() {return collisionType;}
+
+	void calcCubeInvInertia(float size);
 
 	virtual void		Update(float msec);
 
@@ -98,6 +106,7 @@ protected:
 	Vector3		m_linearVelocity;
 	Vector3		m_force;
 	float		m_invMass;
+	float		m_mass;
 
 	Vector3		m_gravity;
 	float		m_airResistance;
@@ -106,9 +115,13 @@ protected:
 	Quaternion  m_orientation;
 	Vector3		m_angularVelocity;
 	Vector3		m_torque;
+	Vector3		m_torqueForce;
+	Vector3		m_torqueDistance;
 	Matrix4     m_invInertia;
 
 	CollisionVolumeType collisionType;
+
+	
 
 	SceneNode*	target;  
 };

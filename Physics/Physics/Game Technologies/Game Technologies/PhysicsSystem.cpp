@@ -30,14 +30,16 @@ void	PhysicsSystem::BroadPhaseCollisions() {
 			//collision between a sphere and a plane
 			if((*i)->GetCollisionType() == COLLISION_PLANE && (*j)->GetCollisionType() == COLLISION_SPHERE )
             {
-				CollisionSphere ball_1((*j)->GetPosition(),15.0f);
+				CollisionSphere ball_1((*j)->GetPosition(),10.0f);
 				CollisionData thisCollision;
 
 				Plane *p = new Plane(Vector3(0,-1,0),0);
-                if( p->SphereInPlane((*j)->GetPosition(),15.0f))
+				if( p->SphereInPlane((*j)->GetPosition(),15.0f, &thisCollision))
                 {
-					(*j)->setForce(Vector3(0,1,0));
-					//(*j)->setLinearVelocity((*j)->GetLinearVelocity() * -0.9);
+					
+					AddCollisionImpulse(*(*i), *(*j), thisCollision.m_point, thisCollision.m_normal, thisCollision.m_penetration);
+					//(*j)->setForce(Vector3(0,5,0));
+					//cout<< "Plane collision!" << endl;
                 }
             }
 
@@ -45,22 +47,13 @@ void	PhysicsSystem::BroadPhaseCollisions() {
 			//collision between two spheres
 			if((*i)->GetCollisionType() == COLLISION_SPHERE && (*j)->GetCollisionType() == COLLISION_SPHERE )
             {
-				CollisionSphere ball_1((*i)->GetPosition(),10.0f);
-                CollisionSphere ball_2((*j)->GetPosition(),10.0f);
+				CollisionSphere ball_1((*i)->GetPosition(),17.0f);
+                CollisionSphere ball_2((*j)->GetPosition(),17.0f);
 				CollisionData thisCollision;
 				if(SphereCollision(ball_1,ball_2, &thisCollision))
-                {
-					Vector3 relativeVelocity = (*i)->GetLinearVelocity() - (*j)->GetLinearVelocity();
-					float compRelVelocity = Vector3::Dot(((*i)->GetLinearVelocity() - (*j)->GetLinearVelocity())*0.5, thisCollision.m_normal);
-					//0.5 = placeholder elasticity (1 = full, 0 = none)
-					//Vector3 momentumLHS = (*i)->GetLinearVelocity() * (*i)->GetInverseMass() + (thisCollision.m_normal * compRelVelocity);
-					//Vector3 momentumRHS = (*i)->GetLinearVelocity() * (*i)->GetInverseMass() - (thisCollision.m_normal * compRelVelocity);
-
-					float impulse = Vector3::Dot(((*i)->GetLinearVelocity() + (*j)->GetLinearVelocity()) * -(1 + 0.5),  thisCollision.m_normal)  /
-									Vector3::Dot(thisCollision.m_normal, thisCollision.m_normal * (1/(*i)->GetInverseMass() + 1/(*j)->GetInverseMass()));
-
-					(*i)->setLinearVelocity((*i)->GetLinearVelocity() + (thisCollision.m_normal * (impulse/(*i)->GetInverseMass()) ));
-					(*j)->setLinearVelocity((*j)->GetLinearVelocity() + (thisCollision.m_normal * (impulse/(*j)->GetInverseMass()) ));
+                {					
+					AddCollisionImpulse(*(*i), *(*j), thisCollision.m_point, thisCollision.m_normal, thisCollision.m_penetration);
+					//cout<< "Sphere collision!" << endl;
                 }
             }
 		}
@@ -109,4 +102,91 @@ bool PhysicsSystem::AABBCollision(const CollisionAABB &cube0, const CollisionAAB
 
 bool PhysicsSystem::PointInConvexPolygon(const Vector3 testPosition, Vector3 * convexShapePoints, int numPointsL) const {
 	return false;
+}
+
+void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, const Vector3 & hitPoint, const Vector3& normal, float penetration ) {
+	// Some simple check code .
+	float invMass0 = c0.GetInverseMass();//( c0.GetMass() > 1000.0f ) ? 0.0f : (1.0f / c0.GetMass() );
+	float invMass1 = c1.GetInverseMass();//( c1.GetMass() >1000.0f ) ? 0.0f : (1.0f / c1.GetMass() );
+
+	//invMass0 = (! c0.m_awake ) ? 0.0f : invMass0 ;
+	//invMass1 = (! c1.m_awake ) ? 0.0f : invMass1 ;
+
+	const Matrix4 worldInvInertia0 = c0.getInertia();
+	const Matrix4 worldInvInertia1 = c1.getInertia();
+
+	// Both objects are non movable
+	if ( ( invMass0 + invMass1 )==0.0 ) return ;
+
+	Vector3 r0 = hitPoint - c0.GetPosition();
+	Vector3 r1 = hitPoint - c1.GetPosition();
+
+	Vector3 v0 = c0.GetLinearVelocity() + Vector3::Cross( c0.GetAngularVelocity() , r0 );	Vector3 v1 = c1.GetLinearVelocity() + Vector3::Cross( c1.GetAngularVelocity() , r1 );
+
+	// Relative Velocity
+	Vector3 dv = v0 - v1 ;
+
+	// If the objects are moving away from each other
+	// we dont need to apply an impulse
+	float relativeMovement = - Vector3::Dot( dv , normal );
+
+	if ( relativeMovement < -0.01f )
+		return ;
+	
+
+	// NORMAL Impulse
+	{
+	// Coefficient of Restitution
+	float e = 0.7f ;
+
+	float normDiv = Vector3::Dot (normal , normal ) * ( ( invMass0 + invMass1 )
+                        + Vector3::Dot ( normal , Vector3::Cross( worldInvInertia0 * Vector3::Cross (r0 , normal ), r0)
+                                         + Vector3::Cross( worldInvInertia1 * Vector3::Cross (r1 , normal ), r1) ) );
+
+	float jn = -1*(1+ e )* Vector3::Dot ( dv , normal ) / normDiv ;
+
+	// Hack fix to stop sinking
+	// bias impulse proportional to penetration distance
+	jn = jn + ( penetration * 0.15f );
+
+	if(c0.GetCollisionType() != COLLISION_PLANE){
+		c0.setLinearVelocity(c0.GetLinearVelocity() +  normal * (invMass0 * jn) );
+		c0.setAngularVelocity(c0.GetAngularVelocity() +  ( worldInvInertia0 * Vector3::Cross (r0 , normal * jn) ));
+		//c0.setAngularVelocity(Vector3(1,0,0));
+	}
+	if(c1.GetCollisionType() != COLLISION_PLANE){
+		c1.setLinearVelocity(c1.GetLinearVelocity() - normal * (invMass1 * jn));
+		c1.setAngularVelocity(c1.GetAngularVelocity() - (worldInvInertia1 *  Vector3::Cross (r1 , normal * jn)));
+		//c1.setAngularVelocity(Vector3(1,0,0));
+	}
+	}
+
+	// TANGENT Impulse Code
+	{
+	// Work out our tangent vector , with is perpendicular
+	// to our collision normal
+	Vector3 tangent = Vector3 (0 ,0 ,0);
+	tangent = dv - (normal  * Vector3::Dot (dv , normal));
+	tangent.Normalise();
+
+	float tangDiv =  invMass0 + invMass1 + 
+		Vector3::Dot ( tangent , Vector3::Cross (( c0.getInertia() * Vector3::Cross (r0 , tangent )  ), r0)
+                                         + Vector3::Cross ((c1.getInertia()  *  Vector3::Cross (r1 , tangent )  ), r1) );
+
+	float jt = -1 * Vector3::Dot(dv,tangent) / tangDiv ;
+	// Clamp min /max tangental component
+
+	// Apply contact impulse
+	if(c0.GetCollisionType() != COLLISION_PLANE){
+		
+		c0.setLinearVelocity(c0.GetLinearVelocity() +  tangent * (invMass0 * jt));
+		//c0.setAngularVelocity(c0.GetAngularVelocity() + ( worldInvInertia0 * Vector3::Cross(r0, tangent * jt) ));
+		c0.setAngularVelocity(c0.GetAngularVelocity() + (Vector3::Cross(r0, tangent * jt)));
+	}
+	if(c1.GetCollisionType() != COLLISION_PLANE){
+		
+		c1.setLinearVelocity(c1.GetLinearVelocity() -  tangent * (invMass1 * jt));
+		c1.setAngularVelocity(c1.GetAngularVelocity() - (Vector3::Cross(r1, tangent * jt)));
+	}
+	} // TANGENT
 }

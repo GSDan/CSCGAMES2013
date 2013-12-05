@@ -27,7 +27,7 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	we don't care whether the renderer is OpenGL / Direct3D / using SOIL or 
 	something else...
 	*/
-	cube	= new OBJMesh("../../Meshes/centeredcube.obj");
+	cube	= new OBJMesh("../../Meshes/anotherUFO.obj");
 	quad	= Mesh::GenerateQuad();
 	sphere	= new OBJMesh("../../Meshes/ico.obj");
 
@@ -42,7 +42,8 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	GameEntity* target = BuildCubeEntity(10);
 	target->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
 	target->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(1000, -5, 0));		
-	target->GetPhysicsNode().setInverseMass(0.1f);
+	target->GetPhysicsNode().SetMass(10);
+	target->GetPhysicsNode().calcCubeInvInertia(10);
 	target->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
 	allEntities.push_back(target);
 
@@ -77,15 +78,15 @@ void MyGame::UpdateGame(float msec) {
 
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q)){
 		//shoot a projectile
-		GameEntity* cube = BuildCubeEntity(10);
+		GameEntity* cube = BuildSphereEntity(10);
 		cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
 		//start the projectile at the camera position and set object physics properties
-		Vector3 force = gameCamera->GetForwardVector()*-5;
+		Vector3 force = gameCamera->GetForwardVector()*-1;
 		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, -5, 0));
 		cube->GetPhysicsNode().setForce(force);
-		cube->GetPhysicsNode().setInverseMass(0.1f);
+		cube->GetPhysicsNode().SetMass(1);
+		cube->GetPhysicsNode().calcCubeInvInertia(1);
 		cube->GetPhysicsNode().setGravity(gravity);
-		cube->GetPhysicsNode().setAirResistance(0.001f);
 		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
 		allEntities.push_back(cube);
 	}
@@ -163,6 +164,8 @@ GameEntity* MyGame::BuildCubeEntity(float size) {
 
 	return g;
 }
+
+
 /*
 Makes a sphere.
 */
@@ -192,6 +195,7 @@ GameEntity* MyGame::BuildQuadEntity(float size) {
 
 	GameEntity*g = new GameEntity(s, p);
 	g->GetPhysicsNode().SetCollisionType(COLLISION_PLANE);
+	g->GetPhysicsNode().SetMass(0);
 	g->ConnectToSystems();
 	return g;
 }

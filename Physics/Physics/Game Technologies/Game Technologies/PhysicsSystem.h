@@ -91,14 +91,6 @@ public:
     Vector3 pos ;
 };
 
-class CollisionData{
-public :
-    Vector3 m_point ;
-    Vector3 m_normal ;
-    float m_penetration ;
-};
-
-
 
 class PhysicsSystem	{
 public:
@@ -108,6 +100,8 @@ public:
 
 	void		BroadPhaseCollisions();
 	void		NarrowPhaseCollisions();
+
+	void AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, const Vector3 & hitPoint, const Vector3& normal, float penetration );
 
 	//Statics
 	static void Initialise() {
