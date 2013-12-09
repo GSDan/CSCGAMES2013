@@ -89,7 +89,14 @@ public:
 	void		SetCollisionType(CollisionVolumeType inCollisionType){  collisionType = inCollisionType;}
 	int			GetCollisionType() {return collisionType;}
 
+	void		setAngularDamping(Vector3 damp) { m_angular_damping = damp; }
+	void		setLinearDamping(Vector3 damp) { m_linear_damping = damp; }
+
+	void		setMinvelocity(Vector3 min) { m_minimum_velocity = min; }
+
 	void calcCubeInvInertia(float size);
+
+	void calcSphereInvInertia(float radius);
 
 	virtual void		Update(float msec);
 
@@ -105,6 +112,8 @@ protected:
 	Vector3		m_position;
 	Vector3		m_linearVelocity;
 	Vector3		m_force;
+	Vector3     m_linear_damping;
+	Vector3		m_minimum_velocity;
 	float		m_invMass;
 	float		m_mass;
 
@@ -117,6 +126,7 @@ protected:
 	Vector3		m_torque;
 	Vector3		m_torqueForce;
 	Vector3		m_torqueDistance;
+	Vector3		m_angular_damping;
 	Matrix4     m_invInertia;
 
 	CollisionVolumeType collisionType;

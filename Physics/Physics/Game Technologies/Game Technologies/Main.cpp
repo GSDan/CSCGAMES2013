@@ -54,7 +54,7 @@ int main() {
 	}
 
 	//set gravity here and pass it so that other classes can modify/access it
-	Vector3 gravity (0, -0.00981f, 0);
+	Vector3 gravity (0, -0.001f, 0);
 
 	PhysicsSystem::Initialise();
 

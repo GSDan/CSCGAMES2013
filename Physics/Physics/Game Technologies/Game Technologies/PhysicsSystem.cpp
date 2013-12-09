@@ -23,17 +23,16 @@ void	PhysicsSystem::Update(float msec, Vector3& OGGravity) {
 
 void	PhysicsSystem::BroadPhaseCollisions() {
 	//loop through all nodes, checking which collisions are possible
-
+	Plane *p = new Plane(Vector3(0,-1,0),0);
 	for(vector<PhysicsNode*>::iterator i = allNodes.begin(); i != allNodes.end(); i++){
 		for(vector<PhysicsNode*>::iterator j = i+1; j != allNodes.end(); j++){
 
 			//collision between a sphere and a plane
 			if((*i)->GetCollisionType() == COLLISION_PLANE && (*j)->GetCollisionType() == COLLISION_SPHERE )
             {
-				CollisionSphere ball_1((*j)->GetPosition(),10.0f);
+				CollisionSphere ball_1((*j)->GetPosition(),15.0f);
 				CollisionData thisCollision;
-
-				Plane *p = new Plane(Vector3(0,-1,0),0);
+				
 				if( p->SphereInPlane((*j)->GetPosition(),15.0f, &thisCollision))
                 {
 					
@@ -47,8 +46,8 @@ void	PhysicsSystem::BroadPhaseCollisions() {
 			//collision between two spheres
 			if((*i)->GetCollisionType() == COLLISION_SPHERE && (*j)->GetCollisionType() == COLLISION_SPHERE )
             {
-				CollisionSphere ball_1((*i)->GetPosition(),17.0f);
-                CollisionSphere ball_2((*j)->GetPosition(),17.0f);
+				CollisionSphere ball_1((*i)->GetPosition(),15.0f);
+                CollisionSphere ball_2((*j)->GetPosition(),15.0f);
 				CollisionData thisCollision;
 				if(SphereCollision(ball_1,ball_2, &thisCollision))
                 {					
@@ -137,17 +136,15 @@ void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, cons
 	// NORMAL Impulse
 	{
 	// Coefficient of Restitution
-	float e = 0.7f ;
+	float e = 0.5f ;
 
-	float normDiv = Vector3::Dot (normal , normal ) * ( ( invMass0 + invMass1 )
-                        + Vector3::Dot ( normal , Vector3::Cross( worldInvInertia0 * Vector3::Cross (r0 , normal ), r0)
-                                         + Vector3::Cross( worldInvInertia1 * Vector3::Cross (r1 , normal ), r1) ) );
+	float normDiv = Vector3::Dot(normal,normal)* (invMass0 + invMass1) + (Vector3::Dot(Vector3::Cross((worldInvInertia0 *(Vector3::Cross(r0,normal))),r0)+Vector3::Cross((worldInvInertia1 * (Vector3::Cross(r1,normal))),r1),normal));
 
 	float jn = -1*(1+ e )* Vector3::Dot ( dv , normal ) / normDiv ;
 
 	// Hack fix to stop sinking
 	// bias impulse proportional to penetration distance
-	jn = jn + ( penetration * 0.15f );
+	jn = jn + ( penetration * 0.0003f );
 
 	if(c0.GetCollisionType() != COLLISION_PLANE){
 		c0.setLinearVelocity(c0.GetLinearVelocity() +  normal * (invMass0 * jn) );
@@ -157,7 +154,7 @@ void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, cons
 	if(c1.GetCollisionType() != COLLISION_PLANE){
 		c1.setLinearVelocity(c1.GetLinearVelocity() - normal * (invMass1 * jn));
 		c1.setAngularVelocity(c1.GetAngularVelocity() - (worldInvInertia1 *  Vector3::Cross (r1 , normal * jn)));
-		//c1.setAngularVelocity(Vector3(1,0,0));
+		
 	}
 	}
 
@@ -180,13 +177,13 @@ void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, cons
 	if(c0.GetCollisionType() != COLLISION_PLANE){
 		
 		c0.setLinearVelocity(c0.GetLinearVelocity() +  tangent * (invMass0 * jt));
-		//c0.setAngularVelocity(c0.GetAngularVelocity() + ( worldInvInertia0 * Vector3::Cross(r0, tangent * jt) ));
-		c0.setAngularVelocity(c0.GetAngularVelocity() + (Vector3::Cross(r0, tangent * jt)));
+		c0.setAngularVelocity(c0.GetAngularVelocity() + ( worldInvInertia0 * Vector3::Cross(r0, tangent * jt) ));
+		//c0.setAngularVelocity(c0.GetAngularVelocity() + (Vector3::Cross(r0, tangent * jt)));
 	}
 	if(c1.GetCollisionType() != COLLISION_PLANE){
 		
 		c1.setLinearVelocity(c1.GetLinearVelocity() -  tangent * (invMass1 * jt));
-		c1.setAngularVelocity(c1.GetAngularVelocity() - (Vector3::Cross(r1, tangent * jt)));
+		c1.setAngularVelocity(c1.GetAngularVelocity() - ( worldInvInertia1 * Vector3::Cross(r1, tangent * jt) ));
 	}
 	} // TANGENT
 }

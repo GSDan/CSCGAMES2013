@@ -39,6 +39,7 @@ void Renderer::RenderScene()	{
 	if(camera) {
 		SetCurrentShader(simpleShader);
 		glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "useTexture"), 1);
 
 		textureMatrix.ToIdentity();
 		modelMatrix.ToIdentity();

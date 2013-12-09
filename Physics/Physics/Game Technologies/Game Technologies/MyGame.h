@@ -30,9 +30,6 @@ _-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
 _-_-_-_-_-_-_-""  ""   
 
 *//////////////////////////////////////////////////////////////////////////////
-
-
-
 #pragma once
 #include "GameEntity.h"
 #include "GameClass.h"
@@ -55,10 +52,13 @@ protected:
 
 	GameEntity* BuildQuadEntity(float size);
 
+	GameEntity* BuildUFOEntity(float size);
+
 
 	Mesh* cube;
 	Mesh* quad;
 	Mesh* sphere;
+	Mesh* UFO;
 
 	Vector3 gravity;
 };

@@ -27,7 +27,7 @@ bool Plane :: SphereInPlane ( const Vector3 & position , float radius , Collisio
 		return false ;
 	}
 
-	separation = -separation;
+	//separation = -separation;
 
 	if ( collisionData ){
 		collisionData -> m_penetration = radius - separation ;

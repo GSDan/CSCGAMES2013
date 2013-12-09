@@ -27,10 +27,13 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	we don't care whether the renderer is OpenGL / Direct3D / using SOIL or 
 	something else...
 	*/
-	cube	= new OBJMesh("../../Meshes/anotherUFO.obj");
+	cube	= new OBJMesh("../../Meshes/centeredcube.obj");
 	quad	= Mesh::GenerateQuad();
-	sphere	= new OBJMesh("../../Meshes/ico.obj");
-
+	sphere	= new OBJMesh("../../Meshes/sphereNew.obj");
+	UFO		= new OBJMesh("../../Meshes/centeredUFO.obj");
+	quad-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/grass.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
+	UFO-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/Top1.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
+	sphere-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/earth_sphere.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	/*
 	A more 'robust' system would check the entities vector for duplicates so as
 	to not cause problems...why not give it a go?
@@ -38,14 +41,15 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	allEntities.push_back(BuildQuadEntity(1000.0f));
 	allEntities.push_back(BuildRobotEntity());
 	
-	//create target cube
-	GameEntity* target = BuildCubeEntity(10);
-	target->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
-	target->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(1000, -5, 0));		
-	target->GetPhysicsNode().SetMass(10);
-	target->GetPhysicsNode().calcCubeInvInertia(10);
-	target->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
-	allEntities.push_back(target);
+	//create UFO
+	GameEntity* UFOEntity = BuildUFOEntity(30);
+	UFOEntity->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(1000, -5, 0));		
+	UFOEntity->GetPhysicsNode().SetMass(30);
+	UFOEntity->GetPhysicsNode().calcCubeInvInertia(30);
+	UFOEntity->GetPhysicsNode().setAngularVelocity(Vector3(0,20,0));
+	UFOEntity->GetPhysicsNode().setAngularDamping(Vector3(1,1,1)); //no damping on rotations
+	UFOEntity->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+	allEntities.push_back(UFOEntity);
 
 }
 
@@ -79,15 +83,17 @@ void MyGame::UpdateGame(float msec) {
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q)){
 		//shoot a projectile
 		GameEntity* cube = BuildSphereEntity(10);
-		cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
+		//cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
 		//start the projectile at the camera position and set object physics properties
-		Vector3 force = gameCamera->GetForwardVector()*-1;
+		Vector3 force = gameCamera->GetForwardVector()*-2;
 		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, -5, 0));
-		cube->GetPhysicsNode().setForce(force);
+		//cube->GetPhysicsNode().setForce(force);
+		cube->GetPhysicsNode().setLinearVelocity(force);
 		cube->GetPhysicsNode().SetMass(1);
-		cube->GetPhysicsNode().calcCubeInvInertia(1);
+		cube->GetPhysicsNode().calcCubeInvInertia(10);
 		cube->GetPhysicsNode().setGravity(gravity);
 		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+		//cube->GetPhysicsNode().setAngularVelocity(Vector3(0,3,0));
 		allEntities.push_back(cube);
 	}
 
@@ -165,6 +171,21 @@ GameEntity* MyGame::BuildCubeEntity(float size) {
 	return g;
 }
 
+/*
+Makes a UFO
+*/
+GameEntity* MyGame::BuildUFOEntity(float size) {
+	GameEntity*g = new GameEntity(new SceneNode(UFO), new PhysicsNode());
+	g->ConnectToSystems();
+	SceneNode &test = g->GetRenderNode();
+
+	test.SetModelScale(Vector3(size,size,size));
+	test.SetBoundingRadius(size);
+
+	return g;
+}
+
+
 
 /*
 Makes a sphere.
@@ -189,6 +210,7 @@ GameEntity* MyGame::BuildQuadEntity(float size) {
 
 	s->SetModelScale(Vector3(size,size,size));
 	//Oh if only we had a set texture function...we could make our brick floor again WINK WINK
+	//s->//SetTexture(SOIL_load_OGL_texture ("../../Textures/Barren Reds.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	s->SetBoundingRadius(size);
 
 	PhysicsNode*p = new PhysicsNode(Quaternion::AxisAngleToQuaterion(Vector3(1,0,0), 90.0f), Vector3());
@@ -196,6 +218,8 @@ GameEntity* MyGame::BuildQuadEntity(float size) {
 	GameEntity*g = new GameEntity(s, p);
 	g->GetPhysicsNode().SetCollisionType(COLLISION_PLANE);
 	g->GetPhysicsNode().SetMass(0);
+	float invIn[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+	g->GetPhysicsNode().setInertia(Matrix4(invIn));
 	g->ConnectToSystems();
 	return g;
 }

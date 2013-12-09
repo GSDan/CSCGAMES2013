@@ -2,15 +2,23 @@
 
 PhysicsNode::PhysicsNode(void)	{
 	target = NULL;
+	m_angular_damping = Vector3(0.995f,0.995f,0.995f);
+	m_linear_damping = Vector3(0.99f,0.99f,0.99f);
+	m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
 }
 
 PhysicsNode::PhysicsNode(Quaternion orientation, Vector3 position) {
 	m_orientation	= orientation;
 	m_position		= position;
+	m_angular_damping = Vector3(0.995f,0.995f,0.995f);
+	m_linear_damping = Vector3(0.99f,0.99f,0.99f);
+	m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
 }
 
 PhysicsNode::~PhysicsNode(void)	{
-
+	m_angular_damping = Vector3(0.995f,0.995f,0.995f);
+	m_linear_damping = Vector3(0.99f,0.99f,0.99f);
+	m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
 }
 
 //You will perform your per-object physics integration, here!
@@ -19,11 +27,11 @@ PhysicsNode::~PhysicsNode(void)	{
 void	PhysicsNode::Update(float msec) {
 
 	Vector3 finalAcceleration = m_force * m_invMass + m_gravity;
-	m_linearVelocity = m_linearVelocity * Vector3(0.99f,0.99f,0.99f);
+	m_linearVelocity = m_linearVelocity * m_linear_damping;
 
 	if(Vector3(abs(m_linearVelocity.x + finalAcceleration.x), 
 				abs(m_linearVelocity.y + finalAcceleration.y), 
-				abs(m_linearVelocity.z + finalAcceleration.z)) < Vector3(0.003f,0.003f,0.003f)){
+				abs(m_linearVelocity.z + finalAcceleration.z)) < m_minimum_velocity){
 		m_linearVelocity = Vector3(0,0,0);
 	}
 	
@@ -38,7 +46,7 @@ void	PhysicsNode::Update(float msec) {
 	//m_torque = Vector3(0,1,0);
 	//m_torque = Vector3::Cross(m_torqueDistance , m_torqueForce);
     m_angularVelocity += m_invInertia * (m_torque*msec);
-	m_angularVelocity = m_angularVelocity * Vector3(0.95f,0.95f,0.95f);
+	m_angularVelocity = m_angularVelocity * m_angular_damping;
     m_orientation = m_orientation + m_orientation*(m_angularVelocity*msec*0.5f);
     m_orientation.Normalise();
 
@@ -91,7 +99,16 @@ Matrix4		PhysicsNode::BuildTransform() {
 }
 
 void PhysicsNode::calcCubeInvInertia(float size){
-	float inertia = 1/12*m_mass*(2 * (size * size));
+	float inertia = 1/(m_mass*(2 * (size * size)));
+	float arr[16] = {inertia, 0, 0, 0, 
+					 0, inertia, 0, 0,
+					 0, 0, inertia, 0,
+					 0, 0, 0, 1};
+	m_invInertia = Matrix4(arr);
+}
+
+void PhysicsNode::calcSphereInvInertia(float radius){
+	float inertia = 1/((2*m_mass*(radius*radius))/5.0f);
 	float arr[16] = {inertia, 0, 0, 0, 
 					 0, inertia, 0, 0,
 					 0, 0, inertia, 0,
