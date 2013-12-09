@@ -56,6 +56,16 @@ public:
 	void			ConnectToSystems();
 	void			DisconnectFromSystems();
 
+	inline bool operator==(const GameEntity &rhs){
+		
+		if(physicsNode == rhs.physicsNode && renderNode == rhs.renderNode){
+			return true;
+		}else{
+			return false;
+		}
+	
+	}
+
 protected:
 	SceneNode*		renderNode;
 	PhysicsNode*	physicsNode;

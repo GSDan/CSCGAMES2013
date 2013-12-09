@@ -51,6 +51,10 @@ public:
 	PhysicsNode(Quaternion orientation, Vector3 position);
 	~PhysicsNode(void);
 
+	Vector3 DistanceTo(Vector3 &a){
+		return Vector3(a.x-m_position.x,a.y-m_position.y,a.z-m_position.z);
+	}
+
 	Vector3		GetPosition()			{ return m_position;}
 	void		setPosition(Vector3 pos) { m_position = pos;}
 
