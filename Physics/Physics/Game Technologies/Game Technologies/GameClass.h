@@ -23,6 +23,7 @@ _-_-_-_-_-_-_-""  ""
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "GameEntity.h"
+#include "AlienAI.h"
 
 #include <vector>
 
@@ -49,6 +50,7 @@ protected:
 	vector<GameEntity*> allEntities;
 
 	Camera* gameCamera;
+	AlienAI* AI;
 	static GameClass* instance;
 };
 

@@ -1,6 +1,7 @@
 #include "GameEntity.h"
 #include <vector>
 #include <queue>
+#include <stack>
 
 class AlienAI{
 
@@ -12,21 +13,46 @@ enum BehaviourState {
 	DEAD
 };
 
-public:
-	AlienAI(GameEntity& entity);
-	~AlienAI();
+class Node {
+	public:
+		Node(){ location = Vector3(0,0,0); parent = NULL; movementCost = 0;};
+		Vector3 location;
+		Node* parent;
+		int movementCost;
+		int Fcost; //cost = movement cost so far + estimated cost from here onwards (hueristic)
+};
 
-	void planRoute(Vector3 thisNode);
+struct NodeCompare{
+	bool operator()(Node& lhs, Node& rhs){
+		return lhs.Fcost > rhs.Fcost;
+		//compare the movement cost so far of each object + their hueristic (lower = better)
+	}
+};
+
+
+public:
+	AlienAI(void){
+		enemies = new priority_queue<Target, vector<Target>, EntityCompareDist>();
+		nodes = new priority_queue<Node, vector<Node>, NodeCompare>();
+	};
+	AlienAI(GameEntity& entity);
+	//~AlienAI();
+
+	void update();
 	void addTarget(GameEntity& target);
 	void kill(){ currentState = DEAD; }
 	Vector3 getPosition() { return entity.GetPhysicsNode().GetPosition(); }
-	GameEntity* getCurrentTarget(){ return enemies.top().entity;}
+	GameEntity* getCurrentTarget(){ return enemies->top().entity;}
 	BehaviourState getBehaviourState(){ return currentState;};
 
 protected:
 
 	class Target {
 	public:
+		Target(){
+			entity = new GameEntity();
+			predator = new AlienAI();
+		}
 		GameEntity* entity;
 		AlienAI* predator;
 
@@ -45,23 +71,29 @@ protected:
 	};
 
 	struct EntityCompareDist{
-		//
+		//compare entities by their distance from the AI (lower = better)
 		bool operator()(Target& lhs, Target& rhs){
 			Vector3 lhsValue = lhs.entity->GetPhysicsNode().DistanceTo(lhs.predator->getPosition());
 			Vector3 rhsValue = rhs.entity->GetPhysicsNode().DistanceTo(rhs.predator->getPosition());
 			return lhsValue < rhsValue;
 		}
 	};
-	
+
 	//a priority queue sorted by distance from current location
-	priority_queue<Target, vector<Target>, EntityCompareDist> enemies;
-	priority_queue<Vector3> nodes;
+	priority_queue<Target, vector<Target>, EntityCompareDist>* enemies;
+	//priority queue of potential A* graph nodes
+	priority_queue<Node, vector<Node>, NodeCompare>* nodes;
+	vector<Node> visitedNodes;
 	BehaviourState currentState;
 	GameEntity entity;
 	
+	void createNodes(Node& root, Vector3 increment);
+	void planRoute(Node* root);
+	void populateRouteStack(Node* node);
+	stack <Node> route;
 	void sortTargets();
 	void attack();
+	int calcFCost(Node& node);
 	
-
 };
 

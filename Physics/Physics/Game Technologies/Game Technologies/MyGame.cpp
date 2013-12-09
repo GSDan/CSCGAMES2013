@@ -50,7 +50,7 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	UFOEntity->GetPhysicsNode().setAngularDamping(Vector3(1,1,1)); //no damping on rotations
 	UFOEntity->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
 	allEntities.push_back(UFOEntity);
-
+	AI = new AlienAI(*UFOEntity);
 }
 
 MyGame::~MyGame(void)	{
@@ -72,6 +72,8 @@ want your games to have some sort of internal logic to them, and this
 logic will be added to this function.
 */
 void MyGame::UpdateGame(float msec) {
+	AI->update();
+
 	if(gameCamera) {
 		gameCamera->UpdateCamera(msec);
 	}
@@ -81,19 +83,21 @@ void MyGame::UpdateGame(float msec) {
 	}
 
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q)){
+
 		//shoot a projectile
 		GameEntity* cube = BuildSphereEntity(10);
 		//cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
 		//start the projectile at the camera position and set object physics properties
 		Vector3 force = gameCamera->GetForwardVector()*-2;
 		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, -5, 0));
-		//cube->GetPhysicsNode().setForce(force);
 		cube->GetPhysicsNode().setLinearVelocity(force);
 		cube->GetPhysicsNode().SetMass(1);
 		cube->GetPhysicsNode().calcCubeInvInertia(10);
 		cube->GetPhysicsNode().setGravity(gravity);
 		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
-		//cube->GetPhysicsNode().setAngularVelocity(Vector3(0,3,0));
+		
+		//add projectile to AI target list and allEntities list
+		AI->addTarget(*cube);
 		allEntities.push_back(cube);
 	}
 
