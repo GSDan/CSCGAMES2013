@@ -17,15 +17,17 @@ enum BehaviourState {
 
 class Node {
 	public:
-		Node(){ location = Vector3(0,0,0); parent = NULL; movementCost = 0;};
+		Node(){ distanceToParent = NULL; directionToParent = NULL;};		
+		//lets us backtrack
 		Vector3 location;
-		Node* parent;
+		int distanceToParent;
+		char directionToParent;
 		int movementCost;
 		int Fcost; //cost = movement cost so far + estimated cost from here onwards (hueristic)
 };
 
-struct NodeCompare{
-	bool operator()(Node& lhs, Node& rhs){
+struct NodeCompare  : public std::binary_function<Node, Node, bool>{
+	bool operator()(const Node lhs, Node rhs){
 		return lhs.Fcost > rhs.Fcost;
 		//compare the movement cost so far of each object + their hueristic (lower = better)
 	}
@@ -80,18 +82,20 @@ protected:
 
 	//a priority queue sorted by distance from current location
 	priority_queue<Target, vector<Target>, EntityCompareDist> enemies;
+
 	//priority queue of potential A* graph nodes
 	priority_queue<Node, vector<Node>, NodeCompare> nodes;
+
 	vector<Node> visitedNodes;
 	BehaviourState currentState;
 	GameEntity entity;
 	set<Vector3> queuedNodeSet;
-	//set<Node>::iterator setIt;
+	
 
-	void createNodes(Node& root, Vector3 increment);
-	void planRoute(Node* root);
-	void populateRouteStack(Node* node);
-	stack <Node> route;
+	void createNodes(int distanceToParent, char direction, Node root);
+	void planRoute();
+	void populateRouteQueue(int distanceToParent, char direction, Vector3 position);
+	queue <Vector3> route;
 	void sortTargets();
 	void attack();
 	int calcFCost(Node& node);
