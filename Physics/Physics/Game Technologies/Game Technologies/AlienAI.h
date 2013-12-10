@@ -2,6 +2,8 @@
 #include <vector>
 #include <queue>
 #include <stack>
+#include <set>
+#include <math.h>
 
 class AlienAI{
 
@@ -31,10 +33,7 @@ struct NodeCompare{
 
 
 public:
-	AlienAI(void){
-		enemies = new priority_queue<Target, vector<Target>, EntityCompareDist>();
-		nodes = new priority_queue<Node, vector<Node>, NodeCompare>();
-	};
+	AlienAI(void){};
 	AlienAI(GameEntity& entity);
 	//~AlienAI();
 
@@ -42,7 +41,7 @@ public:
 	void addTarget(GameEntity& target);
 	void kill(){ currentState = DEAD; }
 	Vector3 getPosition() { return entity.GetPhysicsNode().GetPosition(); }
-	GameEntity* getCurrentTarget(){ return enemies->top().entity;}
+	GameEntity* getCurrentTarget(){ return enemies.top().entity;}
 	BehaviourState getBehaviourState(){ return currentState;};
 
 protected:
@@ -80,13 +79,15 @@ protected:
 	};
 
 	//a priority queue sorted by distance from current location
-	priority_queue<Target, vector<Target>, EntityCompareDist>* enemies;
+	priority_queue<Target, vector<Target>, EntityCompareDist> enemies;
 	//priority queue of potential A* graph nodes
-	priority_queue<Node, vector<Node>, NodeCompare>* nodes;
+	priority_queue<Node, vector<Node>, NodeCompare> nodes;
 	vector<Node> visitedNodes;
 	BehaviourState currentState;
 	GameEntity entity;
-	
+	set<Vector3> queuedNodeSet;
+	//set<Node>::iterator setIt;
+
 	void createNodes(Node& root, Vector3 increment);
 	void planRoute(Node* root);
 	void populateRouteStack(Node* node);
@@ -94,6 +95,21 @@ protected:
 	void sortTargets();
 	void attack();
 	int calcFCost(Node& node);
+
+	bool checkIfSetContains(Vector3 &vec)
+	{
+		set<Vector3>::iterator it;
+		for (it=queuedNodeSet.begin(); it!=queuedNodeSet.end(); ++it)
+		 {
+			 if((*it).x == vec.x && (*it).y == vec.y && (*it).z == vec.z)
+			 {
+				 return true;
+			 }
+		 }
+
+		return false;
+	}
+	
 	
 };
 

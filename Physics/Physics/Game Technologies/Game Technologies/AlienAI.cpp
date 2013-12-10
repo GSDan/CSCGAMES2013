@@ -1,9 +1,6 @@
 #include "AlienAI.h"
 
 AlienAI::AlienAI(GameEntity& entity){
-	enemies = new priority_queue<Target, vector<Target>, EntityCompareDist>();
-	nodes = new priority_queue<Node, vector<Node>, NodeCompare>();
-
 	//assign this AI a game entity to control
 	this->entity = entity;
 	//AI starts as being idle
@@ -15,11 +12,11 @@ void AlienAI::update(){
 
 	Vector3 currentPos = entity.GetPhysicsNode().GetPosition();
 
-	if(currentState == IDLE && !enemies->empty()){
+	if(currentState == IDLE && !enemies.empty()){
 		//if the AI is currently idle and the list of enemies
 		//is not empty, calculate a route to the first target
 		
-		Vector3 enemySpeed = enemies->top().entity->GetPhysicsNode().GetLinearVelocity();
+		Vector3 enemySpeed = enemies.top().entity->GetPhysicsNode().GetLinearVelocity();
 		if(abs(enemySpeed.x) + abs(enemySpeed.y) + abs(enemySpeed.z) <= 0.1){
 			currentState = PONDERING;
 			Node *root = new Node();
@@ -38,7 +35,7 @@ void AlienAI::update(){
 			route.pop();
 			if(route.empty()){
 				//AI is now at the target location!
-				currentState == ATTACK;
+				currentState = ATTACK;
 			}
 		}
 		//double check we didn't just arrive
@@ -79,24 +76,28 @@ void AlienAI::addTarget(GameEntity& target){
 	newTarget.entity = &target;
 	newTarget.predator = this;
 
-	enemies->push(newTarget);
+	enemies.push(newTarget);
 	
 	//replan route if new node is the new closest enemy and the AI isn't dead AND the
 	//new target is stationary
-	if(!enemies->empty()){
-		if(enemies->top() == newTarget && currentState != DEAD){
-			if(enemies->top().entity->GetPhysicsNode().GetLinearVelocity() == Vector3(0,0,0)){
+	if(!enemies.empty()){
+		if(enemies.top() == newTarget && currentState != DEAD){
+			if(enemies.top().entity->GetPhysicsNode().GetLinearVelocity() == Vector3(0,0,0)){
 				Node *root = new Node();
 				root->location = entity.GetPhysicsNode().GetPosition();
 				root->parent = NULL;
 				root->movementCost = 0;
 				root->Fcost = calcFCost(*root);
+				//queuedNodeSet.insert(*root);
 				visitedNodes.push_back(*root);
 
+				//reset the current path
+				//(C++ doesn't have a stack clear function...)
 				while(!route.empty()){
 					route.pop();
 				}
 
+				//recursively create a tree to search using A*
 				planRoute(root);
 			}
 		}
@@ -105,12 +106,11 @@ void AlienAI::addTarget(GameEntity& target){
 
 int AlienAI::calcFCost(Node& node){
 	//cost = movement cost so far + estimated cost from here onwards (hueristic)
-	Vector3 target = enemies->top().entity->GetPhysicsNode().GetPosition();
-	int Fcost = node.movementCost + abs(node.location.x - target.x) + 
-									abs(node.location.y - target.y) +
-									abs(node.location.z - target.z);
-
-	return Fcost;
+	Vector3 target = enemies.top().entity->GetPhysicsNode().GetPosition();
+	float euclidean = sqrt(pow(abs(node.location.x - target.x), 2) + 
+							pow(abs(node.location.y - target.y), 2) +
+							pow(abs(node.location.z - target.z), 2));
+	return node.movementCost + euclidean;
 }
 
 void AlienAI::createNodes(Node& root, Vector3 increment){
@@ -119,28 +119,37 @@ void AlienAI::createNodes(Node& root, Vector3 increment){
 	node->parent = &root;
 	node->movementCost = root.movementCost + abs(increment.x) + abs(increment.y) + abs(increment.z);
 	node->Fcost = calcFCost(*node);
-	bool visited = false;
+	bool visited = false;	
+	int queued = queuedNodeSet.count(node->location);
+	//check not already in queue set
+	if(checkIfSetContains(node->location) != true ){
 
-	for(int i = 0; i < visitedNodes.size(); i++){
-		//see if we've actually already looked here. 
-		if(node->location == visitedNodes[i].location){
-			visited = true;
-			//Check to see if we've found a shorter path:
-			if(node->Fcost < visitedNodes[i].Fcost){
-				//if we have, swap out the old node's info
-				visitedNodes[i].parent = node->parent;
-				visitedNodes[i].movementCost = node->movementCost;
-				visitedNodes[i].Fcost = node->Fcost;
-				break;
+		for(int i = 0; i < visitedNodes.size(); i++){
+			//see if we've actually already looked here. 
+			if(node->location == visitedNodes[i].location){
+				visited = true;
+				//Check to see if we've found a shorter path:
+				if(node->Fcost < visitedNodes[i].Fcost){
+					//if we have, swap out the old node's info
+					visitedNodes[i].parent = node->parent;
+					visitedNodes[i].movementCost = node->movementCost;
+					visitedNodes[i].Fcost = node->Fcost;
+					break;
+				}
 			}
+		} 	 
+	
+		//if visited is still false we haven't seen this node before so add it for consideration
+		if(!visited){
+			queuedNodeSet.insert(node->location);
+			nodes.push(*node);
 		}
-	} 
-	//if visited is still false we haven't seen this node before so add it for consideration
-	if(!visited)
-		nodes->push(*node);
+	}	
 }
 
 void AlienAI::planRoute(Node* root){
+
+	//recursive A* pathfinding function
 
 	bool visited = false;
 
@@ -148,12 +157,15 @@ void AlienAI::planRoute(Node* root){
 		//see if we've actually already looked here. 
 		if(root->location == visitedNodes[i].location){
 			visited = true;
+			break;
 		}
 	} 
-	//if not int the visited array, put it in
-	
-	visitedNodes.push_back(*root);
-	Vector3 target = enemies->top().entity->GetPhysicsNode().GetPosition();
+
+	//if not int the visited array, put it in	
+	if(!visited)
+		visitedNodes.push_back(*root);
+
+	Vector3 target = enemies.top().entity->GetPhysicsNode().GetPosition();
 
 	int distance = abs( root->location.x - target.x) + 
 					abs(root->location.y - target.y) +
@@ -180,12 +192,16 @@ void AlienAI::planRoute(Node* root){
 	createNodes(*root, Vector3(0, 0, -increment));
 
 	//check to see if next node in queue is actually the target
-	if(nodes->top().location == enemies->top().entity->GetPhysicsNode().GetPosition()){
+	if(nodes.top().location == enemies.top().entity->GetPhysicsNode().GetPosition()){
 		//it is! We now know the route. Go back up via the node's parents until we get
 		// to the root node, which has no parent
-		populateRouteStack(&nodes->top());
+		populateRouteStack(&nodes.top());
 	}else{
-		planRoute(&nodes->top());
+		Node next = nodes.top();
+		nodes.pop();
+		planRoute(next);
+
+
 	}
 	
 }
