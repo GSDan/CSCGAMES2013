@@ -5,15 +5,8 @@
 #include <set>
 #include <math.h>
 
-class AlienAI{
 
-enum BehaviourState {
-	IDLE,
-	NAVIGATE,
-	ATTACK,
-	PONDERING,
-	DEAD
-};
+
 
 class Node {
 	public:
@@ -26,13 +19,24 @@ class Node {
 		int Fcost; //cost = movement cost so far + estimated cost from here onwards (hueristic)
 };
 
-struct NodeCompare  : public std::binary_function<Node, Node, bool>{
-	bool operator()(const Node lhs, Node rhs){
+class NodeCompare
+{
+public:
+	bool operator() (const Node &lhs, const Node &rhs) const
+	{
 		return lhs.Fcost > rhs.Fcost;
-		//compare the movement cost so far of each object + their hueristic (lower = better)
 	}
 };
 
+class AlienAI{
+
+enum BehaviourState {
+	IDLE,
+	NAVIGATE,
+	ATTACK,
+	PONDERING,
+	DEAD
+};
 
 public:
 	AlienAI(void){};

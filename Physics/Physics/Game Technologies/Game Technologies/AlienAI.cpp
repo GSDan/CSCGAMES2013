@@ -5,6 +5,9 @@ AlienAI::AlienAI(GameEntity& entity){
 	this->entity = entity;
 	//AI starts as being idle
 	currentState = IDLE;
+
+	
+	
 }
 
 
@@ -173,6 +176,7 @@ void AlienAI::planRoute(){
 
 	//recursive A* pathfinding function
 	Node root = nodes.top();
+
 	nodes.pop();
 	visitedNodes.push_back(root);
 

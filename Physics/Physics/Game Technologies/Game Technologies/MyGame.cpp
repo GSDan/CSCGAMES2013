@@ -1,5 +1,5 @@
 #include "MyGame.h"
-
+#include <queue>
 /*
 Creates a really simple scene for our game - A cube robot standing on
 a floor. As the module progresses you'll see how to get the robot moving
@@ -17,6 +17,7 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	CubeRobot::CreateCube();
 
 	gravity = OGGravity;
+
 
 	/*
 	We're going to manage the meshes we need in our game in the game class!
