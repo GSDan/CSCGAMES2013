@@ -8,6 +8,49 @@ AlienAI::AlienAI(GameEntity& entity){
 
 	
 	
+	/*Node pleb;	
+	pleb.Fcost = 604;			
+	//visitedNodes.push_back(root);
+	test.push(pleb);
+	nodeQueue.push_back(pleb);
+
+	Node wank;	
+	wank.Fcost = 630;			
+	//visitedNodes.push_back(root);
+	test.push(wank);
+	nodeQueue.push_back(wank);
+
+	Node fucker;		
+	fucker.Fcost = 614;			
+	//visitedNodes.push_back(root);
+	test.push(fucker);
+	nodeQueue.push_back(fucker);
+
+	Node twat;	
+	twat.Fcost = 648;			
+	//visitedNodes.push_back(root);
+	test.push(twat);
+	nodeQueue.push_back(twat);
+
+	Node nonce;		
+	nonce.Fcost = 326;			
+	//visitedNodes.push_back(root);
+	test.push(nonce);
+	nodeQueue.push_back(nonce);
+
+	Node cock	;	
+	cock.Fcost = 613;			
+	//visitedNodes.push_back(root);
+	test.push(cock);
+	nodeQueue.push_back(cock);
+
+	Node hello;		
+	hello.Fcost = 612;			
+	//visitedNodes.push_back(root);
+	test.push(hello);
+	nodeQueue.push_back(hello);
+
+	//sort(nodeQueue.begin(), nodeQueue.end(), [](Node a, Node b) { return a < b; });*/
 }
 
 
@@ -21,6 +64,7 @@ void AlienAI::update(){
 		
 		Vector3 enemySpeed = enemies.top().entity->GetPhysicsNode().GetLinearVelocity();
 		if(abs(enemySpeed.x) + abs(enemySpeed.y) + abs(enemySpeed.z) <= 0.1){
+
 			currentState = PONDERING;
 			Node root = Node();
 			root.location = currentPos;
@@ -29,7 +73,8 @@ void AlienAI::update(){
 			root.movementCost = 0;
 			root.Fcost = calcFCost(root);			
 			//visitedNodes.push_back(root);
-			nodes.push(root);
+			//nodes.push(root);
+			nodeQueue.push_back(root);
 			planRoute();
 			currentState = NAVIGATE;
 		}
@@ -82,7 +127,10 @@ void AlienAI::addTarget(GameEntity& target){
 	Target newTarget = Target();
 	newTarget.entity = &target;
 	newTarget.predator = this;
-
+	Vector3 p = entity.GetPhysicsNode().GetPosition();
+	newTarget.entity->GetPhysicsNode().setPosition(Vector3(p.x, p.y, p.z + 200));
+	newTarget.entity->GetPhysicsNode().setGravity(Vector3(0,0,0));
+	newTarget.entity->GetPhysicsNode().setLinearVelocity(Vector3(0,0,0));
 	enemies.push(newTarget);
 	
 	//replan route if new node is the new closest enemy and the AI isn't dead AND the
@@ -98,7 +146,7 @@ void AlienAI::addTarget(GameEntity& target){
 				root.movementCost = 0;
 				root.Fcost = calcFCost(root);
 				//visitedNodes.push_back(root);
-				nodes.push(root);
+				nodeQueue.push_back(root);
 
 				//reset the current path
 				//(C++ doesn't have a stack clear function...)
@@ -116,10 +164,13 @@ void AlienAI::addTarget(GameEntity& target){
 int AlienAI::calcFCost(Node& node){
 	//cost = movement cost so far + estimated cost from here onwards (hueristic)
 	Vector3 target = enemies.top().entity->GetPhysicsNode().GetPosition();
-	float euclidean = sqrt(pow(abs(node.location.x - target.x), 2) + 
+
+
+	float euclidean1 = sqrt(pow(abs(node.location.x - target.x), 2) + 
 							pow(abs(node.location.y - target.y), 2) +
 							pow(abs(node.location.z - target.z), 2));
-	return node.movementCost + euclidean;
+
+	return node.movementCost + euclidean1;
 }
 
 //creates a node using the current top node in the queue and given params
@@ -147,7 +198,7 @@ void AlienAI::createNodes(int distanceToParent, char direction, Node root){
 	bool visited = false;	
 	
 	//check not already in queue set
-	if(checkIfSetContains(node.location) != true ){
+	if(checkIfQueueContains(node) != true ){
 
 		for(int i = 0; i < visitedNodes.size(); i++){
 			//see if we've actually already looked here. 
@@ -156,9 +207,11 @@ void AlienAI::createNodes(int distanceToParent, char direction, Node root){
 				//Check to see if we've found a shorter path:
 				if(node.Fcost < visitedNodes[i].Fcost){
 					//if we have, swap out the old node's info
+					visitedNodes[i].distanceToParent = distanceToParent;
 					visitedNodes[i].directionToParent = direction;
 					visitedNodes[i].movementCost = node.movementCost;
 					visitedNodes[i].Fcost = node.Fcost;
+					nodeQueue.push_back(node);
 					break;
 				}
 			}
@@ -166,18 +219,19 @@ void AlienAI::createNodes(int distanceToParent, char direction, Node root){
 	
 		//if visited is still false we haven't seen this node before so add it for consideration
 		if(!visited){
-			queuedNodeSet.insert(node.location);
-			nodes.push(node);
+			nodeQueue.push_back(node);
 		}
 	}
 }
 
 void AlienAI::planRoute(){
 
-	//recursive A* pathfinding function
-	Node root = nodes.top();
 
-	nodes.pop();
+	//recursive A* pathfinding function
+	Node root = nodeQueue.back();
+
+	nodeQueue.pop_back();
+
 	visitedNodes.push_back(root);
 
 	if(root.location == enemies.top().entity->GetPhysicsNode().GetPosition()){
@@ -199,7 +253,9 @@ void AlienAI::planRoute(){
 		collisions will occur!
 		*/
 		int increment = 1;
-		if(distance > 150) increment = 40;
+		if(distance > 450) increment = 150;
+		else if (distance > 250) increment = 100;
+		else if (distance > 150) increment = 50;
 		else if (distance > 50) increment = 15;
 		else if (distance > 30) increment = 5;
 
@@ -211,11 +267,15 @@ void AlienAI::planRoute(){
 		createNodes(increment, 'F', root);
 		createNodes(increment, 'B', root);
 
+		//sort the queue now that it has new nodes
+		sort(nodeQueue.begin(), nodeQueue.end(), [](Node a, Node b) { return a < b; });
+
 		//check to see if the top node has changed, and final node has been found
-		if(nodes.top().location == enemies.top().entity->GetPhysicsNode().GetPosition()){
+		if(nodeQueue.back().location == enemies.top().entity->GetPhysicsNode().GetPosition()){
 			//it is! We now know the route. Go back up via the node's parents until we get
 			// to the root node, which has no parent
-			populateRouteQueue(increment, nodes.top().directionToParent, nodes.top().location);
+			populateRouteQueue(increment, nodeQueue.back().directionToParent, nodeQueue.back().location);
+
 		}else{	
 			planRoute();
 		}
@@ -231,17 +291,17 @@ void AlienAI::populateRouteQueue(int distanceToParent, char directionToParent, V
 	Vector3 newPos = position;
 
 	if(directionToParent == 'U')
-		newPos += Vector3(0,-distanceToParent,0);
-	else if(directionToParent == 'D')
 		newPos += Vector3(0,distanceToParent,0);
+	else if(directionToParent == 'D')
+		newPos += Vector3(0,-distanceToParent,0);
 	else if(directionToParent == 'L')
-		newPos += Vector3(-distanceToParent,0,0);
-	else if(directionToParent == 'R')
 		newPos += Vector3(distanceToParent,0,0);
+	else if(directionToParent == 'R')
+		newPos += Vector3(-distanceToParent,0,0);
 	else if(directionToParent == 'F')
-		newPos += Vector3(0,0,-distanceToParent);
-	else if(directionToParent == 'B')
 		newPos += Vector3(0,0,distanceToParent);
+	else if(directionToParent == 'B')
+		newPos += Vector3(0,0,-distanceToParent);
 
 	if(newPos != entity.GetPhysicsNode().GetPosition()){
 		//if that position isn't the AI's position, search visited nodes for the 
@@ -250,7 +310,7 @@ void AlienAI::populateRouteQueue(int distanceToParent, char directionToParent, V
 		bool found = false;
 
 		for(int i = 0; i < visitedNodes.size(); i++){
-			//see if we've actually already looked here. 
+			//see if we've actually already looked here.
 			if(newPos == visitedNodes[i].location){
 				populateRouteQueue(visitedNodes[i].distanceToParent,
 								   visitedNodes[i].directionToParent,
@@ -258,13 +318,13 @@ void AlienAI::populateRouteQueue(int distanceToParent, char directionToParent, V
 				found = true;
 				break;
 			}
-			//something bad has happened if this forloop has finished successfully...
-			if(!found)
+			
+			
+		}//something bad has happened if this forloop has finished successfully... 	
+		if(!found)
 				cout << "Node not found!" << endl;
-		} 	
-	}
-
-	
+	}	
 	//return up through all dream levels
 	return;
 }
+

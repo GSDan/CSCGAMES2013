@@ -2,9 +2,8 @@
 #include <vector>
 #include <queue>
 #include <stack>
-#include <set>
 #include <math.h>
-
+#include <list>
 
 
 
@@ -17,6 +16,13 @@ class Node {
 		char directionToParent;
 		int movementCost;
 		int Fcost; //cost = movement cost so far + estimated cost from here onwards (hueristic)
+
+		bool operator<(const Node rhs) const{
+		if(rhs.Fcost < this->Fcost)
+			return true;
+		else
+			return false;
+		};
 };
 
 class NodeCompare
@@ -24,7 +30,10 @@ class NodeCompare
 public:
 	bool operator() (const Node &lhs, const Node &rhs) const
 	{
-		return lhs.Fcost > rhs.Fcost;
+		if(lhs.Fcost < rhs.Fcost) 
+			return true;
+		else 
+			return false;
 	}
 };
 
@@ -88,12 +97,15 @@ protected:
 	priority_queue<Target, vector<Target>, EntityCompareDist> enemies;
 
 	//priority queue of potential A* graph nodes
-	priority_queue<Node, vector<Node>, NodeCompare> nodes;
+	priority_queue<Node, vector<Node>> nodes;
+	vector<Node> nodeQueue;
+	
+
+	priority_queue<Node, vector<Node>> test;//TEST
 
 	vector<Node> visitedNodes;
 	BehaviourState currentState;
 	GameEntity entity;
-	set<Vector3> queuedNodeSet;
 	
 
 	void createNodes(int distanceToParent, char direction, Node root);
@@ -104,18 +116,14 @@ protected:
 	void attack();
 	int calcFCost(Node& node);
 
-	bool checkIfSetContains(Vector3 &vec)
+	bool checkIfQueueContains(Node &lhs)
 	{
-		set<Vector3>::iterator it;
-		for (it=queuedNodeSet.begin(); it!=queuedNodeSet.end(); ++it)
-		 {
-			 if((*it).x == vec.x && (*it).y == vec.y && (*it).z == vec.z)
-			 {
-				 return true;
-			 }
-		 }
-
-		return false;
+		for(int i = 0; i < nodeQueue.size(); i++){
+			if(lhs.location == nodeQueue[i].location)
+				return true;
+			else
+				return false;
+		}
 	}
 	
 	
