@@ -54,6 +54,7 @@ protected:
 
 	GameEntity* BuildUFOEntity(float size);
 
+	void explode(GameEntity& entity);
 
 	Mesh* cube;
 	Mesh* quad;

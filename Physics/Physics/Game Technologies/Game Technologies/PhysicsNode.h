@@ -105,6 +105,10 @@ public:
 
 	void calcSphereInvInertia(float radius);
 
+	void damage(){ health--;}
+	int getHealth(){ return health; }
+	void setHealth(int h) { health = h;}
+
 	virtual void		Update(float msec);
 
 	void	SetTarget(SceneNode *s) { target = s;}
@@ -140,4 +144,6 @@ protected:
 	SceneNode*	target;  
 
 	int size;
+	int health;
+
 };

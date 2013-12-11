@@ -79,8 +79,9 @@ void MyGame::UpdateGame(float msec, int& size) {
 	}
 
 	for(vector<GameEntity*>::iterator i = allEntities.begin(); i != allEntities.end(); ++i) {
-		(*i)->Update(msec);
-	}
+                (*i)->Update(msec);
+				//TODO
+        }
 
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_E)){
 
@@ -98,13 +99,14 @@ void MyGame::UpdateGame(float msec, int& size) {
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q)){
 
 		//shoot a projectile
-		GameEntity* cube = BuildSphereEntity(10);
+		GameEntity* cube = BuildSphereEntity(size);
 		//cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
 		//start the projectile at the camera position and set object physics properties
 		Vector3 force = gameCamera->GetForwardVector()*-2;
 		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, -5, 0));
 		cube->GetPhysicsNode().setLinearVelocity(force);
 		cube->GetPhysicsNode().SetMass(1);
+		cube->GetPhysicsNode().setHealth(5);
 		cube->GetPhysicsNode().calcCubeInvInertia(10);
 		cube->GetPhysicsNode().setGravity(gravity);
 		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
@@ -120,6 +122,7 @@ void MyGame::UpdateGame(float msec, int& size) {
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_O)){
 		size/=2;
 	}
+
 
 	/*
 	Here's how we can use OGLRenderer's inbuilt debug-drawing functions! 
@@ -246,4 +249,28 @@ GameEntity* MyGame::BuildQuadEntity(float size) {
 	g->GetPhysicsNode().setInertia(Matrix4(invIn));
 	g->ConnectToSystems();
 	return g;
+}
+
+void MyGame::explode(GameEntity& entity){
+	int newSize = entity.GetPhysicsNode().getSize()/4;
+	int mass = entity.GetPhysicsNode().GetMass()/4;
+	Vector3 basePos = entity.GetPhysicsNode().GetPosition() - Vector3(20,20,20);
+	for(int i = 0; i < 4; i++){
+		GameEntity* cube = BuildSphereEntity(newSize);
+		//cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
+		//start the projectile at the camera position and set object physics properties
+		cube->GetPhysicsNode().setPosition(basePos + Vector3(i*10,i*10, i*10));
+		cube->GetPhysicsNode().setLinearVelocity(entity.GetPhysicsNode().GetLinearVelocity());
+		cube->GetPhysicsNode().SetMass(mass);
+		cube->GetPhysicsNode().setHealth(5);
+		cube->GetPhysicsNode().calcCubeInvInertia(3);
+		cube->GetPhysicsNode().setGravity(gravity);
+		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+		cube->setSize(newSize);
+		//add projectile to allEntities list
+		allEntities.push_back(cube);
+	}
+
+	//remove the destroyed entity
+	entity.DisconnectFromSystems();
 }

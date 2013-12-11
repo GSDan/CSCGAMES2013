@@ -55,6 +55,7 @@ public:
 
 	void setSize(int s) { renderNode->SetModelScale(Vector3(s,s,s)); physicsNode->setSize(s);}
 
+
 	void			ConnectToSystems();
 	void			DisconnectFromSystems();
 

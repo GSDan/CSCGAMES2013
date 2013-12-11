@@ -135,6 +135,8 @@ protected:
 
 	bool PointInConvexPolygon(const Vector3 testPosition, Vector3 * convexShapePoints, int numPointsL) const;
 
+	void explode(PhysicsNode node);
+
 	Vector3 gravity;
 
 //Statics

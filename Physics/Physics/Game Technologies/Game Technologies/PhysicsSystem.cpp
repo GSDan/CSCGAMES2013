@@ -50,9 +50,11 @@ void	PhysicsSystem::BroadPhaseCollisions() {
                 CollisionSphere ball_2((*j)->GetPosition(),(*j)->getSize());
 				CollisionData thisCollision;
 				if(SphereCollision(ball_1,ball_2, &thisCollision))
-                {					
+                {			
+					(*i)->damage(); (*j)->damage();
+					
 					AddCollisionImpulse(*(*i), *(*j), thisCollision.m_point, thisCollision.m_normal, thisCollision.m_penetration);
-					//cout<< "Sphere collision!" << endl;
+					
                 }
             }
 		}
