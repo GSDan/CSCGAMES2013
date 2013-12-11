@@ -79,6 +79,9 @@ public:
 	Vector3		getGravity() { return m_gravity; }
 	void		setGravity(Vector3 accel) { m_gravity = accel; }
 
+	int			getSize() { return size; }
+	void		setSize(int s) { size = s; }
+
 	Vector3		getForce() { return m_force; }
 	void		setForce(Vector3 force) { m_force = force; }
 
@@ -134,8 +137,7 @@ protected:
 	Matrix4     m_invInertia;
 
 	CollisionVolumeType collisionType;
-
-	
-
 	SceneNode*	target;  
+
+	int size;
 };

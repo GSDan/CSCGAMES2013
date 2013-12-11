@@ -41,7 +41,7 @@ public:
 	MyGame(Vector3& OGGravity);
 	~MyGame(void);
 
-	virtual void UpdateGame(float msec);
+	virtual void UpdateGame(float msec, int& size);
 
 protected:
 	GameEntity* BuildRobotEntity();
@@ -61,5 +61,7 @@ protected:
 	Mesh* UFO;
 
 	Vector3 gravity;
+
+	
 };
 

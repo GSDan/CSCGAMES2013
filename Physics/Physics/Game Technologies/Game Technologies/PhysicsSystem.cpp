@@ -26,14 +26,14 @@ void	PhysicsSystem::BroadPhaseCollisions() {
 	Plane *p = new Plane(Vector3(0,-1,0),0);
 	for(vector<PhysicsNode*>::iterator i = allNodes.begin(); i != allNodes.end(); i++){
 		for(vector<PhysicsNode*>::iterator j = i+1; j != allNodes.end(); j++){
-
+			
 			//collision between a sphere and a plane
 			if((*i)->GetCollisionType() == COLLISION_PLANE && (*j)->GetCollisionType() == COLLISION_SPHERE )
             {
-				CollisionSphere ball_1((*j)->GetPosition(),15.0f);
+				CollisionSphere ball_1((*j)->GetPosition(),(*j)->getSize());
 				CollisionData thisCollision;
 				
-				if( p->SphereInPlane((*j)->GetPosition(),15.0f, &thisCollision))
+				if( p->SphereInPlane((*j)->GetPosition(),(*j)->getSize(), &thisCollision))
                 {
 					
 					AddCollisionImpulse(*(*i), *(*j), thisCollision.m_point, thisCollision.m_normal, thisCollision.m_penetration);
@@ -46,8 +46,8 @@ void	PhysicsSystem::BroadPhaseCollisions() {
 			//collision between two spheres
 			if((*i)->GetCollisionType() == COLLISION_SPHERE && (*j)->GetCollisionType() == COLLISION_SPHERE )
             {
-				CollisionSphere ball_1((*i)->GetPosition(),15.0f);
-                CollisionSphere ball_2((*j)->GetPosition(),15.0f);
+				CollisionSphere ball_1((*i)->GetPosition(),(*i)->getSize());
+                CollisionSphere ball_2((*j)->GetPosition(),(*j)->getSize());
 				CollisionData thisCollision;
 				if(SphereCollision(ball_1,ball_2, &thisCollision))
                 {					
@@ -88,7 +88,7 @@ bool PhysicsSystem::SphereCollision(const CollisionSphere &s0, const CollisionSp
 			collisionData -> m_penetration = sumRadius - sqrtf( distSq );
 			collisionData -> m_normal = ( s0.m_pos - s1.m_pos );
 			collisionData -> m_normal.Normalise();
-			collisionData -> m_point = s0 . m_pos - collisionData -> m_normal * ( s0 . m_radius - collisionData -> m_penetration *0.5f );
+			collisionData -> m_point = s0.m_pos - collisionData -> m_normal * ( s0.m_radius - collisionData->m_penetration *0.5f );
 		}
 		return true ; // Collision
 	}

@@ -37,9 +37,9 @@ public:
 	GameClass();
 	~GameClass(void);
 
-	virtual void UpdateCore(float msec, Vector3& gravity);
+	virtual void UpdateCore(float msec, Vector3& gravity, int& size);
 
-	virtual void UpdateGame(float msec) = 0;
+	virtual void UpdateGame(float msec, int& size) = 0;
 
 	static GameClass& GetGameClass() { return *instance;}
 

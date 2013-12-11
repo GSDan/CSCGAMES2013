@@ -18,7 +18,6 @@ MyGame::MyGame(Vector3& OGGravity)	{
 
 	gravity = OGGravity;
 
-
 	/*
 	We're going to manage the meshes we need in our game in the game class!
 
@@ -42,7 +41,7 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	allEntities.push_back(BuildQuadEntity(1000.0f));
 	allEntities.push_back(BuildRobotEntity());
 	
-	//create UFO
+	/*create UFO
 	GameEntity* UFOEntity = BuildUFOEntity(30);
 	UFOEntity->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(1000, -5, 0));		
 	UFOEntity->GetPhysicsNode().SetMass(30);
@@ -51,7 +50,7 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	UFOEntity->GetPhysicsNode().setAngularDamping(Vector3(1,1,1)); //no damping on rotations
 	UFOEntity->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
 	allEntities.push_back(UFOEntity);
-	AI = new AlienAI(*UFOEntity);
+	AI = new AlienAI(*UFOEntity);*/
 }
 
 MyGame::~MyGame(void)	{
@@ -72,8 +71,8 @@ Here's the base 'skeleton' of your game update loop! You will presumably
 want your games to have some sort of internal logic to them, and this
 logic will be added to this function.
 */
-void MyGame::UpdateGame(float msec) {
-	AI->update();
+void MyGame::UpdateGame(float msec, int& size) {
+	//AI->update();
 
 	if(gameCamera) {
 		gameCamera->UpdateCamera(msec);
@@ -81,6 +80,19 @@ void MyGame::UpdateGame(float msec) {
 
 	for(vector<GameEntity*>::iterator i = allEntities.begin(); i != allEntities.end(); ++i) {
 		(*i)->Update(msec);
+	}
+
+	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_E)){
+
+		//make a target for the AI
+		GameEntity* cube = BuildSphereEntity(10);
+		cube->GetPhysicsNode().SetMass(1);
+		cube->GetPhysicsNode().calcCubeInvInertia(10);
+		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+		
+		//add projectile to AI target list and allEntities list
+		AI->addTarget(*cube);
+		allEntities.push_back(cube);
 	}
 
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q)){
@@ -96,10 +108,17 @@ void MyGame::UpdateGame(float msec) {
 		cube->GetPhysicsNode().calcCubeInvInertia(10);
 		cube->GetPhysicsNode().setGravity(gravity);
 		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
-		
-		//add projectile to AI target list and allEntities list
-		AI->addTarget(*cube);
+		cube->setSize(size);
+		//add projectile to allEntities list
 		allEntities.push_back(cube);
+	}
+
+	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)){
+		size*=2;
+	}
+
+	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_O)){
+		size/=2;
 	}
 
 	/*

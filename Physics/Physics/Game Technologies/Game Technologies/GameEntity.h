@@ -53,6 +53,8 @@ public:
 	SceneNode&		GetRenderNode()		{ return *renderNode;}
 	PhysicsNode&	GetPhysicsNode()	{ return *physicsNode;}
 
+	void setSize(int s) { renderNode->SetModelScale(Vector3(s,s,s)); physicsNode->setSize(s);}
+
 	void			ConnectToSystems();
 	void			DisconnectFromSystems();
 
@@ -69,5 +71,6 @@ public:
 protected:
 	SceneNode*		renderNode;
 	PhysicsNode*	physicsNode;
+	
 };
 

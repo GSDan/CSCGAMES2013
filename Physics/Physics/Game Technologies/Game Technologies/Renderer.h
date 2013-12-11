@@ -36,11 +36,14 @@ _-_-_-_-_-_-_-""  ""
 #include "../../nclgl/SceneNode.h"
 #include "../../nclgl/Camera.h"
 #include "../../nclgl/Frustum.h"
+#include "../../nclgl/Vector3.h"
+#include "TextMesh.h"
 #include <algorithm>
+#include <sstream>
 
 class Renderer : public OGLRenderer	{
 public:
-	virtual void RenderScene();
+	virtual void RenderScene(int& size);
 	virtual void UpdateScene(float msec);
 
 	void	SetCamera(Camera*c);
@@ -70,10 +73,16 @@ protected:
 	void	ClearNodeLists();
 	void	DrawNodes();
 	void	DrawNode(SceneNode*n);
+	void DrawText(const std::string &text, const Vector3 &position, const float size, const bool perspective);
 
 	SceneNode*	root;
 	Camera*		camera;
+
+	Font*        basicFont;
+	TextMesh * txtMesh;
+
 	Shader*		simpleShader;
+	Shader*		textShader;
 
 	Frustum		frameFrustum;
 
@@ -81,5 +90,7 @@ protected:
 	vector<SceneNode*> nodeList;
 
 	static Renderer*	instance;
+
+	int fps;
 };
 

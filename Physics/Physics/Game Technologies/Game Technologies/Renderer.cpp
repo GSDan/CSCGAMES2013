@@ -9,10 +9,14 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent)	{
 	root = new SceneNode();
 
 	simpleShader = new Shader(SHADERDIR"TechVertex.glsl", SHADERDIR"TechFragment.glsl");
-
-	if(!simpleShader->LinkProgram() ){
+	textShader = new Shader("../../Shaders/TexturedVertex.glsl", "../../Shaders/TexturedFragment.glsl");
+	
+	if(!simpleShader->LinkProgram() || !textShader->LinkProgram()){
 		return;
 	}
+
+	 //setup basic font
+    basicFont = new Font(SOIL_load_OGL_texture("../../Textures/tahoma.tga",SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_COMPRESS_TO_DXT),16,16);
 
 	instance = this;
 
@@ -27,13 +31,14 @@ Renderer::~Renderer(void)	{
 }
 
 void Renderer::UpdateScene(float msec)	{
+	fps = 1000.0f / msec;
 	if(camera) {
 		camera->UpdateCamera(msec); 
 	}
 	root->Update(msec);
 }
 
-void Renderer::RenderScene()	{
+void Renderer::RenderScene(int& objectSize)	{
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	if(camera) {
@@ -60,6 +65,16 @@ void Renderer::RenderScene()	{
 		DrawNodes();
 		ClearNodeLists();
 	}
+
+	stringstream ss;
+	ss << fps;
+    DrawText("FPS: " + ss.str(), Vector3(width-150,0,0), 20.0f, false);
+
+	ss.str("");
+    ss.clear();
+
+	ss << objectSize;
+    DrawText("Size: " + ss.str(), Vector3(0,0,0), 16.0f, false);
 
 	glUseProgram(0);
 	SwapBuffers();
@@ -123,4 +138,39 @@ void	Renderer::AddNode(SceneNode* n) {
 void	Renderer::RemoveNode(SceneNode* n) {
 	//cout<<"UIHUIH";
 	//root->RemoveChild(n);
+}
+
+void Renderer::DrawText(const std::string &text, const Vector3 &position, const float size, const bool perspective)        {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+
+        glUseProgram(textShader->GetProgram());
+        SetCurrentShader(textShader);
+        glUniform1i(glGetUniformLocation(textShader->GetProgram(), "diffuseTex"), 0);
+
+        //Create a new temporary TextMesh, using our line of text and our font
+        TextMesh* mesh = new TextMesh(text,*basicFont);
+
+        //This just does simple matrix setup to render in either perspective or
+        //orthographic mode, there's nothing here that's particularly tricky.
+        if(perspective) {
+                modelMatrix = Matrix4::Translation(position) * Matrix4::Scale(Vector3(size,size,1));
+                viewMatrix = camera->BuildViewMatrix();
+                projMatrix = Matrix4::Perspective(1.0f,10000.0f,(float)width / (float)height, 45.0f);
+        }
+        else{        
+                //In ortho mode, we subtract the y from the height, so that a height of 0
+                //is at the top left of the screen, which is more intuitive
+                //(for me anyway...)
+                modelMatrix = Matrix4::Translation(Vector3(position.x,height-position.y, position.z)) * Matrix4::Scale(Vector3(size,size,1));
+                viewMatrix.ToIdentity();
+                projMatrix = Matrix4::Orthographic(-1.0f,1.0f,(float)width, 0.0f,(float)height, 0.0f);
+                textureMatrix.ToIdentity();
+        }
+        //Either way, we update the matrices, and draw the mesh
+        UpdateShaderMatrices();
+        mesh->Draw();
+        projMatrix = Matrix4::Perspective(1.0f,10000.0f,(float)width / (float)height, 45.0f);
+        delete mesh; //Once it's drawn, we don't need it anymore!
+        glDisable(GL_BLEND);
 }

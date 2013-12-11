@@ -94,21 +94,21 @@ void AlienAI::update(){
 		if(currentState == NAVIGATE){			
 			//move the AI towards the next element in the route stack
 			if(currentPos.x > route.front().x){
-				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x + 1, currentPos.y, currentPos.z));
+				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x - 1, currentPos.y, currentPos.z));
 			}else if(currentPos.x < route.front().x){
-				Vector3(currentPos.x - 1, currentPos.y, currentPos.z);
+				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x + 1, currentPos.y, currentPos.z));
 			}
 
 			if(currentPos.y > route.front().y){
-				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x, currentPos.y + 1, currentPos.z));
+				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x, currentPos.y - 1, currentPos.z));
 			}else if(currentPos.y < route.front().y){
-				Vector3(currentPos.x, currentPos.y - 1, currentPos.z);
+				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x, currentPos.y + 1, currentPos.z));
 			}
 
 			if(currentPos.z > route.front().z){
-				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x, currentPos.y, currentPos.z + 1));
+				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x, currentPos.y, currentPos.z - 1));
 			}else if(currentPos.z < route.front().z){
-				Vector3(currentPos.x, currentPos.y, currentPos.z - 1);
+				entity.GetPhysicsNode().setPosition(Vector3(currentPos.x, currentPos.y, currentPos.z + 1));
 			}
 
 		}
@@ -128,7 +128,7 @@ void AlienAI::addTarget(GameEntity& target){
 	newTarget.entity = &target;
 	newTarget.predator = this;
 	Vector3 p = entity.GetPhysicsNode().GetPosition();
-	newTarget.entity->GetPhysicsNode().setPosition(Vector3(p.x, p.y, p.z + 200));
+	newTarget.entity->GetPhysicsNode().setPosition(Vector3(p.x, p.y, p.z + 350));
 	newTarget.entity->GetPhysicsNode().setGravity(Vector3(0,0,0));
 	newTarget.entity->GetPhysicsNode().setLinearVelocity(Vector3(0,0,0));
 	enemies.push(newTarget);
@@ -252,12 +252,12 @@ void AlienAI::planRoute(){
 		make the graph we have to consider much smaller. Can't make increments too large as otherwise
 		collisions will occur!
 		*/
-		int increment = 1;
-		if(distance > 450) increment = 150;
+		int increment = 5;
+		/*if(distance > 450) increment = 150;
 		else if (distance > 250) increment = 100;
 		else if (distance > 150) increment = 50;
 		else if (distance > 50) increment = 15;
-		else if (distance > 30) increment = 5;
+		else if (distance > 30) increment = 5;*/
 
 		//create nodes to consider
 		createNodes(increment, 'U', root);
