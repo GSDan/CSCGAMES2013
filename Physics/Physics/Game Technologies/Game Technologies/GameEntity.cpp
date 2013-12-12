@@ -32,8 +32,8 @@ void	GameEntity::ConnectToSystems() {
 	}
 
 	if(renderNode && physicsNode) {
-		physicsNode->SetTarget(renderNode);
-	}
+                physicsNode->SetTarget(renderNode);
+    }
 }
 
 void	GameEntity::DisconnectFromSystems() {

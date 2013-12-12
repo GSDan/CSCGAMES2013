@@ -16,13 +16,13 @@ GameClass::~GameClass(void)	{
 	delete gameCamera;
 }
 
-void GameClass::UpdateCore(float msec, Vector3& gravity, int& size, int& score) {
+void GameClass::UpdateCore(float msec, Vector3& gravity, int& size, int& score, int& ents, int& fps) {
 	renderCounter	-= msec;
 	physicsCounter	+= msec;
 
 	if(renderCounter <= 0.0f) {	//Update our rendering logic
 		Renderer::GetRenderer().UpdateScene(1000.0f / (float)RENDER_HZ);
-		Renderer::GetRenderer().RenderScene(size, score);
+		Renderer::GetRenderer().RenderScene(size, score, ents, fps);
 		renderCounter += (1000.0f / (float)RENDER_HZ);
 	}
 
@@ -32,5 +32,5 @@ void GameClass::UpdateCore(float msec, Vector3& gravity, int& size, int& score) 
 	}
 
 	Renderer::GetRenderer().UpdateScene(msec);
-	Renderer::GetRenderer().RenderScene(size, score);
+	Renderer::GetRenderer().RenderScene(size, score, ents, fps);
 }

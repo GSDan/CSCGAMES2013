@@ -6,50 +6,6 @@ AlienAI::AlienAI(GameEntity& entity){
 	//AI starts as being idle
 	currentState = IDLE;
 
-	
-	
-	/*Node pleb;	
-	pleb.Fcost = 604;			
-	//visitedNodes.push_back(root);
-	test.push(pleb);
-	nodeQueue.push_back(pleb);
-
-	Node wank;	
-	wank.Fcost = 630;			
-	//visitedNodes.push_back(root);
-	test.push(wank);
-	nodeQueue.push_back(wank);
-
-	Node fucker;		
-	fucker.Fcost = 614;			
-	//visitedNodes.push_back(root);
-	test.push(fucker);
-	nodeQueue.push_back(fucker);
-
-	Node twat;	
-	twat.Fcost = 648;			
-	//visitedNodes.push_back(root);
-	test.push(twat);
-	nodeQueue.push_back(twat);
-
-	Node nonce;		
-	nonce.Fcost = 326;			
-	//visitedNodes.push_back(root);
-	test.push(nonce);
-	nodeQueue.push_back(nonce);
-
-	Node cock	;	
-	cock.Fcost = 613;			
-	//visitedNodes.push_back(root);
-	test.push(cock);
-	nodeQueue.push_back(cock);
-
-	Node hello;		
-	hello.Fcost = 612;			
-	//visitedNodes.push_back(root);
-	test.push(hello);
-	nodeQueue.push_back(hello);
-
 	//sort(nodeQueue.begin(), nodeQueue.end(), [](Node a, Node b) { return a < b; });*/
 }
 

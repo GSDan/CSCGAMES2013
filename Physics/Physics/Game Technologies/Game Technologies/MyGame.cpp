@@ -31,9 +31,9 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	quad	= Mesh::GenerateQuad();
 	sphere	= new OBJMesh("../../Meshes/sphereNew.obj");
 	rubble  = new OBJMesh("../../Meshes/sphereNew.obj");
-	UFO		= new OBJMesh("../../Meshes/centeredUFO.obj");
+	//UFO		= new OBJMesh("../../Meshes/centeredUFO.obj");
 	quad-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/grass.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
-	UFO-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/Top1.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
+	//UFO-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/Top1.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	sphere-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/earth_sphere.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	rubble-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/destroyed.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	/*
@@ -43,16 +43,18 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	allEntities.push_back(BuildQuadEntity(1000.0f));
 	//allEntities.push_back(BuildRobotEntity());
 	
-	/*create UFO
-	GameEntity* UFOEntity = BuildUFOEntity(30);
-	UFOEntity->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(1000, -5, 0));		
-	UFOEntity->GetPhysicsNode().SetMass(30);
-	UFOEntity->GetPhysicsNode().calcCubeInvInertia(30);
-	UFOEntity->GetPhysicsNode().setAngularVelocity(Vector3(0,20,0));
-	UFOEntity->GetPhysicsNode().setAngularDamping(Vector3(1,1,1)); //no damping on rotations
-	UFOEntity->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
-	allEntities.push_back(UFOEntity);
-	AI = new AlienAI(*UFOEntity);*/
+	//create UFO
+	/*
+	ai = BuildUFOEntity(100);
+	ai->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, 150, 0));		
+	ai->GetPhysicsNode().SetMass(30);
+	ai->GetPhysicsNode().setGravity(Vector3(0,0,0));
+	ai->GetPhysicsNode().calcCubeInvInertia(30);
+	ai->GetPhysicsNode().setAngularVelocity(Vector3(0,20,0));
+	ai->GetPhysicsNode().setAngularDamping(Vector3(1,1,1)); //no damping on rotations
+	ai->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+	allEntities.push_back(ai);*/
+	
 
 }
 
@@ -74,8 +76,8 @@ Here's the base 'skeleton' of your game update loop! You will presumably
 want your games to have some sort of internal logic to them, and this
 logic will be added to this function.
 */
-void MyGame::UpdateGame(float msec, int& size, int& score) {
-	//AI->update();
+void MyGame::UpdateGame(float msec, int& size, int& score, int& ents) {
+	
 
 	if(gameCamera) {
 		gameCamera->UpdateCamera(msec);
@@ -94,14 +96,18 @@ void MyGame::UpdateGame(float msec, int& size, int& score) {
 
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_E)){
 
-		//make a target for the AI
-		GameEntity* cube = BuildSphereEntity(10);
+		//set restful object
+		GameEntity* cube = BuildSphereEntity(size);
+		//cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
+		//start the projectile at the camera position and set object physics properties
+		cube->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, -5, 0));
 		cube->GetPhysicsNode().SetMass(1);
+		cube->GetPhysicsNode().setHealth(5);
 		cube->GetPhysicsNode().calcCubeInvInertia(10);
 		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
-		
-		//add projectile to AI target list and allEntities list
-		AI->addTarget(*cube);
+		cube->setSize(size);
+		cube->GetPhysicsNode().setGravity(Vector3(0,0,0));
+		//add projectile to allEntities list
 		allEntities.push_back(cube);
 	}
 
@@ -124,14 +130,15 @@ void MyGame::UpdateGame(float msec, int& size, int& score) {
 		allEntities.push_back(cube);
 	}
 
-	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)){
+	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)&& size<128){
 		size*=2;
 	}
 
-	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_O)){
+	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_O)&& size>2){
 		size/=2;
 	}
 
+	ents = allEntities.size();
 
 	/*
 	Here's how we can use OGLRenderer's inbuilt debug-drawing functions! 
@@ -178,6 +185,14 @@ void MyGame::UpdateGame(float msec, int& size, int& score) {
 
 	////CubeRobot is looking at his treasure map upside down!, the treasure's really here...
 	Renderer::GetRenderer().DrawDebugCircle(DEBUGDRAW_PERSPECTIVE, Vector3(-200,1,-200),50.0f, Vector3(0,1,0));
+
+	/*if(ai->GetPhysicsNode().target != NULL){
+		ai->GetPhysicsNode().navigate();
+	}
+	else{
+		PhysicsSystem::GetPhysicsSystem().aiInNeed = &ai->GetPhysicsNode();
+	}*/
+
 }
 
 /*
@@ -254,42 +269,66 @@ Makes a flat quad, initially oriented such that we can use it as a simple
 floor. 
 */
 GameEntity* MyGame::BuildQuadEntity(float size) {
-	SceneNode* s = new SceneNode(quad);
+	 SceneNode* s = new SceneNode(quad);
 
-	s->SetModelScale(Vector3(size,size,size));
-	s->SetBoundingRadius(size);
+     s->SetModelScale(Vector3(size,size,size));
+     s->SetBoundingRadius(size);
 
-	PhysicsNode*p = new PhysicsNode(Quaternion::AxisAngleToQuaterion(Vector3(1,0,0), 90.0f), Vector3());
+     PhysicsNode*p = new PhysicsNode(Quaternion::AxisAngleToQuaterion(Vector3(1,0,0), 90.0f), Vector3());
 
-	GameEntity*g = new GameEntity(s, p);
-	g->GetPhysicsNode().SetCollisionType(COLLISION_PLANE);
-	g->GetPhysicsNode().SetMass(0);
-	g->GetPhysicsNode().setHealth(1000);
-	float invIn[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-	g->GetPhysicsNode().setInertia(Matrix4(invIn));
-	g->ConnectToSystems();
-	return g;
+     GameEntity*g = new GameEntity(s, p);
+     g->GetPhysicsNode().SetCollisionType(COLLISION_PLANE);
+     g->GetPhysicsNode().SetMass(0);
+     g->GetPhysicsNode().setHealth(1000);
+     float invIn[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+     g->GetPhysicsNode().setInertia(Matrix4(invIn));
+     g->ConnectToSystems();
+     return g;
 }
 
 void MyGame::explode(GameEntity& entity, int& score){
 	int newSize = entity.GetPhysicsNode().getSize()/2;
-	int mass = entity.GetPhysicsNode().GetMass()/4;
 	Vector3 basePos = entity.GetPhysicsNode().GetPosition();
 	Vector3 baseVel = entity.GetPhysicsNode().GetLinearVelocity();
 
+	Vector3 v0 = Vector3(1,0,0);
+	Vector3 v1 = Vector3(0,1,0);
+	Vector3 v2 = Vector3(0,0,1);
+	Vector3 v3 = Vector3(-1,0,0);
+	Vector3 v4 = Vector3(0,0,-1);
 	//prevent recursive destruction!
-	if(newSize > 4){
+	if(newSize > 1){
 		//create four smaller entities
-		for(int i = 0; i < 6; i++){
+		for(int i = 0; i < 5; i++){
 
 			GameEntity* rubble = BuildRubbleEntity(newSize);
 			rubble->GetPhysicsNode().setPosition(basePos + Vector3(i * 7, i *8, i*7));
-			rubble->GetPhysicsNode().setLinearVelocity(baseVel + Vector3(0, i*0.05f, 0));
+			
+			switch (i){
+			case 0:
+				rubble->GetPhysicsNode().setLinearVelocity(baseVel + v0 );
+				break;
+			case 1:
+				rubble->GetPhysicsNode().setLinearVelocity(baseVel + v1 );
+				break;
+			case 2:
+				rubble->GetPhysicsNode().setLinearVelocity(baseVel + v2 );
+				break;
+			case 3:
+				rubble->GetPhysicsNode().setLinearVelocity(baseVel + v3 );
+				break;
+			case 4:
+				rubble->GetPhysicsNode().setLinearVelocity(baseVel + v4 );
+				break;
+			}
 			rubble->GetPhysicsNode().SetMass(1);
-			rubble->GetPhysicsNode().setHealth(80);
+			rubble->GetPhysicsNode().setHealth(10);
 			rubble->GetPhysicsNode().calcCubeInvInertia(10);
 			rubble->GetPhysicsNode().setGravity(gravity);
-			rubble->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+			if(newSize > 2 && allEntities.size() < 120)
+				rubble->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+			else
+				rubble->GetPhysicsNode().SetCollisionType(PLANE_ONLY_SPHERE);
 			rubble->setSize(newSize);
 			allEntities.push_back(rubble);
 		}

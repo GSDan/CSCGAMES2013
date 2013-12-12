@@ -41,7 +41,7 @@ public:
 	MyGame(Vector3& OGGravity);
 	~MyGame(void);
 
-	virtual void UpdateGame(float msec, int& size, int& score);
+	virtual void UpdateGame(float msec, int& size, int& score, int& ents);
 
 protected:
 	GameEntity* BuildRobotEntity();
@@ -66,6 +66,7 @@ protected:
 
 	Vector3 gravity;
 
+	//GameEntity* ai;
 	
 	
 };

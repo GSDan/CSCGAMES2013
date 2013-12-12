@@ -31,14 +31,14 @@ Renderer::~Renderer(void)	{
 }
 
 void Renderer::UpdateScene(float msec)	{
-	fps = 1000.0f / msec;
+	
 	if(camera) {
 		camera->UpdateCamera(msec); 
 	}
 	root->Update(msec);
 }
 
-void Renderer::RenderScene(int& objectSize, int& score)	{
+void Renderer::RenderScene(int& objectSize, int& score, int& ents, int& fps)	{
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	if(camera) {
@@ -78,9 +78,13 @@ void Renderer::RenderScene(int& objectSize, int& score)	{
 
 	ss.str("");
     ss.clear();
-
 	ss << score;
     DrawText("Score: " + ss.str(), Vector3(0,height - 30,0), 20.0f, false);
+
+	ss.str("");
+    ss.clear();
+	ss << ents;
+    DrawText("Num of entities: " + ss.str(), Vector3(width-500,height-30,0), 20.0f, false);
 
 	glUseProgram(0);
 	SwapBuffers();

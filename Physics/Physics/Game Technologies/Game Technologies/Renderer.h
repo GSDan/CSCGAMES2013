@@ -43,7 +43,7 @@ _-_-_-_-_-_-_-""  ""
 
 class Renderer : public OGLRenderer	{
 public:
-	virtual void RenderScene(int& size, int& score);
+	virtual void RenderScene(int& size, int& score, int& ents, int& fps);
 	virtual void UpdateScene(float msec);
 
 	void	SetCamera(Camera*c);

@@ -3,7 +3,7 @@
 PhysicsSystem* PhysicsSystem::instance = 0;
 
 PhysicsSystem::PhysicsSystem(void)	{
-
+	//aiInNeed = NULL;
 }
 
 PhysicsSystem::~PhysicsSystem(void)	{
@@ -11,59 +11,99 @@ PhysicsSystem::~PhysicsSystem(void)	{
 }
 
 void	PhysicsSystem::Update(float msec, Vector3& OGGravity) {	
+
+	//START OCTREE SETUP
+	
+	//set octree boundaries
+	octree = new Octree(Vector3(0,0,0), Vector3(10000,10000,10000));
+
+	//insert nodes into octree
+	for(vector<PhysicsNode*>::iterator i = allNodes.begin(); i != allNodes.end(); ++i) {
+		if((*i)->GetCollisionType() == COLLISION_SPHERE || (*i)->GetCollisionType() == PLANE_ONLY_SPHERE)		{
+			OctreePoint* tempPoint = new OctreePoint((*i)->GetPosition());
+			tempPoint->setNode((*i));
+			octree->insert(tempPoint);
+		}
+    }
+
+	//END OCTREE SETUP
+
 	BroadPhaseCollisions();
-	NarrowPhaseCollisions();
 
 	gravity = OGGravity;
 
 	for(vector<PhysicsNode*>::iterator i = allNodes.begin(); i != allNodes.end(); ++i) {
 		(*i)->Update(msec);
 	}
+
+	/*if(aiInNeed != NULL){
+		getAITarget(aiInNeed);
+	}*/
+
+	delete octree;
 }
 
-void	PhysicsSystem::BroadPhaseCollisions() {
-	//loop through all nodes, checking which collisions are possible
+void	PhysicsSystem::BroadPhaseCollisions() {	
+	//ground plane
 	Plane *p = new Plane(Vector3(0,-1,0),0);
-	for(vector<PhysicsNode*>::iterator i = allNodes.begin(); i != allNodes.end(); i++){
-		for(vector<PhysicsNode*>::iterator j = i+1; j != allNodes.end(); j++){
-			
-			//collision between a sphere and a plane
-			if((*i)->GetCollisionType() == COLLISION_PLANE && (*j)->GetCollisionType() == COLLISION_SPHERE )
-            {
-				CollisionSphere ball_1((*j)->GetPosition(),(*j)->getSize());
-				CollisionData thisCollision;
-				
-				if( p->SphereInPlane((*j)->GetPosition(),(*j)->getSize(), &thisCollision))
-                {
-					
-					AddCollisionImpulse(*(*i), *(*j), thisCollision.m_point, thisCollision.m_normal, thisCollision.m_penetration);
-					//(*j)->setForce(Vector3(0,5,0));
-					//cout<< "Plane collision!" << endl;
-                }
-            }
 
+	for(vector<PhysicsNode*>::iterator i = allNodes.begin(); i != allNodes.end(); i++){		
+		
+		//radius around node to check
+		int dist = (*i)->getSize() * 1.5;
 
-			//collision between two spheres
-			if((*i)->GetCollisionType() == COLLISION_SPHERE && (*j)->GetCollisionType() == COLLISION_SPHERE )
-            {
-				CollisionSphere ball_1((*i)->GetPosition(),(*i)->getSize());
-                CollisionSphere ball_2((*j)->GetPosition(),(*j)->getSize());
-				CollisionData thisCollision;
-				if(SphereCollision(ball_1,ball_2, &thisCollision))
-                {			
-					(*i)->damage(); (*j)->damage();
-					
-					AddCollisionImpulse(*(*i), *(*j), thisCollision.m_point, thisCollision.m_normal, thisCollision.m_penetration);
-					
-                }
-            }
-		}
+		Vector3 qmin((*i)->GetPosition().x-dist,(*i)->GetPosition().y-dist,(*i)->GetPosition().z-dist);
+        Vector3 qmax((*i)->GetPosition().x+dist,(*i)->GetPosition().y+dist,(*i)->GetPosition().z+dist);
+
+		//make a vector of all nodes in that area
+		vector<OctreePoint*>* results = new vector<OctreePoint*>;
+		octree->getPointsInsideBox(qmin, qmax, (*results));	
+		
+		if(results->size() > 0)
+			//do narrow phase on the resulting nodes		
+			NarrowPhaseCollisions(results, p);
+
 	}
-
 }
 
-void	PhysicsSystem::NarrowPhaseCollisions() {
+void	PhysicsSystem::NarrowPhaseCollisions(vector<OctreePoint*>* results, Plane* p) {
+	//loop through all nodes, checking which collisions are possible
+	
+	for(vector<OctreePoint*>::iterator i = results->begin(); i != results->end(); i++){
 
+		if((*i)->getNode()->GetCollisionType() == COLLISION_SPHERE){
+			for(vector<OctreePoint*>::iterator j = i+1; j != results->end(); j++){   
+				//collision between two spheres
+				if((*i)->getNode()->GetCollisionType() == COLLISION_SPHERE && (*j)->getNode()->GetCollisionType() == COLLISION_SPHERE )
+				{
+					CollisionSphere ball_1((*i)->getNode()->GetPosition(),(*i)->getNode()->getSize());
+					CollisionSphere ball_2((*j)->getNode()->GetPosition(),(*j)->getNode()->getSize());
+					CollisionData thisCollision;
+					if(SphereCollision(ball_1,ball_2, &thisCollision))
+					{			
+						(*i)->getNode()->damage(); (*j)->getNode()->damage();
+					
+						AddCollisionImpulse(*(*i)->getNode(), *(*j)->getNode(), thisCollision.m_point, thisCollision.m_normal, thisCollision.m_penetration, false);
+						if(!(*i)->getNode()->hasGravity())
+							(*i)->getNode()->setGravity(gravity);
+						if(!(*j)->getNode()->hasGravity())
+							(*j)->getNode()->setGravity(gravity);
+					}
+				}
+			}
+		}
+
+		//collision between a sphere and a plane
+			
+		CollisionSphere ball_1((*i)->getNode()->GetPosition(),(*i)->getNode()->getSize());
+		CollisionData thisCollision;
+		
+		if( p->SphereInPlane((*i)->getNode()->GetPosition(),(*i)->getNode()->getSize(), &thisCollision)){
+
+			AddCollisionImpulse((*allNodes[0]), *(*i)->getNode(), thisCollision.m_point, thisCollision.m_normal, thisCollision.m_penetration, true);
+        }
+
+	}
 }
 
 void	PhysicsSystem::AddNode(PhysicsNode* n) {
@@ -105,7 +145,7 @@ bool PhysicsSystem::PointInConvexPolygon(const Vector3 testPosition, Vector3 * c
 	return false;
 }
 
-void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, const Vector3 & hitPoint, const Vector3& normal, float penetration ) {
+void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, const Vector3 & hitPoint, const Vector3& normal, float penetration, bool plane0 ) {
 	// Some simple check code .
 	float invMass0 = c0.GetInverseMass();//( c0.GetMass() > 1000.0f ) ? 0.0f : (1.0f / c0.GetMass() );
 	float invMass1 = c1.GetInverseMass();//( c1.GetMass() >1000.0f ) ? 0.0f : (1.0f / c1.GetMass() );
@@ -146,11 +186,27 @@ void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, cons
 
 	// Hack fix to stop sinking
 	// bias impulse proportional to penetration distance
-	//jn = jn + ( penetration * 0.0003f );
-	if(c0.GetCollisionType() == COLLISION_SPHERE)
-		jn = jn + ( penetration * (c0.getSize() / 60000.0f) );
-	else if(c1.GetCollisionType() == COLLISION_SPHERE)
-		jn = jn + ( penetration * (c1.getSize() / 60000.0f) );
+	
+	
+	
+	if(plane0){
+		//we know this is a plane->sphere collision
+		if(c1.getSize() == 128)
+			jn = jn + ( penetration * 0.0000375f );
+		else if(c1.getSize() == 64)
+			jn = jn + ( penetration * 0.000075f );
+		else if(c1.getSize() == 32)
+			jn = jn + ( penetration * 0.00015f );
+		else if(c1.getSize() == 16)
+			jn = jn + ( penetration * 0.0003f );
+		else if(c1.getSize() == 8)
+			jn = jn + ( penetration * 0.0008f );
+		else if(c1.getSize() == 4)
+			jn = jn + ( penetration * 0.0016f );
+		else if(c1.getSize() == 2)
+			jn = jn + ( penetration * 0.0033f );
+	}
+
 
 	if(c0.GetCollisionType() != COLLISION_PLANE){
 		c0.setLinearVelocity(c0.GetLinearVelocity() +  normal * (invMass0 * jn) );
@@ -193,3 +249,32 @@ void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, cons
 	}
 	} // TANGENT
 }
+
+/*void PhysicsSystem::getAITarget(PhysicsNode* ai){
+	//pull nearest node from octree which != this ai
+	//navigate above the node
+	//if in position, attack
+
+	//radius around node to check
+	int dist = 500;
+
+	Vector3 qmin(ai->GetPosition().x-dist,ai->GetPosition().y-dist,ai->GetPosition().z-dist);
+    Vector3 qmax(ai->GetPosition().x+dist,ai->GetPosition().y+dist,ai->GetPosition().z+dist);
+
+	//make a vector of all nodes in that area
+	vector<OctreePoint*>* results = new vector<OctreePoint*>;
+	octree->getPointsInsideBox(qmin, qmax, (*results));	
+
+	bool targetFound = false;
+
+	for(vector<OctreePoint*>::iterator i = results->begin(); i != results->end(); i++){
+		//if this entity is not the AI and is a collision sphere, set target!
+		if((*i)->getNode() != ai && (*i)->getNode()->GetCollisionType() == COLLISION_SPHERE){	
+			ai->target = (*i)->getNode();
+			break;
+		}
+	}
+
+	ai = NULL;
+}
+*/

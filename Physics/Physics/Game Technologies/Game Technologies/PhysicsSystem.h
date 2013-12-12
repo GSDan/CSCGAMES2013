@@ -29,6 +29,7 @@ _-_-_-_-_-_-_-""  ""
 #pragma once
 
 #include "PhysicsNode.h"
+#include "Octree.h"
 #include "../../nclgl/Plane.h"
 #include <vector>
 
@@ -99,9 +100,9 @@ public:
 	void		Update(float msec, Vector3& OGGravity);
 
 	void		BroadPhaseCollisions();
-	void		NarrowPhaseCollisions();
+	void		NarrowPhaseCollisions(vector<OctreePoint*>* results, Plane* p);
 
-	void AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, const Vector3 & hitPoint, const Vector3& normal, float penetration );
+	void AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, const Vector3 & hitPoint, const Vector3& normal, float penetration, bool plane0 );
 
 	//Statics
 	static void Initialise() {
@@ -119,6 +120,8 @@ public:
 	void	AddNode(PhysicsNode* n);
 
 	void	RemoveNode(PhysicsNode* n);
+	//void getAITarget(PhysicsNode* ai);
+	//PhysicsNode* aiInNeed;
 
 protected:
 	PhysicsSystem(void);
@@ -134,20 +137,20 @@ protected:
 	//Sphere plane collisions we started in the previous module, and expand upon via the Plane class..
 
 	bool PointInConvexPolygon(const Vector3 testPosition, Vector3 * convexShapePoints, int numPointsL) const;
-
+	
 	void explode(PhysicsNode node);
 
 	Vector3 gravity;
+
+	Octree *octree;
+	OctreePoint *octreePoints;
+	Vector3 qmin, qmax;
 
 //Statics
 	static PhysicsSystem* instance;
 
 	vector<PhysicsNode*> allNodes;
 
-	//split nodes into broad phase sectors
-	/*vector<PhysicsNode*> sector1; // x: 0-550 y: 0-550 (top left)
-	vector<PhysicsNode*> sector2; // x: 450-1000 y: 0-450 (top right)
-	vector<PhysicsNode*> sector3; // x: 0-550 y:450-1000 (bottom left)
-	vector<PhysicsNode*> sector4; // x: 450-1000 y: 450-1000 (bottom right)*/
+	
+	
 };
-

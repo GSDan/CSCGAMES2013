@@ -1,66 +1,66 @@
 #include "PhysicsNode.h"
 
-PhysicsNode::PhysicsNode(void)	{
-	target = NULL;
-	m_angular_damping = Vector3(0.995f,0.995f,0.995f);
-	m_linear_damping = Vector3(0.99f,0.99f,0.99f);
-	m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
+PhysicsNode::PhysicsNode(void)        {
+        target = NULL;
+        m_angular_damping = Vector3(0.995f,0.995f,0.995f);
+        m_linear_damping = Vector3(0.99f,0.99f,0.99f);
+        m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
 }
 
 PhysicsNode::PhysicsNode(Quaternion orientation, Vector3 position) {
-	m_orientation	= orientation;
-	m_position		= position;
-	m_angular_damping = Vector3(0.995f,0.995f,0.995f);
-	m_linear_damping = Vector3(0.99f,0.99f,0.99f);
-	m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
+        m_orientation        = orientation;
+        m_position                = position;
+        m_angular_damping = Vector3(0.995f,0.995f,0.995f);
+        m_linear_damping = Vector3(0.99f,0.99f,0.99f);
+        m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
 }
 
-PhysicsNode::~PhysicsNode(void)	{
-	m_angular_damping = Vector3(0.995f,0.995f,0.995f);
-	m_linear_damping = Vector3(0.99f,0.99f,0.99f);
-	m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
+PhysicsNode::~PhysicsNode(void)        {
+        m_angular_damping = Vector3(0.995f,0.995f,0.995f);
+        m_linear_damping = Vector3(0.99f,0.99f,0.99f);
+        m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
 }
 
 //You will perform your per-object physics integration, here!
 //I've added in a bit that will set the transform of the
 //graphical representation of this object, too.
-void	PhysicsNode::Update(float msec) {
+void        PhysicsNode::Update(float msec) {
 
-	Vector3 finalAcceleration = m_force * m_invMass + m_gravity;
-	m_linearVelocity = m_linearVelocity * m_linear_damping;
+        Vector3 finalAcceleration = m_force * m_invMass + m_gravity;
+        m_linearVelocity = m_linearVelocity * m_linear_damping;
 
-	if(Vector3(abs(m_linearVelocity.x + finalAcceleration.x), 
-				abs(m_linearVelocity.y + finalAcceleration.y), 
-				abs(m_linearVelocity.z + finalAcceleration.z)) < m_minimum_velocity){
-		m_linearVelocity = Vector3(0,0,0);
-	}
-	
-	//semi-implicit Euler Integration
-	//next velocity = this velocity + this acceleration * change in time
-	//next position = this position + next velocity * change in time
-		
-	m_linearVelocity = m_linearVelocity + finalAcceleration * msec;
-	m_position = m_position + m_linearVelocity * msec;
+        if(Vector3(abs(m_linearVelocity.x + finalAcceleration.x), 
+                                abs(m_linearVelocity.y + finalAcceleration.y), 
+                                abs(m_linearVelocity.z + finalAcceleration.z)) < m_minimum_velocity){
+                m_linearVelocity = Vector3(0,0,0);
+        }
+        
+        //semi-implicit Euler Integration
+        //next velocity = this velocity + this acceleration * change in time
+        //next position = this position + next velocity * change in time
+                
+        m_linearVelocity = m_linearVelocity + finalAcceleration * msec;
+        m_position = m_position + m_linearVelocity * msec;
 
-	//do cube and sphere rotation physics here
-	//m_torque = Vector3(0,1,0);
-	//m_torque = Vector3::Cross(m_torqueDistance , m_torqueForce);
+        //do cube and sphere rotation physics here
+        //m_torque = Vector3(0,1,0);
+        //m_torque = Vector3::Cross(m_torqueDistance , m_torqueForce);
     m_angularVelocity += m_invInertia * (m_torque*msec);
-	m_angularVelocity = m_angularVelocity * m_angular_damping;
+        m_angularVelocity = m_angularVelocity * m_angular_damping;
     m_orientation = m_orientation + m_orientation*(m_angularVelocity*msec*0.5f);
     m_orientation.Normalise();
 
 
 
-	if(target) {
-		target->SetTransform(BuildTransform());
-	}
+        if(target) {
+                target->SetTransform(BuildTransform());
+        }
 
-	//reset The Force vectors
-	m_force = Vector3(0,0,0);
-	m_torqueForce = m_force;
+        //reset The Force vectors
+        m_force = Vector3(0,0,0);
+        m_torqueForce = m_force;
 /*
-	                  ____                  
+                          ____                  
                 _.' :  `._               
             .-.'`.  ;   .'`.-.           
    __      / : ___\ ;  /___ ; \      __  
@@ -75,7 +75,7 @@ void	PhysicsNode::Update(float msec) {
        .' /:`. "-.:     .-" .';  `.      
     .-"  / ;  "-. "-..-" .-"  :    "-.   
  .+"-.  : :      "-.__.-"      ;-._   \  
-				*/
+                                */
 }
 
 /*
@@ -90,28 +90,28 @@ physics processing and 'game-side' logic, it is much neater to
 have seperate orientations and positions.
 
 */
-Matrix4		PhysicsNode::BuildTransform() {
-	Matrix4 m = m_orientation.ToMatrix();
+Matrix4                PhysicsNode::BuildTransform() {
+        Matrix4 m = m_orientation.ToMatrix();
 
-	m.SetPositionVector(m_position);
+        m.SetPositionVector(m_position);
 
-	return m;
+        return m;
 }
 
 void PhysicsNode::calcCubeInvInertia(float size){
-	float inertia = 1/(m_mass*(2 * (size * size)));
-	float arr[16] = {inertia, 0, 0, 0, 
-					 0, inertia, 0, 0,
-					 0, 0, inertia, 0,
-					 0, 0, 0, 1};
-	m_invInertia = Matrix4(arr);
+        float inertia = 1/(m_mass*(2 * (size * size)));
+        float arr[16] = {inertia, 0, 0, 0, 
+                                         0, inertia, 0, 0,
+                                         0, 0, inertia, 0,
+                                         0, 0, 0, 1};
+        m_invInertia = Matrix4(arr);
 }
 
 void PhysicsNode::calcSphereInvInertia(float radius){
-	float inertia = 1/((2*m_mass*(radius*radius))/5.0f);
-	float arr[16] = {inertia, 0, 0, 0, 
-					 0, inertia, 0, 0,
-					 0, 0, inertia, 0,
-					 0, 0, 0, 1};
-	m_invInertia = Matrix4(arr);
+        float inertia = 1/((2*m_mass*(radius*radius))/5.0f);
+        float arr[16] = {inertia, 0, 0, 0, 
+                                         0, inertia, 0, 0,
+                                         0, 0, inertia, 0,
+                                         0, 0, 0, 1};
+        m_invInertia = Matrix4(arr);
 }
