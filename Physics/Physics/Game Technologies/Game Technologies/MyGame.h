@@ -56,6 +56,7 @@ protected:
 
 	GameEntity* BuildUFOEntity(float size);
 
+
 	void explode(GameEntity& entity, int& score);
 
 	Mesh* cube;
@@ -66,7 +67,7 @@ protected:
 
 	Vector3 gravity;
 
-	//GameEntity* ai;
+	
 	
 	
 };

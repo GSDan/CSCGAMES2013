@@ -36,10 +36,6 @@ void	PhysicsSystem::Update(float msec, Vector3& OGGravity) {
 		(*i)->Update(msec);
 	}
 
-	/*if(aiInNeed != NULL){
-		getAITarget(aiInNeed);
-	}*/
-
 	delete octree;
 }
 

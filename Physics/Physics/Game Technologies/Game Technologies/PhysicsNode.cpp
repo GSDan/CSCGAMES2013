@@ -2,6 +2,8 @@
 
 PhysicsNode::PhysicsNode(void)        {
         target = NULL;
+		targetNode = NULL;
+		targetedBy = NULL;
         m_angular_damping = Vector3(0.995f,0.995f,0.995f);
         m_linear_damping = Vector3(0.99f,0.99f,0.99f);
         m_minimum_velocity = Vector3(0.003f,0.003f,0.003f);
@@ -43,12 +45,11 @@ void        PhysicsNode::Update(float msec) {
         m_position = m_position + m_linearVelocity * msec;
 
         //do cube and sphere rotation physics here
-        //m_torque = Vector3(0,1,0);
-        //m_torque = Vector3::Cross(m_torqueDistance , m_torqueForce);
-    m_angularVelocity += m_invInertia * (m_torque*msec);
-        m_angularVelocity = m_angularVelocity * m_angular_damping;
-    m_orientation = m_orientation + m_orientation*(m_angularVelocity*msec*0.5f);
-    m_orientation.Normalise();
+    
+		m_angularVelocity += m_invInertia * (m_torque*msec);
+			m_angularVelocity = m_angularVelocity * m_angular_damping;
+		m_orientation = m_orientation + m_orientation*(m_angularVelocity*msec*0.5f);
+		m_orientation.Normalise();
 
 
 

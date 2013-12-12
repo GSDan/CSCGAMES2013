@@ -45,7 +45,7 @@ int Quit(bool pause = false, const string &reason = "") {
 }
 
 int main() {
-	if(!Window::Initialise("Game Technologies", 1280,720,false)) {
+	if(!Window::Initialise("Game Technologies", 1920,1080,true)) {
 		return Quit(true, "Window failed to initialise!");
 	}
 

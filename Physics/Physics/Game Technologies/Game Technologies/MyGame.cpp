@@ -31,9 +31,9 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	quad	= Mesh::GenerateQuad();
 	sphere	= new OBJMesh("../../Meshes/sphereNew.obj");
 	rubble  = new OBJMesh("../../Meshes/sphereNew.obj");
-	//UFO		= new OBJMesh("../../Meshes/centeredUFO.obj");
+	UFO		= new OBJMesh("../../Meshes/centeredUFO.obj");
 	quad-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/grass.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
-	//UFO-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/Top1.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
+	UFO-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/Top1.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	sphere-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/earth_sphere.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	rubble-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/destroyed.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	/*
@@ -45,15 +45,17 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	
 	//create UFO
 	/*
-	ai = BuildUFOEntity(100);
-	ai->GetPhysicsNode().setPosition(gameCamera->GetPosition()+ Vector3(0, 150, 0));		
-	ai->GetPhysicsNode().SetMass(30);
-	ai->GetPhysicsNode().setGravity(Vector3(0,0,0));
-	ai->GetPhysicsNode().calcCubeInvInertia(30);
-	ai->GetPhysicsNode().setAngularVelocity(Vector3(0,20,0));
-	ai->GetPhysicsNode().setAngularDamping(Vector3(1,1,1)); //no damping on rotations
-	ai->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
-	allEntities.push_back(ai);*/
+	GameEntity* ufo = BuildUFOEntity(80);
+	ufo->GetRenderNode().SetModelScale(Vector3(50,50,50));
+	ufo->GetPhysicsNode().setPosition(Vector3(0, 150, 0));		
+	ufo->GetPhysicsNode().SetMass(1);
+	ufo->GetPhysicsNode().setHealth(10);
+	ufo->GetPhysicsNode().setGravity(Vector3(0,0,0));
+	ufo->GetPhysicsNode().calcCubeInvInertia(10);
+	ufo->GetPhysicsNode().setAngularVelocity(Vector3(0,10,0));
+	ufo->GetPhysicsNode().setAngularDamping(Vector3(1,1,1)); //no damping on rotations
+	ufo->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+	allEntities.push_back(ufo); */
 	
 
 }
@@ -186,13 +188,6 @@ void MyGame::UpdateGame(float msec, int& size, int& score, int& ents) {
 	////CubeRobot is looking at his treasure map upside down!, the treasure's really here...
 	Renderer::GetRenderer().DrawDebugCircle(DEBUGDRAW_PERSPECTIVE, Vector3(-200,1,-200),50.0f, Vector3(0,1,0));
 
-	/*if(ai->GetPhysicsNode().target != NULL){
-		ai->GetPhysicsNode().navigate();
-	}
-	else{
-		PhysicsSystem::GetPhysicsSystem().aiInNeed = &ai->GetPhysicsNode();
-	}*/
-
 }
 
 /*
@@ -227,12 +222,8 @@ Makes a UFO
 */
 GameEntity* MyGame::BuildUFOEntity(float size) {
 	GameEntity*g = new GameEntity(new SceneNode(UFO), new PhysicsNode());
+	g->GetPhysicsNode().setSize(size);
 	g->ConnectToSystems();
-	SceneNode &test = g->GetRenderNode();
-
-	test.SetModelScale(Vector3(size,size,size));
-	test.SetBoundingRadius(size);
-
 	return g;
 }
 
@@ -291,13 +282,13 @@ void MyGame::explode(GameEntity& entity, int& score){
 	Vector3 basePos = entity.GetPhysicsNode().GetPosition();
 	Vector3 baseVel = entity.GetPhysicsNode().GetLinearVelocity();
 
-	Vector3 v0 = Vector3(1,0,0);
-	Vector3 v1 = Vector3(0,1,0);
-	Vector3 v2 = Vector3(0,0,1);
-	Vector3 v3 = Vector3(-1,0,0);
-	Vector3 v4 = Vector3(0,0,-1);
+	Vector3 v0 = Vector3(0.5f,0,0);
+	Vector3 v1 = Vector3(0,0.5f,0);
+	Vector3 v2 = Vector3(0,0,0.5f);
+	Vector3 v3 = Vector3(-0.5f,0,0);
+	Vector3 v4 = Vector3(0,0,-0.5f);
 	//prevent recursive destruction!
-	if(newSize > 1){
+	if(newSize > 2){
 		//create four smaller entities
 		for(int i = 0; i < 5; i++){
 
@@ -325,7 +316,7 @@ void MyGame::explode(GameEntity& entity, int& score){
 			rubble->GetPhysicsNode().setHealth(10);
 			rubble->GetPhysicsNode().calcCubeInvInertia(10);
 			rubble->GetPhysicsNode().setGravity(gravity);
-			if(newSize > 2 && allEntities.size() < 120)
+			if(newSize > 2 && allEntities.size() < 500)
 				rubble->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
 			else
 				rubble->GetPhysicsNode().SetCollisionType(PLANE_ONLY_SPHERE);

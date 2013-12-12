@@ -52,6 +52,9 @@ public:
         PhysicsNode(Quaternion orientation, Vector3 position);
         ~PhysicsNode(void);
 
+		PhysicsNode* targetNode;
+		PhysicsNode* targetedBy;
+
         Vector3 DistanceTo(Vector3 &a){
                 return Vector3(a.x-m_position.x,a.y-m_position.y,a.z-m_position.z);
         }
