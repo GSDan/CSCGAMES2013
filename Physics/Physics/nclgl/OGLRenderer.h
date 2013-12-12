@@ -101,7 +101,7 @@ public:
 	OGLRenderer(Window &parent);
 	virtual ~OGLRenderer(void);
 
-	virtual void	RenderScene(int& size)		= 0;
+	virtual void	RenderScene(int& size, int& score)		= 0;
 	virtual void	UpdateScene(float msec);
 	void			SwapBuffers();
 

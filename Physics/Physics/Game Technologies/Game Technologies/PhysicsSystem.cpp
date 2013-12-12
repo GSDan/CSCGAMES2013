@@ -146,7 +146,11 @@ void PhysicsSystem::AddCollisionImpulse ( PhysicsNode& c0, PhysicsNode& c1, cons
 
 	// Hack fix to stop sinking
 	// bias impulse proportional to penetration distance
-	jn = jn + ( penetration * 0.0003f );
+	//jn = jn + ( penetration * 0.0003f );
+	if(c0.GetCollisionType() == COLLISION_SPHERE)
+		jn = jn + ( penetration * (c0.getSize() / 60000.0f) );
+	else if(c1.GetCollisionType() == COLLISION_SPHERE)
+		jn = jn + ( penetration * (c1.getSize() / 60000.0f) );
 
 	if(c0.GetCollisionType() != COLLISION_PLANE){
 		c0.setLinearVelocity(c0.GetLinearVelocity() +  normal * (invMass0 * jn) );

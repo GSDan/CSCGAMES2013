@@ -41,7 +41,7 @@ public:
 	MyGame(Vector3& OGGravity);
 	~MyGame(void);
 
-	virtual void UpdateGame(float msec, int& size);
+	virtual void UpdateGame(float msec, int& size, int& score);
 
 protected:
 	GameEntity* BuildRobotEntity();
@@ -50,19 +50,23 @@ protected:
 
 	GameEntity* BuildSphereEntity(float radius);
 
+	GameEntity* BuildRubbleEntity(float radius);
+
 	GameEntity* BuildQuadEntity(float size);
 
 	GameEntity* BuildUFOEntity(float size);
 
-	void explode(GameEntity& entity);
+	void explode(GameEntity& entity, int& score);
 
 	Mesh* cube;
 	Mesh* quad;
 	Mesh* sphere;
 	Mesh* UFO;
+	Mesh* rubble;
 
 	Vector3 gravity;
 
+	
 	
 };
 

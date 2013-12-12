@@ -42,7 +42,8 @@ _-_-_-_-_-_-_-""  ""
 enum CollisionVolumeType {
 	COLLISION_SPHERE,
 	COLLISION_PLANE,
-	COLLISION_AABB
+	COLLISION_AABB,
+	NO_COLLISION
 };
 
 class PhysicsNode	{

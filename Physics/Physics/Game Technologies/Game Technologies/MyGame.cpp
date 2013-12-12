@@ -30,10 +30,12 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	cube	= new OBJMesh("../../Meshes/centeredcube.obj");
 	quad	= Mesh::GenerateQuad();
 	sphere	= new OBJMesh("../../Meshes/sphereNew.obj");
+	rubble  = new OBJMesh("../../Meshes/sphereNew.obj");
 	UFO		= new OBJMesh("../../Meshes/centeredUFO.obj");
 	quad-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/grass.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	UFO-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/Top1.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	sphere-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/earth_sphere.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
+	rubble-> SetTexture ( SOIL_load_OGL_texture ("../../Textures/destroyed.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	/*
 	A more 'robust' system would check the entities vector for duplicates so as
 	to not cause problems...why not give it a go?
@@ -51,6 +53,7 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	UFOEntity->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
 	allEntities.push_back(UFOEntity);
 	AI = new AlienAI(*UFOEntity);*/
+
 }
 
 MyGame::~MyGame(void)	{
@@ -71,7 +74,7 @@ Here's the base 'skeleton' of your game update loop! You will presumably
 want your games to have some sort of internal logic to them, and this
 logic will be added to this function.
 */
-void MyGame::UpdateGame(float msec, int& size) {
+void MyGame::UpdateGame(float msec, int& size, int& score) {
 	//AI->update();
 
 	if(gameCamera) {
@@ -86,7 +89,7 @@ void MyGame::UpdateGame(float msec, int& size) {
     }
 
 	for(vector<GameEntity*>::iterator i = toDestroy.begin(); i != toDestroy.end(); ++i){
-		explode(*(*i));
+		explode(*(*i), score);
 	}
 
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_E)){
@@ -234,6 +237,18 @@ GameEntity* MyGame::BuildSphereEntity(float radius) {
 	return g;
 }
 
+//create rubble
+GameEntity* MyGame::BuildRubbleEntity(float radius) {
+	SceneNode* s = new SceneNode(rubble);
+
+	s->SetModelScale(Vector3(radius,radius,radius));
+	s->SetBoundingRadius(radius);
+
+	GameEntity*g = new GameEntity(s, new PhysicsNode());
+	g->ConnectToSystems();
+	return g;
+}
+
 /*
 Makes a flat quad, initially oriented such that we can use it as a simple
 floor. 
@@ -242,8 +257,6 @@ GameEntity* MyGame::BuildQuadEntity(float size) {
 	SceneNode* s = new SceneNode(quad);
 
 	s->SetModelScale(Vector3(size,size,size));
-	//Oh if only we had a set texture function...we could make our brick floor again WINK WINK
-	//s->//SetTexture(SOIL_load_OGL_texture ("../../Textures/Barren Reds.jpg",SOIL_LOAD_AUTO , SOIL_CREATE_NEW_ID , 0));
 	s->SetBoundingRadius(size);
 
 	PhysicsNode*p = new PhysicsNode(Quaternion::AxisAngleToQuaterion(Vector3(1,0,0), 90.0f), Vector3());
@@ -258,26 +271,39 @@ GameEntity* MyGame::BuildQuadEntity(float size) {
 	return g;
 }
 
-void MyGame::explode(GameEntity& entity){
-	int newSize = entity.GetPhysicsNode().getSize()/4;
+void MyGame::explode(GameEntity& entity, int& score){
+	int newSize = entity.GetPhysicsNode().getSize()/2;
 	int mass = entity.GetPhysicsNode().GetMass()/4;
-	Vector3 basePos = entity.GetPhysicsNode().GetPosition() - Vector3(20,20,20);
-	/*for(int i = 0; i < 4; i++){
-		GameEntity* cube = BuildSphereEntity(newSize);
-		//cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
-		//start the projectile at the camera position and set object physics properties
-		cube->GetPhysicsNode().setPosition(basePos + Vector3(i*10,i*10, i*10));
-		cube->GetPhysicsNode().setLinearVelocity(entity.GetPhysicsNode().GetLinearVelocity());
-		cube->GetPhysicsNode().SetMass(mass);
-		cube->GetPhysicsNode().setHealth(5);
-		cube->GetPhysicsNode().calcCubeInvInertia(3);
-		cube->GetPhysicsNode().setGravity(gravity);
-		cube->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
-		cube->setSize(newSize);
-		//add projectile to allEntities list
-		allEntities.push_back(cube);
-	}*/
+	Vector3 basePos = entity.GetPhysicsNode().GetPosition();
+	Vector3 baseVel = entity.GetPhysicsNode().GetLinearVelocity();
 
-	//remove the destroyed entity
-	entity.DisconnectFromSystems();
+	//prevent recursive destruction!
+	if(newSize > 4){
+		//create four smaller entities
+		for(int i = 0; i < 6; i++){
+
+			GameEntity* rubble = BuildRubbleEntity(newSize);
+			rubble->GetPhysicsNode().setPosition(basePos + Vector3(i * 7, i *8, i*7));
+			rubble->GetPhysicsNode().setLinearVelocity(baseVel + Vector3(0, i*0.05f, 0));
+			rubble->GetPhysicsNode().SetMass(1);
+			rubble->GetPhysicsNode().setHealth(80);
+			rubble->GetPhysicsNode().calcCubeInvInertia(10);
+			rubble->GetPhysicsNode().setGravity(gravity);
+			rubble->GetPhysicsNode().SetCollisionType(COLLISION_SPHERE);
+			rubble->setSize(newSize);
+			allEntities.push_back(rubble);
+		}
+		//add size to score
+		score += newSize * 4;
+		//remove the physics and render nodes of this entity
+		entity.DisconnectFromSystems();
+		//finally, remove this entity from this class
+		for(vector<GameEntity*>::iterator i = allEntities.begin(); i != allEntities.end(); ++i) {
+			if((*i) == &entity) {
+				allEntities.erase(i);
+				break;
+			}
+		}
+	}
+	
 }

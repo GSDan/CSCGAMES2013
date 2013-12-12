@@ -38,7 +38,7 @@ void Renderer::UpdateScene(float msec)	{
 	root->Update(msec);
 }
 
-void Renderer::RenderScene(int& objectSize)	{
+void Renderer::RenderScene(int& objectSize, int& score)	{
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	if(camera) {
@@ -74,7 +74,13 @@ void Renderer::RenderScene(int& objectSize)	{
     ss.clear();
 
 	ss << objectSize;
-    DrawText("Size: " + ss.str(), Vector3(0,0,0), 16.0f, false);
+    DrawText("Size: " + ss.str(), Vector3(0,0,0), 20.0f, false);
+
+	ss.str("");
+    ss.clear();
+
+	ss << score;
+    DrawText("Score: " + ss.str(), Vector3(0,height - 30,0), 20.0f, false);
 
 	glUseProgram(0);
 	SwapBuffers();
