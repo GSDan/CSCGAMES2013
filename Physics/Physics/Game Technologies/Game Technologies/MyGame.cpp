@@ -39,7 +39,7 @@ MyGame::MyGame(Vector3& OGGravity)	{
 	to not cause problems...why not give it a go?
 	*/
 	allEntities.push_back(BuildQuadEntity(1000.0f));
-	allEntities.push_back(BuildRobotEntity());
+	//allEntities.push_back(BuildRobotEntity());
 	
 	/*create UFO
 	GameEntity* UFOEntity = BuildUFOEntity(30);
@@ -78,10 +78,16 @@ void MyGame::UpdateGame(float msec, int& size) {
 		gameCamera->UpdateCamera(msec);
 	}
 
+	vector<GameEntity*> toDestroy;
+
 	for(vector<GameEntity*>::iterator i = allEntities.begin(); i != allEntities.end(); ++i) {
                 (*i)->Update(msec);
-				//TODO
-        }
+				if((*i)->GetPhysicsNode().getHealth() <= 0) toDestroy.push_back((*i));
+    }
+
+	for(vector<GameEntity*>::iterator i = toDestroy.begin(); i != toDestroy.end(); ++i){
+		explode(*(*i));
+	}
 
 	if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_E)){
 
@@ -245,6 +251,7 @@ GameEntity* MyGame::BuildQuadEntity(float size) {
 	GameEntity*g = new GameEntity(s, p);
 	g->GetPhysicsNode().SetCollisionType(COLLISION_PLANE);
 	g->GetPhysicsNode().SetMass(0);
+	g->GetPhysicsNode().setHealth(1000);
 	float invIn[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 	g->GetPhysicsNode().setInertia(Matrix4(invIn));
 	g->ConnectToSystems();
@@ -255,7 +262,7 @@ void MyGame::explode(GameEntity& entity){
 	int newSize = entity.GetPhysicsNode().getSize()/4;
 	int mass = entity.GetPhysicsNode().GetMass()/4;
 	Vector3 basePos = entity.GetPhysicsNode().GetPosition() - Vector3(20,20,20);
-	for(int i = 0; i < 4; i++){
+	/*for(int i = 0; i < 4; i++){
 		GameEntity* cube = BuildSphereEntity(newSize);
 		//cube->GetRenderNode().SetColour(Vector4(1,0,0,1));//red
 		//start the projectile at the camera position and set object physics properties
@@ -269,7 +276,7 @@ void MyGame::explode(GameEntity& entity){
 		cube->setSize(newSize);
 		//add projectile to allEntities list
 		allEntities.push_back(cube);
-	}
+	}*/
 
 	//remove the destroyed entity
 	entity.DisconnectFromSystems();

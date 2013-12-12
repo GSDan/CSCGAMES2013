@@ -136,8 +136,8 @@ void	Renderer::AddNode(SceneNode* n) {
 }
 
 void	Renderer::RemoveNode(SceneNode* n) {
-	//cout<<"UIHUIH";
-	//root->RemoveChild(n);
+	//cout<<"UIHUIH"; ?????
+	root->RemoveChild(n);
 }
 
 void Renderer::DrawText(const std::string &text, const Vector3 &position, const float size, const bool perspective)        {

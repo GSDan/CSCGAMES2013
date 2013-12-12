@@ -25,6 +25,7 @@ public:
 	void SetMesh(Mesh* m) {mesh = m;}
 
 	void AddChild(SceneNode* s);
+	void RemoveChild(SceneNode* s);
 
 	virtual void Update(float msec);
 	virtual void Draw(const OGLRenderer &r);

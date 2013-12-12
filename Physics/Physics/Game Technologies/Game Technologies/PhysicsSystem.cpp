@@ -70,7 +70,7 @@ void	PhysicsSystem::AddNode(PhysicsNode* n) {
 	allNodes.push_back(n);
 }
 
-void	PhysicsSystem::RemoveNode(PhysicsNode* n) {
+void	PhysicsSystem::RemoveNode(PhysicsNode* n) {	
 	for(vector<PhysicsNode*>::iterator i = allNodes.begin(); i != allNodes.end(); ++i) {
 		if((*i) == n) {
 			allNodes.erase(i);

@@ -19,6 +19,15 @@ void SceneNode::AddChild(SceneNode* s) {
 	s->parent = this;
 }
 
+void SceneNode::RemoveChild(SceneNode* s){
+	for(vector<SceneNode*>::iterator i = children.begin(); i != children.end(); ++i) {
+		if((*i) == s) {
+			children.erase(i);
+			return;
+		}
+	}
+}
+
 void SceneNode::Draw(const OGLRenderer &r) {
 	if(mesh)
 		mesh->Draw();
@@ -33,5 +42,4 @@ void SceneNode::Update(float msec) {
 	for(vector<SceneNode*>::iterator i = children.begin(); i != children.end(); i++)
 		(*i)->Update(msec);
 }
-
 	
